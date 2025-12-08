@@ -89,6 +89,67 @@ export function decode(buf, name, allProtos)
                     }
                     break;
                 }
+                case 114: // r
+                {
+                    const tn = split(k, ":");
+                    if (length(tn) === 2) {
+                        k = tn[1];
+                        switch (tn[0]) {
+                            case "fixed32":
+                                d = struct.unpack(sprintf("<%dI", length(d) / 4), d);
+                                break;
+                            case "sfixed32":
+                                d = struct.unpack(sprintf("<%di", length(d) / 4), d);
+                                break;
+                            case "fixed64":
+                                d = struct.unpack(sprintf("<%dQ", length(d) / 8), d);
+                                break;
+                            case "sfixed64":
+                                d = struct.unpack(sprintf("<%dq", length(d) / 8), d);
+                                break;
+                            case "int32":
+                            case "uint32":
+                            case "int64":
+                            case "uint64":
+                            {
+                                const buf = d;
+                                const len = length(buf);
+                                let i = 0;
+                                d = [];
+                                while (i < len) {
+                                    let v = 0;
+                                    let s = 0;
+                                    while (i < len) {
+                                        const n = ord(buf, i++);
+                                        v += (n & 127) << s;
+                                        if (n < 128) {
+                                            break;
+                                        }
+                                        s += 7;
+                                    }
+                                    switch (tn[0]) {
+                                        case "int32":
+                                        case "int64":
+                                            if (v <= 0xffffffff) {
+                                                v = struct.unpack("i", struct.pack("I", v))[0];
+                                            }
+                                            else {
+                                                v = struct.unpack("q", struct.pack("Q", v))[0];
+                                            }
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    push(d, v);
+                                }
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }

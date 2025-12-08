@@ -116,21 +116,39 @@ const environmentProto = {
     "21": "soil_moisture",
     "22": "f:soil_temperature"
 };
+const powerProto = {
+    "1": "f:ch1_voltage",
+    "2": "f:ch1_current",
+    "3": "f:ch2_voltage",
+    "4": "f:ch2_current",
+    "5": "f:ch3_voltage",
+    "6": "f:ch3_current",
+    "7": "f:ch4_voltage",
+    "8": "f:ch4_current",
+    "9": "f:ch5_voltage",
+    "10": "f:ch5_current",
+    "11": "f:ch6_voltage",
+    "12": "f:ch6_current",
+    "13": "f:ch7_voltage",
+    "14": "f:ch7_current",
+    "15": "f:ch8_voltage",
+    "16": "f:ch8_current"
+};
 const telemetryProto = {
     "1": "time",
     "2": "p:device:device_metrics",
     "3": "p:environment:environment_metrics",
     "4": "p:all:air_quality_metrics",
-    "5": "p:all:power_metrics",
+    "5": "p:power:power_metrics",
     "6": "p:all:local_stats",
     "7": "p:all:health_metrics",
     "8": "p:all:host_metrics"
 };
 const tracerouteProto = {
-    "1": "route",
-    "2": "snr_towards",
-    "3": "route_back",
-    "4": "snr_back"
+    "1": "r:fixed32:route",
+    "2": "r:int32:snr_towards",
+    "3": "r:fixed32:route_back",
+    "4": "r:int32:snr_back"
 };
 const allProtos = {
     packet: packetProto,
@@ -143,6 +161,7 @@ const allProtos = {
     device: deviceMetrics,
     environment: environmentProto,
     heartbeat: heartbeatProto,
+    power: powerProto
 };
 const portnum2Proto = {
     "1": "textmessage",
@@ -194,11 +213,17 @@ export function parsePacket(pkt) {
                     const protoname = portnum2Proto[`${msg.data.portnum}`] ?? "unknown";
                     msg.data[protoname] = protobuf.decode(msg.data.payload, protoname, allProtos);
                     if (msg.data[protoname]) {
+                        //msg.data.payload_bytes = "";
+                        //for (let i = 0; i < length(msg.data.payload); i++) {
+                        //    msg.data.payload_bytes += sprintf("%02x ", ord(msg.data.payload, i));
+                        //}
                         delete msg.data.payload;
                     }
                 }
-
             }
+        }
+        else {
+            delete msg.data;
         }
     }
     return msg;
