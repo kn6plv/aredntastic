@@ -1,5 +1,8 @@
 import * as struct from "struct";
+import * as fs from "fs";
 import * as aes from "./aes.uc";
+
+const OPENSSL = "/usr/bin/openssl";
 
 export function decrypt(from, id, key, encrypted)
 {
@@ -36,4 +39,18 @@ export function decrypt(from, id, key, encrypted)
 export function encrypt(from, id, key, plain)
 {
     return decrypt(from, id, key, plain);
+};
+
+export function generateKeyPair()
+{
+    const privatefile = "/tmp/private_key.der";
+    const publicfile = "/tmp/public_key.der";
+    system(`${OPENSSL} genpkey -algorithm X25519 -outform DER -out ${privatefile}; ${OPENSSL} pkey -inform DER -in ${privatefile} -pubout -outform DER -out ${publicfile}`);
+    const keys = {
+        public: fs.readfile(publicfile),
+        private: fs.readfile(privatefile)
+    };
+    fs.unlink(privatefile);
+    fs.unlink(publicfile);
+    return keys;
 };

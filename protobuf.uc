@@ -272,10 +272,9 @@ export function encode(name, data)
         let v = data[k];
         let d = null;
         if (!p) {
-            print(`Missing proto ${name}:${k}\n`);
-            return null;
+            //print(`Missing proto ${name}:${k}\n`);
         }
-        if (p.proto) {
+        else if (p.proto) {
             const buf = encode(p.proto, v);
             d = tag(p.id, 2) + varint(length(buf)) + buf;
         }

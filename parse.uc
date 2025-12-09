@@ -249,7 +249,7 @@ registerProto(
 export function decodePacket(pkt, key)
 {
     const msg = protobuf.decode("packet", pkt);
-    if (kay && msg.encrypted && msg.channel === 31) {
+    if (key && msg.encrypted && msg.channel === 31) {
         msg.decoded = crypto.decrypt(msg.from, msg.id, key, msg.encrypted);
     }
     if (msg.decoded) {
