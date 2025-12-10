@@ -62,6 +62,15 @@ export function getNode()
                 precision_bits: 24
 
             };
+        },
+        deviceTelemetry: () => {
+            return {
+                time: time(),
+                device_metrics: {
+                    battery_level: 101, // 101 == Grid power
+                    uptime_seconds: clock(true)[0]
+                }
+            };
         }
     };
 };

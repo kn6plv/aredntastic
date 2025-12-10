@@ -11,6 +11,7 @@ export function setup()
     s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
         multiaddr: "224.0.0.69"
     });
+    s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0);
     s.listen();
 };
 

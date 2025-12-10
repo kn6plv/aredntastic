@@ -1,11 +1,9 @@
 #!/usr/bin/ucode
 
 import * as multicasthandler from "./multicasthandler.uc";
-import * as parse from "./parse.uc";
-import * as nodedb from "./nodedb.uc";
-import * as keys from "./keys.uc";
 import * as node from "./node.uc";
-import * as payloads from "./payloads.uc";
+import * as messages from "./messages.uc";
+import * as router from "./router.uc";
 
 const me = node.getNode();
 
@@ -13,30 +11,16 @@ multicasthandler.setup();
 
 let nodeupdatetime = 0;
 
+//router.process(payloads.createTextMessage(me, null, "Testing"));
+
 for (;;) {
     const now = clock()[0];
-
     if (now > nodeupdatetime) {
-        nodeupdatetime = now + 10 * 60;
-        multicasthandler.send(
-            parse.encodePacket(
-                payloads.createPayload(me, null, "user", me.info()),
-                keys.defaultKey
-            )
-        );
-        multicasthandler.send(
-            parse.encodePacket(
-                payloads.createPayload(me, null, "position", me.position()),
-                keys.defaultKey
-            )
-        );
+        nodeupdatetime = now + 30 * 60;
+        router.process(messages.createMessage(me, null, "user", me.info()));
+        router.process(messages.createMessage(me, null, "position", me.position()));
+        router.process(messages.createMessage(me, null, "telemetry", me.deviceTelemetry()));
     }
-
-    const pkt = multicasthandler.wait(60);
-    if (pkt) {
-        const msg = parse.decodePacket(pkt, keys.defaultKey);
-        printf("%.2J\n", msg);
-        nodedb.updateNode(msg);
-    }
+    router.wait(60);
 }
 
