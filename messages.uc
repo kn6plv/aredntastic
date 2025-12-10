@@ -1,6 +1,6 @@
 import * as math from "math";
-import * as fs from "fs";
 import * as router from "router";
+import * as datastore from "datastore";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
@@ -8,21 +8,19 @@ const DEFAULT_HOPS = 5;
 const DEFAULT_PRIORITY = 64;
 const BITFIELD_MQTT_OKAY = 1;
 
-const ROOT = "/tmp/at";
-
 let messages;
 
 function getMessages()
 {
     if (!messages) {
-        messages = json(fs.readfile(`${ROOT}/messages.json`) ?? "[]");
+        messages = datastore.load("messages") ?? [];
     }
     return messages;
 }
 
 function saveMessages()
 {
-    fs.writefile(`${ROOT}/messages.json`, sprintf("%.2J", messages));
+    datastore.store("messages", messages);
 }
 
 export function createMessage(to, from, type, payload, extra)

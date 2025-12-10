@@ -19,6 +19,8 @@ let nodeupdatetime = 0;
 
 //router.queue(payloads.createTextMessage(null, null, "Testing"));
 
+node.setLocation(37.2113000, -121.9362000, 10, 16);
+
 for (;;) {
     const now = clock()[0];
     if (now > nodeupdatetime) {

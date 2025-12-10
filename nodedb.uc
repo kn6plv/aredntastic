@@ -1,14 +1,12 @@
-import * as fs from "fs";
 import * as router from "router";
-
-const ROOT = "/tmp/at";
+import * as datastore from "datastore";
 
 let nodedb;
 
 export function getNode(id)
 {
     if (!nodedb) {
-        nodedb = json(fs.readfile(`${ROOT}/nodedb.json`) ?? "{}");
+        nodedb = datastore.load("nodedb") ?? {};
     }
     return nodedb[id] ?? { id: id };
 };
@@ -16,7 +14,7 @@ export function getNode(id)
 function saveNode(id, node)
 {
     nodedb[id] = node;
-    fs.writefile(`${ROOT}/nodedb.json`, sprintf("%.2J", nodedb));
+    datastore.store("nodedb", nodedb);
 }
 
 function isdiff(a, b)
