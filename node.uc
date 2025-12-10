@@ -7,10 +7,11 @@ const ROOT = "/tmp/at";
 
 const ROLE_CLIENT_MUTE = 1;
 const PRIVATE_HW = 255;
+const GRID_POWER = 101;
 
 let me = null;
 
-export function createNode()
+function createNode()
 {
     const id = [
         math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255
@@ -27,17 +28,19 @@ export function createNode()
     fs.writefile(`${ROOT}/node.json`, sprintf("%.2J", me));
 };
 
-export function getNode()
+export function setup()
 {
-    if (!me) {
-        const n = fs.readfile(`${ROOT}/node.json`);
-        if (!n) {
-            createNode();
-        }
-        else {
-            me = json(n);
-        }
+    const n = fs.readfile(`${ROOT}/node.json`);
+    if (!n) {
+        createNode();
     }
+    else {
+        me = json(n);
+    }
+};
+
+export function getInfo()
+{
     return {
         id: () => me.id,
         info: () => {
@@ -67,10 +70,15 @@ export function getNode()
             return {
                 time: time(),
                 device_metrics: {
-                    battery_level: 101, // 101 == Grid power
+                    battery_level: GRID_POWER,
                     uptime_seconds: clock(true)[0]
                 }
             };
         }
     };
+};
+
+export function id()
+{
+    return me.id;
 };

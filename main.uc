@@ -1,26 +1,32 @@
 #!/usr/bin/ucode
 
-import * as multicasthandler from "./multicasthandler.uc";
+import * as multicast from "./multicast.uc";
 import * as node from "./node.uc";
-import * as messages from "./messages.uc";
 import * as router from "./router.uc";
 
-const me = node.getNode();
+import * as messages from "./messages.uc";
+import * as nodedb from "./nodedb.uc";
+import * as traceroute from "./traceroute.uc";
 
-multicasthandler.setup();
+node.setup();
+multicast.setup();
+
+router.registerApp(messages);
+router.registerApp(nodedb);
+router.registerApp(traceroute);
 
 let nodeupdatetime = 0;
 
-//router.process(payloads.createTextMessage(me, null, "Testing"));
+//router.queue(payloads.createTextMessage(null, null, "Testing"));
 
 for (;;) {
     const now = clock()[0];
     if (now > nodeupdatetime) {
         nodeupdatetime = now + 30 * 60;
-        router.process(messages.createMessage(me, null, "user", me.info()));
-        router.process(messages.createMessage(me, null, "position", me.position()));
-        router.process(messages.createMessage(me, null, "telemetry", me.deviceTelemetry()));
+        const me = node.getInfo();
+        router.queue(messages.createMessage(null, null, "user", me.info()));
+        router.queue(messages.createMessage(null, null, "position", me.position()));
+        router.queue(messages.createMessage(null, null, "telemetry", me.deviceTelemetry()));
     }
     router.wait(60);
 }
-

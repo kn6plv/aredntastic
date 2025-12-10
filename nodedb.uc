@@ -1,16 +1,17 @@
 import * as fs from "fs";
+import * as router from "router";
 
 const ROOT = "/tmp/at";
 
 let nodedb;
 
-function getNode(id)
+export function getNode(id)
 {
     if (!nodedb) {
         nodedb = json(fs.readfile(`${ROOT}/nodedb.json`) ?? "{}");
     }
-    return nodedb[id] ?? {};
-}
+    return nodedb[id] ?? { id: id };
+};
 
 function saveNode(id, node)
 {
@@ -23,32 +24,36 @@ function isdiff(a, b)
     return sprintf("%J", a) != sprintf("%J", b);
 }
 
-export function updateNode(msg)
+export function process(msg)
 {
     let update = false;
 
-    const node = getNode(msg.from);
+    if (!router.forMe(msg)) {
+        return;
+    }
+
+    const from = getNode(msg.from);
 
     if (msg.hop_start && msg.hop_limit) {
         const distance = msg.hop_start - msg.hop_limit;
-        if (node.distance != distance) {
-            node.distance = distance;
+        if (from.distance != distance) {
+            from.distance = distance;
             update = true;
         }
     }
     const data = msg.data;
     if (data) {
-        if (data.user && isdiff(node.user, data.user)) {
-            node.user = data.user;
+        if (data.user && isdiff(from.user, data.user)) {
+            from.user = data.user;
             update = true;
         }
-        if (data.position && isdiff(node.position, data.position)) {
-            node.position = data.position;
+        if (data.position && isdiff(from.position, data.position)) {
+            from.position = data.position;
             update = true;
         }
         const tdata = data.telemetry;
         if (tdata) {
-            const telemetry = node.telemetry ?? (node.telemetry = {});
+            const telemetry = from.telemetry ?? (from.telemetry = {});
             if (tdata.device_metrics && isdiff(telemetry.device_metrics, tdata.device_metrics)) {
                 telemetry.device_metrics = tdata.device_metrics;
                 update = true;
@@ -60,7 +65,7 @@ export function updateNode(msg)
         }
     }
     if (update) {
-        saveNode(msg.from, node);
+        saveNode(msg.from, from);
     }
 };
 

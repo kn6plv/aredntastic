@@ -77,7 +77,7 @@ registerProto(
         "3": "bool want_response",
         "4": "fixed32 dest",
         "5": "fixed32 source",
-        "6": "fixed32 equest_id",
+        "6": "fixed32 request_id",
         "7": "fixed32 reply_id",
         "8": "fixed32 emoji",
         "9": "uint32 bitfield"

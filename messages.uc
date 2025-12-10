@@ -1,7 +1,12 @@
 import * as math from "math";
 import * as fs from "fs";
+import * as router from "router";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
+const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
+const DEFAULT_HOPS = 5;
+const DEFAULT_PRIORITY = 64;
+const BITFIELD_MQTT_OKAY = 1;
 
 const ROOT = "/tmp/at";
 
@@ -20,35 +25,61 @@ function saveMessages()
     fs.writefile(`${ROOT}/messages.json`, sprintf("%.2J", messages));
 }
 
-export function createMessage(from, to, type, payload)
+export function createMessage(to, from, type, payload, extra)
 {
-    return {
-        from: from.id(),
-        to: to?.id() ?? 0xffffffff, // Broadcast by default
+    const fid = from ?? router.id(); // From me by default;
+    const msg = {
+        from: fid,
+        to: to ?? router.BROADCAST,
         channel: 31,
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,
-        hop_limit: 5,
-        priority: 64,
+        hop_limit: DEFAULT_HOPS,
+        priority: DEFAULT_PRIORITY,
         rx_rssi: 0,
-        hop_start: 5,
-        relay_node: from.id() & 255,
-        transport_mechanism: 6, // multicast udp
+        hop_start: DEFAULT_HOPS,
+        relay_node: fid & 255,
+        transport_mechanism: TRANSPORT_MECHANISM_MULTICAST_UDP,
         data: {
-            bitfield: 0,
+            bitfield: BITFIELD_MQTT_OKAY,
             [type]: payload
         }
     };
+    if (extra) {
+        for (let k in extra) {
+            if (k === "data") {
+                for (let j in extra.data) {
+                    msg.data[j] = extra.data[j];
+                }
+            }
+            else {
+                msg[k] = extra[k];
+            }
+        }
+    }
+    return msg;
 };
 
-export function createTextMessage(from, to, text)
+export function createReplyMessage(msg, type, payload)
 {
-    return createMessage(from, to, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+    return createMessage(msg.from, msg.to, type, payload, {
+        data: {
+            request_id: msg.id
+        }
+    });
 };
 
-export function updateMessage(msg)
+export function createTextMessage(to, from, text)
 {
+    return createMessage(to, from, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+};
+
+export function process(msg)
+{
+    if (!router.forMe(msg)) {
+        return;
+    }
     const text = msg.data?.text_message;
     if (text) {
         getMessages();
