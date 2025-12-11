@@ -86,6 +86,10 @@ export function createAckMessage(msg, reason)
     });
 };
 
+export function tick()
+{
+};
+
 export function process(msg)
 {
     if (!node.forMe(msg)) {

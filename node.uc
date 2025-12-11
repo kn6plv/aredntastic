@@ -5,6 +5,9 @@ import * as datastore from "datastore";
 
 const LOCATION_PRECISION = 16;
 
+export const ROLE_CLIENT = 0;
+export const ROLE_CLIENT_MUTE = 1;
+
 let me = null;
 
 export const BROADCAST = 0xffffffff;
@@ -45,7 +48,8 @@ function createNode()
         lat: 0.0,
         lon: 0.0,
         alt: 0,
-        percision: LOCATION_PRECISION
+        percision: LOCATION_PRECISION,
+        role: ROLE_CLIENT_MUTE
     };
     save();
 };
@@ -71,7 +75,18 @@ export function setLocation(lat, lon, alt, percision)
 
 export function setNames(long_name, short_name)
 {
-    me.long_name = long_name ?? me.long_name;
-    me.short_name = short_name ?? me.short_name;
-    save();
+    if (me.long_name != long_name || me.short_name != short_name) {
+        me.long_name = long_name ?? me.long_name;
+        me.short_name = short_name ?? me.short_name;
+        save();
+    }
+};
+
+
+export function setRole(role)
+{
+    if (me.role != role) {
+        me.role = role ?? ROLE_CLIENT_MUTE;
+        save();
+    }
 };

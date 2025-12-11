@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as timers from "timers";
 import * as router from "router";
 import * as messages from "messages";
+import * as node from "node";
+import * as nodedb from "nodedb";
 
 timers.setTimeout("environmental_metrics", 30 * 60);
 
@@ -83,3 +85,11 @@ export function tick()
         }
     }
 };
+
+export function process(msg)
+{
+    if (node.forMe(msg) && msg.data?.telemetry?.environment_metrics) {
+        nodedb.updateEnvironmentMetrics(msg.from, msg.data.telemetry.environment_metrics);
+    }
+};
+

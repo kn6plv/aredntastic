@@ -4,6 +4,10 @@ import * as node from "node";
 
 const ROUTE_SIZE = 8;
 
+export function tick()
+{
+};
+
 export function process(msg)
 {
     if (msg.data?.traceroute) {

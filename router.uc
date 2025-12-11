@@ -49,6 +49,9 @@ export function queue(msg)
 
 export function tick()
 {
+    for (let i = 0; i < length(apps); i++) {
+        apps[i].tick();
+    }
     process();
     const pkt = multicast.wait(timers.minTimeout(60));
     if (pkt) {
