@@ -2,13 +2,14 @@
 
 import * as multicast from "./multicast.uc";
 import * as node from "./node.uc";
-import * as nodeinfo from "./nodeinfo.uc";
 import * as router from "./router.uc";
 import * as channels from "./channels.uc";
 
 import * as messages from "./messages.uc";
 import * as nodedb from "./nodedb.uc";
 import * as traceroute from "./traceroute.uc";
+import * as nodeinfo from "./nodeinfo.uc";
+import * as environmental from "./environmental_weewx.uc";
 
 node.setup();
 multicast.setup();
@@ -23,8 +24,10 @@ channels.setChannel("AREDN", "og==");
 //router.queue(messages.createTextMessage(null, null, "AREDN", "Testing"));
 
 node.setLocation(37.2113000, -121.9362000, 10, 16);
+environmental.setURL("http://192.168.51.130/current_minimal.json");
 
 for (;;) {
     nodeinfo.tick();
+    environmental.tick();
     router.tick();
 }

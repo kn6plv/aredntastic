@@ -189,7 +189,7 @@ registerProto(
         "10": "float white_lux",
         "11": "float ir_lux",
         "12": "float uv_lux",
-        "13": "float wind_direction",
+        "13": "uint32 wind_direction",
         "14": "float wind_speed",
         "15": "float weight",
         "16": "float wind_gust",

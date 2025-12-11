@@ -6,6 +6,7 @@ const MAX_TEXT_MESSAGE_LENGTH = 200;
 const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
 const DEFAULT_HOPS = 5;
 const DEFAULT_PRIORITY = 64;
+const ACK_PRIORITY = 120;
 const BITFIELD_MQTT_OKAY = 1;
 
 let messages;
@@ -71,6 +72,18 @@ export function createReplyMessage(msg, type, payload)
 export function createTextMessage(to, from, channel, text)
 {
     return createMessage(to, from, channel, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+};
+
+export function createAckMessage(msg, reason)
+{
+    return createMessage(msg.from, msg.to, msg.channelname, "routing", {
+        error_reason: reason ?? 0
+    }, {
+        priority: ACK_PRIORITY,
+        data: {
+            request_id: msg.id
+        }
+    });
 };
 
 export function process(msg)

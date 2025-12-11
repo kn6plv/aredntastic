@@ -1,6 +1,7 @@
 import * as multicast from "multicast";
 import * as parse from "parse";
 import * as node from "node";
+import * as timers from "timers";
 
 const MAX_RECENT = 32;
 const recent = [];
@@ -49,7 +50,7 @@ export function queue(msg)
 export function tick()
 {
     process();
-    const pkt = multicast.wait(60);
+    const pkt = multicast.wait(timers.minTimeout(60));
     if (pkt) {
         queue(parse.decodePacket(pkt));
     }
