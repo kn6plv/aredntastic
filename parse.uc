@@ -1,6 +1,7 @@
 
 import * as protobuf from "protobuf";
 import * as crypto from "crypto";
+import * as channels from "channels";
 
 const portnum2Proto = {
     "2": "hardware",
@@ -246,11 +247,13 @@ registerProto(
     70
 );
 
-export function decodePacket(pkt, key)
+export function decodePacket(pkt)
 {
     const msg = protobuf.decode("packet", pkt);
-    if (key && msg.encrypted && msg.channel === 31) {
-        msg.decoded = crypto.decrypt(msg.from, msg.id, key, msg.encrypted);
+    const channel = channels.getChannelByHash(msg.channel);
+    if (channel && msg.encrypted) {
+        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.key, msg.encrypted);
+        msg.channelname = channel.name;
     }
     if (msg.decoded) {
         const data = protobuf.decode("data", msg.decoded);
@@ -275,7 +278,7 @@ export function decodePacket(pkt, key)
     return msg;
 };
 
-export function encodePacket(msg, key)
+export function encodePacket(msg)
 {
     const data = msg.data;
     if (data.text_message) {
@@ -295,8 +298,10 @@ export function encodePacket(msg, key)
     }
     msg.decoded = protobuf.encode("data", msg.data);
     delete msg.data;
-    if (key) {
-        msg.encrypted = crypto.encrypt(msg.from, msg.id, key, msg.decoded);
+    const channel = channels.getChannelByName(msg.channelname);
+    if (channel) {
+        msg.channel = channel.hash;
+        msg.encrypted = crypto.encrypt(msg.from, msg.id, channel.key, msg.decoded);
         delete msg.decoded;
     }
     return protobuf.encode("packet", msg);

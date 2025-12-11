@@ -3,6 +3,7 @@
 import * as multicast from "./multicast.uc";
 import * as node from "./node.uc";
 import * as router from "./router.uc";
+import * as channels from "./channels.uc";
 
 import * as messages from "./messages.uc";
 import * as nodedb from "./nodedb.uc";
@@ -15,9 +16,12 @@ router.registerApp(messages);
 router.registerApp(nodedb);
 router.registerApp(traceroute);
 
+channels.setChannel("MediumFast", "AQ==");
+channels.setChannel("AREDN", "Ag==");
+
 let nodeupdatetime = 0;
 
-//router.queue(payloads.createTextMessage(null, null, "Testing"));
+//router.queue(messages.createTextMessage(null, null, "AREDN", "Testing"));
 
 node.setLocation(37.2113000, -121.9362000, 10, 16);
 
@@ -26,9 +30,9 @@ for (;;) {
     if (now > nodeupdatetime) {
         nodeupdatetime = now + 30 * 60;
         const me = node.getInfo();
-        router.queue(messages.createMessage(null, null, "user", me.info()));
-        router.queue(messages.createMessage(null, null, "position", me.position()));
-        router.queue(messages.createMessage(null, null, "telemetry", me.deviceTelemetry()));
+        router.queue(messages.createMessage(null, null, null, "user", me.info()));
+        router.queue(messages.createMessage(null, null, null, "position", me.position()));
+        router.queue(messages.createMessage(null, null, null, "telemetry", me.deviceTelemetry()));
     }
     router.wait(60);
 }

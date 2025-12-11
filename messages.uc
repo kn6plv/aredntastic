@@ -1,6 +1,7 @@
 import * as math from "math";
 import * as router from "router";
 import * as datastore from "datastore";
+import * as channels from "channels";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
@@ -23,13 +24,13 @@ function saveMessages()
     datastore.store("messages", messages);
 }
 
-export function createMessage(to, from, type, payload, extra)
+export function createMessage(to, from, channelname, type, payload, extra)
 {
     const fid = from ?? router.id(); // From me by default;
     const msg = {
         from: fid,
         to: to ?? router.BROADCAST,
-        channel: 31,
+        channelname: channelname,
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,
@@ -61,16 +62,16 @@ export function createMessage(to, from, type, payload, extra)
 
 export function createReplyMessage(msg, type, payload)
 {
-    return createMessage(msg.from, msg.to, type, payload, {
+    return createMessage(msg.from, msg.to, msg.channelname, type, payload, {
         data: {
             request_id: msg.id
         }
     });
 };
 
-export function createTextMessage(to, from, text)
+export function createTextMessage(to, from, channel, text)
 {
-    return createMessage(to, from, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+    return createMessage(to, from, channel, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
 };
 
 export function process(msg)
@@ -83,6 +84,7 @@ export function process(msg)
         getMessages();
         push(messages, {
             from: msg.from,
+            channelname: msg.channelname,
             when: msg.rx_time,
             text: text
         });

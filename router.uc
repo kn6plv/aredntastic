@@ -1,5 +1,4 @@
 import * as multicast from "multicast";
-import * as crypto from "crypto";
 import * as parse from "parse";
 import * as node from "node";
 
@@ -45,7 +44,7 @@ export function process()
         // Forward the message as necessary
         if (!toMe(msg)) {
             if (msg.from == id()) {
-                multicast.send(parse.encodePacket(msg, crypto.defaultKey));
+                multicast.send(parse.encodePacket(msg));
             }
         }
     }
@@ -69,6 +68,6 @@ export function wait(timeout)
     process();
     const pkt = multicast.wait(timeout);
     if (pkt) {
-        queue(parse.decodePacket(pkt, crypto.defaultKey));
+        queue(parse.decodePacket(pkt));
     }
 };
