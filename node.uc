@@ -82,7 +82,6 @@ export function setNames(long_name, short_name)
     }
 };
 
-
 export function setRole(role)
 {
     if (me.role != role) {

@@ -11,7 +11,6 @@ timers.setTimeout("device_metrics", 30 * 60);
 export function tick()
 {
     if (timers.tick("device_metrics")) {
-        const me = node.getInfo();
         router.queue(messages.createMessage(null, null, null, "telemetry", {
             time: time(),
             device_metrics: {

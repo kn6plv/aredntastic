@@ -39,22 +39,22 @@ export function updatePosition(id, position)
     }
 };
 
-export function updateDeviceMetrics(id, device)
+export function updateDeviceMetrics(id, metrics)
 {
     const node = getNode(id);
     const telemetry = node.telemetry ?? (node.telemetry = {});
-    if (isdiff(telemetry.device_metrics, device)) {
-        telemetry.device_metrics = device;  
+    if (isdiff(telemetry.device_metrics, metrics)) {
+        telemetry.device_metrics = metrics;  
         saveNode(node);
     }
 };
 
-export function updateEnvironmentMetrics(id, environment)
+export function updateEnvironmentMetrics(id, metrics)
 {
     const node = getNode(id);
     const telemetry = node.telemetry ?? (node.telemetry = {});
-    if (isdiff(telemetry.environment_metrics, environment)) {
-        telemetry.environment_metrics = environment;  
+    if (isdiff(telemetry.environment_metrics, metrics)) {
+        telemetry.environment_metrics = metrics;  
         saveNode(node);
     }
 };
