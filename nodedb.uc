@@ -1,4 +1,4 @@
-import * as router from "router";
+import * as node from "node";
 import * as datastore from "datastore";
 
 let nodedb;
@@ -26,7 +26,7 @@ export function process(msg)
 {
     let update = false;
 
-    if (!router.forMe(msg)) {
+    if (!node.forMe(msg)) {
         return;
     }
 

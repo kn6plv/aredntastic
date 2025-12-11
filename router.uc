@@ -7,23 +7,6 @@ const recent = [];
 const apps = [];
 const q = [];
 
-export const BROADCAST = 0xffffffff;
-
-export function id()
-{
-    return node.id();
-};
-
-export function forMe(msg)
-{
-    return msg.to === BROADCAST || msg.to === node.id();
-};
-
-export function toMe(msg)
-{
-    return msg.to === node.id();
-};
-
 export function registerApp(app)
 {
     push(apps, app);
@@ -42,8 +25,8 @@ export function process()
         }
 
         // Forward the message as necessary
-        if (!toMe(msg)) {
-            if (msg.from == id()) {
+        if (!node.toMe(msg)) {
+            if (msg.from == node.id()) {
                 multicast.send(parse.encodePacket(msg));
             }
         }
@@ -63,10 +46,10 @@ export function queue(msg)
     }
 };
 
-export function wait(timeout)
+export function tick()
 {
     process();
-    const pkt = multicast.wait(timeout);
+    const pkt = multicast.wait(60);
     if (pkt) {
         queue(parse.decodePacket(pkt));
     }

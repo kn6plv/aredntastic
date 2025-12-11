@@ -3,13 +3,26 @@ import * as math from "math";
 import * as crypto from "crypto";
 import * as datastore from "datastore";
 
-const ROLE_CLIENT = 0;
-const PRIVATE_HW = 255;
-const GRID_POWER = 101;
-const LOCATION_SOURCE_MANUAL = 1;
 const LOCATION_PRECISION = 16;
 
 let me = null;
+
+export const BROADCAST = 0xffffffff;
+
+export function id()
+{
+    return me.id;
+};
+
+export function forMe(msg)
+{
+    return msg.to === BROADCAST || msg.to === me.id;
+};
+
+export function toMe(msg)
+{
+    return msg.to === me.id;
+};
 
 function save()
 {
@@ -44,46 +57,7 @@ export function setup()
 
 export function getInfo()
 {
-    return {
-        id: () => me.id,
-        info: () => {
-            return {
-                id: sprintf("!%08x", me.id),
-                long_name: me.long_name,
-                short_name: me.short_name,
-                macaddr: me.macaddr,
-                hw_model: PRIVATE_HW,
-                role: ROLE_CLIENT,
-                public_key: substr(me.public_key, -32),
-                is_unmessagable: false
-            };
-        },
-        position: () => {
-            return {
-                latitude_i: me.lat * 10000000,
-                longitude_i: me.lon * 10000000,
-                altitude: me.alt,
-                time: time(),
-                location_source: LOCATION_SOURCE_MANUAL,
-                precision_bits: me.percision
-
-            };
-        },
-        deviceTelemetry: () => {
-            return {
-                time: time(),
-                device_metrics: {
-                    battery_level: GRID_POWER,
-                    uptime_seconds: clock(true)[0]
-                }
-            };
-        }
-    };
-};
-
-export function id()
-{
-    return me.id;
+    return me;
 };
 
 export function setLocation(lat, lon, alt, percision)

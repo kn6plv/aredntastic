@@ -1,5 +1,6 @@
 import * as messages from "messages";
 import * as router from "router";
+import * as node from "node";
 
 const ROUTE_SIZE = 8;
 
@@ -25,7 +26,7 @@ export function process(msg)
             const rdiff = msg.hop_start - msg.hop_limit - length(routes);
             for (let i = 0; i < rdiff; i++) {
                 if (length(routes) < ROUTE_SIZE) {
-                    push(routes, router.BROADCAST);
+                    push(routes, node.BROADCAST);
                 }
             }
             const sdiff = length(routes) - length(snrs);
@@ -40,9 +41,9 @@ export function process(msg)
             push(snrs, 0); // snr == 0
         }
     
-        if (!router.toMe(msg)) {
+        if (!node.toMe(msg)) {
             if (length(routes) < ROUTE_SIZE) {
-                push(routes, router.id());
+                push(routes, node.id());
             }
         }
         else {

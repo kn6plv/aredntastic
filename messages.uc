@@ -1,7 +1,6 @@
 import * as math from "math";
-import * as router from "router";
 import * as datastore from "datastore";
-import * as channels from "channels";
+import * as node from "node";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
@@ -26,10 +25,10 @@ function saveMessages()
 
 export function createMessage(to, from, channelname, type, payload, extra)
 {
-    const fid = from ?? router.id(); // From me by default;
+    const fid = from ?? node.id(); // From me by default;
     const msg = {
         from: fid,
-        to: to ?? router.BROADCAST,
+        to: to ?? node.BROADCAST,
         channelname: channelname,
         id: math.rand(),
         rx_time: time(),
@@ -76,7 +75,7 @@ export function createTextMessage(to, from, channel, text)
 
 export function process(msg)
 {
-    if (!router.forMe(msg)) {
+    if (!node.forMe(msg)) {
         return;
     }
     const text = msg.data?.text_message;
