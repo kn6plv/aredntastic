@@ -33,7 +33,7 @@ export function process(msg)
     if (node.forMe(msg) && msg.data?.position) {
         nodedb.updatePosition(msg.from, msg.data.position);
         if (node.toMe(msg) && msg.data.want_response) {
-            router.queue(messages.createMessage(msg.from, null, null, "position", position()));
+            router.queue(messages.createReplyMessage(msg, "position", position()));
         }
     }
 };

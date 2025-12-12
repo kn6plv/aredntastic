@@ -1,6 +1,7 @@
 import * as math from "math";
 import * as datastore from "datastore";
 import * as node from "node";
+import * as channels from "channels";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
@@ -24,13 +25,16 @@ function saveMessages()
     datastore.store("messages", messages);
 }
 
-export function createMessage(to, from, channelname, type, payload, extra)
+export function createMessage(to, from, channel_name, type, payload, extra)
 {
+    const channel = channels.getChannelByName(channel_name);
     const fid = from ?? node.id(); // From me by default;
     const msg = {
         from: fid,
         to: to ?? node.BROADCAST,
-        channelname: channelname,
+        channel_name: channel.name,
+        channel_key: channel.key,
+        channel: channel.hash,
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,
@@ -62,7 +66,7 @@ export function createMessage(to, from, channelname, type, payload, extra)
 
 export function createReplyMessage(msg, type, payload)
 {
-    return createMessage(msg.from, msg.to, msg.channelname, type, payload, {
+    return createMessage(msg.from, msg.to, msg.channel_name, type, payload, {
         data: {
             request_id: msg.id
         }
@@ -76,7 +80,7 @@ export function createTextMessage(to, from, channel, text)
 
 export function createAckMessage(msg, reason)
 {
-    return createMessage(msg.from, msg.to, msg.channelname, "routing", {
+    return createMessage(msg.from, msg.to, msg.channel_name, "routing", {
         error_reason: reason ?? 0
     }, {
         priority: ACK_PRIORITY,
@@ -100,7 +104,8 @@ export function process(msg)
         getMessages();
         push(messages, {
             from: msg.from,
-            channelname: msg.channelname,
+            channel_name: msg.channel_name,
+            channel_key: msg.channel_key,
             when: msg.rx_time,
             text: text
         });

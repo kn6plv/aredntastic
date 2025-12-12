@@ -26,10 +26,8 @@ export function process()
         }
 
         // Forward the message as necessary
-        if (!node.toMe(msg)) {
-            if (msg.from == node.id()) {
-                multicast.send(parse.encodePacket(msg));
-            }
+        if (!node.toMe(msg) && node.fromMe(msg)) {
+            multicast.send(parse.encodePacket(msg));
         }
     }
 };

@@ -6,7 +6,7 @@ import * as timers from "timers";
 
 const PRIVATE_HW = 255;
  
-timers.setTimeout("user", 30 * 60);
+timers.setTimeout("user", 3 * 60 * 60);
 
 export function tick()
 {

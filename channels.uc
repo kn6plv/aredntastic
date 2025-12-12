@@ -16,11 +16,11 @@ let primaryChannel;
 
 export function setChannel(name, key)
 {
-    let nkey = [];
-    key = b64dec(key);
-    if (length(key) === 1) {
-        nkey = [ 0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59, 0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, ord(key, 0) ];
-        if (nkey[-1] === 1) {
+    let crypto = [];
+    const nkey = b64dec(key);
+    if (length(nkey) === 1) {
+        crypto = [ 0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59, 0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, ord(nkey, 0) ];
+        if (crypto[-1] === 1) {
             if (index(primaryChannelPresets, name) == -1) {
                 print("Bad primary channel name\n");
             }
@@ -28,25 +28,25 @@ export function setChannel(name, key)
         }
     }
     else {
-        for (let i = 0; i < length(key); i++) {
-            nkey[i] = ord(key, i);
+        for (let i = 0; i < length(nkey); i++) {
+            crypto[i] = ord(nkey, i);
         }
     }
     let hash = 0;
-    for (let i = 0; i < length(nkey); i++) {
-        hash ^= nkey[i];
+    for (let i = 0; i < length(crypto); i++) {
+        hash ^= crypto[i];
     }
     for (let i = 0; i < length(name); i++) {
         hash ^= ord(name, i);
     }
-    const channel = { name: name, key: nkey, hash: hash };
+    const channel = { name: name, key: key, crypto: crypto, hash: hash };
     channelByName[name] = channel;
     channelByHash[hash] = channel;
 };
 
 export function getChannelByHash(hash)
 {
-    return channelByHash[hash];
+    return hash !== null ? channelByHash[hash] : channelByName[primaryChannel];
 };
 
 export function getChannelByName(name)

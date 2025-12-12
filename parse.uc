@@ -252,8 +252,9 @@ export function decodePacket(pkt)
     const msg = protobuf.decode("packet", pkt);
     const channel = channels.getChannelByHash(msg.channel);
     if (channel && msg.encrypted) {
-        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.key, msg.encrypted);
-        msg.channelname = channel.name;
+        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.crypto, msg.encrypted);
+        msg.channel_name = channel.name;
+        msg.channel_key = channel.key;
     }
     if (msg.decoded) {
         const data = protobuf.decode("data", msg.decoded);
@@ -298,10 +299,9 @@ export function encodePacket(msg)
     }
     msg.decoded = protobuf.encode("data", msg.data);
     delete msg.data;
-    const channel = channels.getChannelByName(msg.channelname);
+    const channel = channels.getChannelByName(msg.channel_name);
     if (channel) {
-        msg.channel = channel.hash;
-        msg.encrypted = crypto.encrypt(msg.from, msg.id, channel.key, msg.decoded);
+        msg.encrypted = crypto.encrypt(msg.from, msg.id, channel.crypto, msg.decoded);
         delete msg.decoded;
     }
     return protobuf.encode("packet", msg);

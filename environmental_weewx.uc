@@ -12,6 +12,9 @@ let weewxurl;
 
 function convert(tounit, value)
 {
+    if (!value) {
+        return null;
+    }
     const fromunit = value.units;
     let v = value.value;
     switch (tounit) {
@@ -71,9 +74,9 @@ export function tick()
                     time: time(),
                     environment_metrics: {
                         temperature: convert("C", c.temperature),
-                        relative_humidity: c.humidity.value,
+                        relative_humidity: c.humidity?.value,
                         barometric_pressure: convert("hPA", c.barometer),
-                        wind_direction: c["wind direction"].value,
+                        wind_direction: c["wind direction"]?.value,
                         wind_speed: convert("m/s", c["wind speed"]),
                         wind_gust: convert("m/s", c["wind gust"]),
                         rainfall_1h: convert("mm/h", c["rain rate"])

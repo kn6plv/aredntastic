@@ -27,6 +27,11 @@ export function toMe(msg)
     return msg.to === me.id;
 };
 
+export function fromMe(msg)
+{
+    return msg.from === me.id;
+};
+
 function save()
 {
     datastore.store("node", me);
