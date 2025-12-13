@@ -125,4 +125,3 @@ export function process(msg)
         nodedb.updateEnvironmentMetrics(msg.from, msg.data.telemetry.environment_metrics);
     }
 };
-
