@@ -1,5 +1,6 @@
 #!/usr/bin/ucode
 
+import * as unicast from "./unicast.uc";
 import * as multicast from "./multicast.uc";
 import * as node from "./node.uc";
 import * as channels from "./channels.uc";
@@ -7,6 +8,7 @@ import * as apps from "./apps.uc";
 import * as environmental from "./environmental_weewx.uc";
 
 node.setup();
+unicast.setup();
 multicast.setup();
 apps.setup();
 

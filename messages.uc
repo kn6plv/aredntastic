@@ -4,11 +4,13 @@ import * as node from "node";
 import * as channels from "channels";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
-const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
 const DEFAULT_HOPS = 5;
 const DEFAULT_PRIORITY = 64;
 const ACK_PRIORITY = 120;
 const BITFIELD_MQTT_OKAY = 1;
+
+export const TRANSPORT_MECHANISM_UNICAST_UDP = 251;
+export const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
 
 let messages;
 

@@ -1,9 +1,12 @@
 import * as multicast from "multicast";
+import * as unicast from "unicast";
 import * as parse from "parse";
 import * as node from "node";
+import * as messages from "messages";
+import * as socket from "socket";
 import * as timers from "timers";
 
-const MAX_RECENT = 32;
+const MAX_RECENT = 128;
 const recent = [];
 const apps = [];
 const q = [];
@@ -25,9 +28,17 @@ export function process()
             apps[i].process(msg);
         }
 
-        // Forward the message as necessary
-        if (!node.toMe(msg) && node.fromMe(msg)) {
-            multicast.send(parse.encodePacket(msg));
+        // Forward the message if it's not just to me. We never forward encrypted traffic.
+        if (!node.toMe(msg) && !msg.encrypted) {
+            const transport = msg.transport_mechanism;
+            if (transport === messages.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
+                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_UNICAST_UDP;
+                unicast.send(msg.to, sprintf("%J", msg));
+            }
+            if (transport === messages.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
+                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
+                multicast.send(parse.encodePacket(msg));
+            }
         }
     }
 };
@@ -51,8 +62,22 @@ export function tick()
         apps[i].tick();
     }
     process();
-    const pkt = multicast.wait(timers.minTimeout(60));
-    if (pkt) {
-        queue(parse.decodePacket(pkt));
+    const us = unicast.handle();
+    const ms = multicast.handle();
+    const v = socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ], [ ms, socket.POLLIN ]);
+    if (v[0][1]) {
+            const pkt = unicast.recv();
+            try {
+                const msg = json(pkt);
+                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_UNICAST_UDP;
+                queue(msg);
+            }
+            catch (_) {
+            }
+    }
+    if (v[1][1]) {
+        const msg = parse.decodePacket(multicast.recv());
+        msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
+        queue(msg);
     }
 };
