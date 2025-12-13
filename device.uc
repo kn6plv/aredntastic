@@ -1,5 +1,5 @@
 import * as router from "router";
-import * as messages from "messages";
+import * as message from "message";
 import * as node from "node";
 import * as timers from "timers";
 import * as nodedb from "nodedb";
@@ -24,7 +24,7 @@ parse.registerProto(
 export function tick()
 {
     if (timers.tick("device_metrics")) {
-        router.queue(messages.createMessage(null, null, null, "telemetry", {
+        router.queue(message.createMessage(null, null, null, "telemetry", {
             time: time(),
             device_metrics: {
                 battery_level: GRID_POWER,

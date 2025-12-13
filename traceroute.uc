@@ -1,4 +1,4 @@
-import * as messages from "messages";
+import * as message from "message";
 import * as router from "router";
 import * as node from "node";
 import * as parse from "parse";
@@ -62,7 +62,7 @@ export function process(msg)
             }
         }
         else {
-            router.queue(messages.createReplyMessage(msg, "traceroute", traceroute));
+            router.queue(message.createReplyMessage(msg, "traceroute", traceroute));
         }
     }
 };

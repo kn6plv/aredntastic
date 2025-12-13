@@ -1,5 +1,5 @@
 import * as router from "router";
-import * as messages from "messages";
+import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as timers from "timers";
@@ -28,7 +28,7 @@ export function tick()
 {
     if (timers.tick("user")) {
         const me = node.getInfo();
-        router.queue(messages.createMessage(null, null, null, "user", {
+        router.queue(message.createMessage(null, null, null, "user", {
             id: sprintf("!%08x", me.id),
             long_name: me.long_name,
             short_name: me.short_name,

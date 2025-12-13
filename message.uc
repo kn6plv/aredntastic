@@ -1,5 +1,5 @@
 import * as math from "math";
-import * as datastore from "datastore";
+import * as messagedb from "messagedb";
 import * as node from "node";
 import * as channels from "channels";
 import * as parse from "parse";
@@ -30,21 +30,6 @@ parse.registerProto(
         "3": "enum error_reason"
     }
 );
-
-let messages;
-
-function getMessages()
-{
-    if (!messages) {
-        messages = datastore.load("messages") ?? [];
-    }
-    return messages;
-}
-
-function saveMessages()
-{
-    datastore.store("messages", messages);
-}
 
 export function createMessage(to, from, channel_name, type, payload, extra)
 {
@@ -117,20 +102,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (!node.forMe(msg)) {
-        return;
-    }
-    const text = msg.data?.text_message;
-    if (text) {
-        getMessages();
-        push(messages, {
-            from: msg.from,
-            channel_name: msg.channel_name,
-            channel_key: msg.channel_key,
-            when: msg.rx_time,
-            text: text
-        });
-        sort(messages, (a, b) => a.when - b.when);
-        saveMessages();
+    if (node.forMe(msg) && msg.data?.text_message) {
+        messagedb.addMessage(msg);
     }
 };

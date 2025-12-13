@@ -3,43 +3,47 @@ import * as protobuf from "protobuf";
 import * as crypto from "crypto";
 import * as channels from "channels";
 
-const portnum2Proto = {
-    "2": "hardware",
-    //"3": "position",
-    //"4": "user",
-    //"5": "routing",
-    "6": "admin",
-    "7": "compressed",
-    "8": "waypoint",
-    "9": "audio",
-    "10": "detectionsensor",
-    "11": "alert",
-    "12": "keyverification",
-    "32": "reply",
-    "33": "iptunnel",
-    "34": "paxcounter",
-    "64": "serial",
-    //"65": "storeandforward",
-    "66": "rangetest",
-    //"67": "telemetry",
-    "68": "zps",
-    "69": "simulator",
-    //"70": "traceroute",
-    "71": "neighborinfo",
-    "72": "atak",
-    "73": "mapreport",
-    "74": "powerstress",
-    "76": "reticulumtunnel",
-    "77": "cayenne",
-    "257": "atakforwarder"
-};
+/*
+ * Known port numbers
+ *
+ *  2 - hardware
+ *  3 - position
+ *  4 - user
+ *  5 - routing
+ *  6 - admin
+ *  7 - compressed
+ *  8 - waypoint
+ *  9 - audio
+ * 10 - detectionsensor
+ * 11 - alert
+ * 12 - keyverification
+ * 32 - reply
+ * 33 - iptunnel
+ * 34 - paxcounter
+ * 64 - serial
+ * 65 - storeandforward
+ * 66 - rangetest
+ * 67 - telemetry
+ * 68 - zps
+ * 69 - simulator
+ * 70 - traceroute
+ * 71 - neighborinfo
+ * 72 - atak
+ * 73 - mapreport
+ * 74 - powerstress
+ * 76 - reticulumtunnel
+ * 77 - cayenne
+ * 257 - atakforwarder
+ */
+
+const portnum2Proto = {};
 const proto2Portnum = {};
 
 export function registerProto(name, portnum, decode)
 {
     protobuf.registerProto(name, decode);
     if (portnum) {
-        portnum2Proto[`${portnum}`] = name;
+        portnum2Proto[portnum] = name;
         proto2Portnum[name] = portnum;
     }
 };
@@ -128,18 +132,8 @@ registerProto(
 
  --- */
 
-export function decodePacket(pkt)
-{
-    const msg = protobuf.decode("packet", pkt);
-    if (msg.encrypted) {
-        const channel = channels.getChannelByHash(msg.channel);
-        if (!channel) {
-            return null;
-        }
-        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.crypto, msg.encrypted);
-        msg.channel_name = channel.name;
-        msg.channel_key = channel.key;
-    }
+ function decodePacketData(msg)
+ {
     if (msg.decoded) {
         const data = protobuf.decode("data", msg.decoded);
         if (data && data.portnum !== null && data.payload && data.bitfield !== null) {
@@ -159,6 +153,28 @@ export function decodePacket(pkt)
                     return msg;
                 }
             }
+        }
+    }
+    return null;
+ }
+
+export function decodePacket(pkt)
+{
+    const msg = protobuf.decode("packet", pkt);
+    if (!msg.encrypted) {
+        return decodePacketData(msg);
+    }
+    const hashchannels = channels.getChannelsByHash(msg.channel);
+    if (!hashchannels) {
+        return null;
+    }
+    for (let i = 0; i < length(hashchannels); i++) {
+        const channel = hashchannels[i];
+        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.crypto, msg.encrypted);
+        msg.channel_name = channel.name;
+        msg.channel_key = channel.key;
+        if (decodePacketData(msg)) {
+            return msg;
         }
     }
     return null;

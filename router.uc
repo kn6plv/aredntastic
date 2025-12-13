@@ -2,7 +2,7 @@ import * as multicast from "multicast";
 import * as unicast from "unicast";
 import * as parse from "parse";
 import * as node from "node";
-import * as messages from "messages";
+import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
 
@@ -31,12 +31,12 @@ export function process()
         // Forward the message if it's not just to me. We never forward encrypted traffic.
         if (!node.toMe(msg) && !msg.encrypted) {
             const transport = msg.transport_mechanism;
-            if (transport === messages.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
-                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_UNICAST_UDP;
+            if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
+                msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
                 unicast.send(msg.to, sprintf("%J", msg));
             }
-            if (transport === messages.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
-                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
+            if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
+                msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
                 multicast.send(parse.encodePacket(msg));
             }
         }
@@ -69,7 +69,7 @@ export function tick()
             const pkt = unicast.recv();
             try {
                 const msg = json(pkt);
-                msg.transport_mechanism = messages.TRANSPORT_MECHANISM_UNICAST_UDP;
+                msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
                 queue(msg);
             }
             catch (_) {
@@ -78,7 +78,7 @@ export function tick()
     if (v[1][1]) {
         const msg = parse.decodePacket(multicast.recv());
         if (msg) {
-            msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
+            msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
             queue(msg);
         }
     }

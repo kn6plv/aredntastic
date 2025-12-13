@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as timers from "timers";
 import * as router from "router";
-import * as messages from "messages";
+import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as parse from "parse";
@@ -100,7 +100,7 @@ export function tick()
             p.close();
             try {
                 const c = json(all).current;
-                router.queue(messages.createMessage(null, null, null, "telemetry", {
+                router.queue(message.createMessage(null, null, null, "telemetry", {
                     time: time(),
                     environment_metrics: {
                         temperature: convert("C", c.temperature),

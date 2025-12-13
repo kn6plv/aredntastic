@@ -11,7 +11,7 @@ const primaryChannelPresets = [
 ];
 
 const channelByName = {};
-const channelByHash = {};
+const channelsByHash = {};
 let primaryChannel;
 
 export function setChannel(name, key)
@@ -41,12 +41,15 @@ export function setChannel(name, key)
     }
     const channel = { name: name, key: key, crypto: crypto, hash: hash };
     channelByName[name] = channel;
-    channelByHash[hash] = channel;
+    channelsByHash[hash] = [ channel ];
 };
 
-export function getChannelByHash(hash)
+export function getChannelsByHash(hash)
 {
-    return hash !== null ? channelByHash[hash] : channelByName[primaryChannel];
+    if (!hash) {
+        return [ channelByName[primaryChannel] ];
+    }
+    return channelsByHash[hash];
 };
 
 export function getChannelByName(name)

@@ -1,7 +1,7 @@
 import * as router from "router";
 
 import * as user from "user";
-import * as messages from "messages";
+import * as message from "message";
 import * as position from "position";
 import * as traceroute from "traceroute";
 import * as device from "device";
@@ -11,7 +11,7 @@ import * as aredn from "aredn";
 export function setup()
 {
     router.registerApp(user);
-    router.registerApp(messages);
+    router.registerApp(message);
     router.registerApp(position);
     router.registerApp(traceroute);
     router.registerApp(device);

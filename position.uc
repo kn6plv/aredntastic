@@ -1,5 +1,5 @@
 import * as timers from "timers";
-import * as messages from "messages";
+import * as message from "message";
 import * as router from "router";
 import * as nodedb from "nodedb";
 import * as node from "node";
@@ -54,7 +54,7 @@ function position()
 export function tick()
 {
     if (timers.tick("position")) {
-        router.queue(messages.createMessage(null, null, null, "position", position()));
+        router.queue(message.createMessage(null, null, null, "position", position()));
     }
 };
 
@@ -63,7 +63,7 @@ export function process(msg)
     if (node.forMe(msg) && msg.data?.position) {
         nodedb.updatePosition(msg.from, msg.data.position);
         if (node.toMe(msg) && msg.data.want_response) {
-            router.queue(messages.createReplyMessage(msg, "position", position()));
+            router.queue(message.createReplyMessage(msg, "position", position()));
         }
     }
 };
