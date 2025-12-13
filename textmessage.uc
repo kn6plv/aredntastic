@@ -1,4 +1,5 @@
 import * as datastore from "datastore";
+import * as node from "node";
 
 let messages;
 
@@ -14,7 +15,7 @@ function saveMessages()
     datastore.store("messages", messages);
 }
 
-export function addMessage(msg)
+function addMessage(msg)
 {
     loadMessages();
     push(messages, {
@@ -26,4 +27,15 @@ export function addMessage(msg)
     });
     sort(messages, (a, b) => a.when - b.when);
     saveMessages();
+};
+
+export function tick()
+{
+};
+
+export function process(msg)
+{
+    if (node.forMe(msg) && msg.data?.text_message) {
+        addMessage(msg);
+    }
 };

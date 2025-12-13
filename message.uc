@@ -1,5 +1,4 @@
 import * as math from "math";
-import * as messagedb from "messagedb";
 import * as node from "node";
 import * as channels from "channels";
 import * as parse from "parse";
@@ -94,15 +93,4 @@ export function createAckMessage(msg, reason)
             request_id: msg.id
         }
     });
-};
-
-export function tick()
-{
-};
-
-export function process(msg)
-{
-    if (node.forMe(msg) && msg.data?.text_message) {
-        messagedb.addMessage(msg);
-    }
 };
