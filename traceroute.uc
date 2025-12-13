@@ -1,6 +1,17 @@
 import * as messages from "messages";
 import * as router from "router";
 import * as node from "node";
+import * as parse from "parse";
+
+parse.registerProto(
+    "traceroute", 70,
+    {
+        "1": "repeated fixed32 route",
+        "2": "repeated int32 snr_towards",
+        "3": "repeated fixed32 route_back",
+        "4": "repeated int32 snr_back"
+    }
+);
 
 const ROUTE_SIZE = 8;
 

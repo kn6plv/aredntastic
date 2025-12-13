@@ -77,7 +77,9 @@ export function tick()
     }
     if (v[1][1]) {
         const msg = parse.decodePacket(multicast.recv());
-        msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
-        queue(msg);
+        if (msg) {
+            msg.transport_mechanism = messages.TRANSPORT_MECHANISM_MULTICAST_UDP;
+            queue(msg);
+        }
     }
 };

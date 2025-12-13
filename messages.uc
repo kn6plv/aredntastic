@@ -2,6 +2,7 @@ import * as math from "math";
 import * as datastore from "datastore";
 import * as node from "node";
 import * as channels from "channels";
+import * as parse from "parse";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const DEFAULT_HOPS = 5;
@@ -11,6 +12,24 @@ const BITFIELD_MQTT_OKAY = 1;
 
 export const TRANSPORT_MECHANISM_UNICAST_UDP = 251;
 export const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
+
+parse.registerProto(
+    "routediscovery", null,
+    {
+        "1": "repeated fixed32 route",
+        "2": "repeated int32 snr_towards",
+        "3": "repeated fixed32 route_back",
+        "4": "repeated int32 snr_back"
+    }
+);
+parse.registerProto(
+    "routing", 5,
+    {
+        "1": "proto routediscovery route_request",
+        "2": "proto routediscovery route_reply",
+        "3": "enum error_reason"
+    }
+);
 
 let messages;
 

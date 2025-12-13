@@ -35,7 +35,7 @@ const portnum2Proto = {
 };
 const proto2Portnum = {};
 
-export function registerProto(name, decode, portnum)
+export function registerProto(name, portnum, decode)
 {
     protobuf.registerProto(name, decode);
     if (portnum) {
@@ -45,7 +45,7 @@ export function registerProto(name, decode, portnum)
 };
 
 registerProto(
-    "packet",
+    "packet", null,
     {
         "1": "fixed32 from",
         "2": "fixed32 to",
@@ -71,7 +71,7 @@ registerProto(
     }
 );
 registerProto(
-    "data",
+    "data", null,
     {
         "1": "enum portnum",
         "2": "bytes payload",
@@ -84,125 +84,28 @@ registerProto(
         "9": "uint32 bitfield"
     }
 );
+
+/* --- Unused ---
+
 registerProto(
-    "position",
-    {
-        "1": "sfixed32 latitude_i",
-        "2": "sfixed32 longitude_i",
-        "3": "int32 altitude",
-        "4": "fixed32 time",
-        "5": "enum location_source",
-        "6": "enum altitude_source",
-        "7": "fixed32 timestamp",
-        "8": "int32 timestamp_millis_adjust",
-        "9": "sint32 altitude_hae",
-        "10": "sint32 altitude_geoidal_separation",
-        "11": "uint32 PDOP",
-        "12": "uint32 HDOP",
-        "13": "uint32 VDOP",
-        "14": "uint32 gps_accuracy",
-        "15": "uint32 ground_speed",
-        "16": "uint32 ground_track",
-        "17": "uint32 fix_quality",
-        "18": "uint32 fix_type",
-        "19": "uint32 sats_in_view",
-        "20": "uint32 sensor_id",
-        "21": "uint32 next_update",
-        "22": "uint32 seq_number",
-        "23": "uint32 precision_bits"
-    },
-    3
-);
-registerProto(
-    "user",
-    {
-        "1": "string id",
-        "2": "string long_name",
-        "3": "string short_name",
-        "4": "bytes macaddr",
-        "5": "enum hw_model",
-        "6": "bool is_licensed",
-        "7": "enum role",
-        "8": "bytes public_key",
-        "9": "bool is_unmessagable"
-    },
-    4
-);
-registerProto(
-    "routediscovery",
-    {
-        "1": "repeated fixed32 route",
-        "2": "repeated int32 snr_towards",
-        "3": "repeated fixed32 route_back",
-        "4": "repeated int32 snr_back"
-    }
-);
-registerProto(
-    "routing",
-    {
-        "1": "proto routediscovery route_request",
-        "2": "proto routediscovery route_reply",
-        "3": "enum error_reason"
-    },
-    5
-);
-registerProto(
-    "storeandforward",
+    "storeandforward", 65,
     {
         "1": "enum rr",
         "2": "proto statistics stats",
         "3": "proto history history",
         "4": "proto heartbeat heartbeat",
         "5": "bytes text"
-    },
-    65
+    }
 );
 registerProto(
-    "heartbeat",
+    "heartbeat", null,
     {
         "1": "uint32 period",
         "2": "uint32 secondary"
     }
 );
 registerProto(
-    "device",
-    {
-        "1": "uint32 battery_level",
-        "2": "float voltage",
-        "3": "float channel_utilization",
-        "4": "float air_util_tx",
-        "5": "uint32 uptime_seconds"
-    }
-);
-registerProto(
-    "environment",
-    {
-        "1": "float temperature",
-        "2": "float relative_humidity",
-        "3": "float barometric_pressure",
-        "4": "float gas_resistance",
-        "5": "float voltage",
-        "6": "float current",
-        "7": "uint32 iaq",
-        "8": "float distance",
-        "9": "float lux",
-        "10": "float white_lux",
-        "11": "float ir_lux",
-        "12": "float uv_lux",
-        "13": "uint32 wind_direction",
-        "14": "float wind_speed",
-        "15": "float weight",
-        "16": "float wind_gust",
-        "17": "float wind_lull",
-        "18": "float radiation",
-        "19": "float rainfall_1h",
-        "20": "float rainfall_24h",
-        "21": "uint32 soil_moisture",
-        "22": "float soil_temperature"
-    }
-);
-registerProto(
-    "power",
+    "power_metrics", null,
     {
         "1": "float ch1_voltage",
         "2": "float ch1_current",
@@ -222,61 +125,43 @@ registerProto(
         "16": "float ch8_current"
     }
 );
-registerProto(
-    "telemetry",
-    {
-        "1": "fixed32 time",
-        "2": "proto device device_metrics",
-        "3": "proto environment environment_metrics",
-        "4": "proto unknown air_quality_metrics",
-        "5": "proto power power_metrics",
-        "6": "proto unknown local_stats",
-        "7": "proto unknown health_metrics",
-        "8": "proto unknown host_metrics"
-    },
-    67
-);
-registerProto(
-    "traceroute",
-    {
-        "1": "repeated fixed32 route",
-        "2": "repeated int32 snr_towards",
-        "3": "repeated fixed32 route_back",
-        "4": "repeated int32 snr_back"
-    },
-    70
-);
+
+ --- */
 
 export function decodePacket(pkt)
 {
     const msg = protobuf.decode("packet", pkt);
-    const channel = channels.getChannelByHash(msg.channel);
-    if (channel && msg.encrypted) {
+    if (msg.encrypted) {
+        const channel = channels.getChannelByHash(msg.channel);
+        if (!channel) {
+            return null;
+        }
         msg.decoded = crypto.decrypt(msg.from, msg.id, channel.crypto, msg.encrypted);
         msg.channel_name = channel.name;
         msg.channel_key = channel.key;
     }
     if (msg.decoded) {
         const data = protobuf.decode("data", msg.decoded);
-        if (data) {
+        if (data && data.portnum !== null && data.payload && data.bitfield !== null) {
             delete msg.decoded;
-            if (data.payload) {
-                if (data.portnum === 1) {
-                    data.text_message = data.payload;
+            if (data.portnum === 1) {
+                data.text_message = data.payload;
+                delete data.payload;
+                msg.data = data;
+                return msg;
+            }
+            const protoname = portnum2Proto[`${data.portnum}`];
+            if (protoname) {
+                data[protoname] = protobuf.decode(protoname, data.payload);
+                if (data[protoname]) {
                     delete data.payload;
-                }
-                else {
-                    const protoname = portnum2Proto[`${data.portnum}`] ?? "unknown";
-                    data[protoname] = protobuf.decode(protoname, data.payload);
-                    if (data[protoname]) {
-                        delete data.payload;
-                    }
+                    msg.data = data;
+                    return msg;
                 }
             }
-            msg.data = data;
         }
     }
-    return msg;
+    return null;
 };
 
 export function encodePacket(msg)

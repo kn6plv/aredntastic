@@ -3,10 +3,23 @@ import * as messages from "messages";
 import * as node from "node";
 import * as timers from "timers";
 import * as nodedb from "nodedb";
+import * as parse from "parse";
+import * as telemetry from "telemetry";
 
 const GRID_POWER = 101;
  
 timers.setTimeout("device_metrics", 30 * 60);
+
+parse.registerProto(
+    "device_metrics", null,
+    {
+        "1": "uint32 battery_level",
+        "2": "float voltage",
+        "3": "float channel_utilization",
+        "4": "float air_util_tx",
+        "5": "uint32 uptime_seconds"
+    }
+);
 
 export function tick()
 {
