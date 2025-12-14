@@ -30,15 +30,14 @@ parse.registerProto(
     }
 );
 
-export function createMessage(to, from, channel_name, type, payload, extra)
+export function createMessage(to, from, namekey, type, payload, extra)
 {
-    const chan = channel.getLocalChannelByName(channel_name);
+    const chan = channel.getChannelByNameKey(namekey);
     const fid = from ?? node.id(); // From me by default;
     const msg = {
         from: fid,
         to: to ?? node.BROADCAST,
-        channel_name: chan.name,
-        channel_key: chan.key,
+        namekey: namekey,
         channel: chan.hash,
         id: math.rand(),
         rx_time: time(),
@@ -71,21 +70,21 @@ export function createMessage(to, from, channel_name, type, payload, extra)
 
 export function createReplyMessage(msg, type, payload)
 {
-    return createMessage(msg.from, msg.to, msg.channel_name, type, payload, {
+    return createMessage(msg.from, msg.to, msg.namekey, type, payload, {
         data: {
             request_id: msg.id
         }
     });
 };
 
-export function createTextMessage(to, from, channel, text)
+export function createTextMessage(to, from, namekey, text)
 {
-    return createMessage(to, from, channel, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+    return createMessage(to, from, namekey, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
 };
 
 export function createAckMessage(msg, reason)
 {
-    return createMessage(msg.from, msg.to, msg.channel_name, "routing", {
+    return createMessage(msg.from, msg.to, msg.namekey, "routing", {
         error_reason: reason ?? 0
     }, {
         priority: ACK_PRIORITY,

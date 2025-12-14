@@ -42,15 +42,15 @@ function getHash(name, crypto)
     return hash;
 }
 
-export function addMessageKey(name, key)
+export function addMessageNameKey(namekey)
 {
-    const namekey = `${name}:${key}`;
     if (channelByNameKey[namekey]) {
         return null;
     }
-    const crypto = getCryptoKey(key);
-    const hash = getHash(name, crypto);
-    const chan = { name: name, key: key, crypto: crypto, hash: hash };
+    const nk = split(namekey, "\n");
+    const crypto = getCryptoKey(nk[1]);
+    const hash = getHash(nk[0], crypto);
+    const chan = { namekey: namekey, crypto: crypto, hash: hash };
     channelByNameKey[namekey] = chan;
     const bucket = channelsByHash[hash] ?? (channelsByHash[hash] = []);
     push(bucket, chan);
@@ -59,15 +59,15 @@ export function addMessageKey(name, key)
 
 export function setChannel(name, key)
 {
-    const channel = addMessageKey(name, key);
-    if (channel) {
-        if (channel.crypto[-1] === 1) {
-            if (index(primaryChannelPresets, channel.name) == -1) {
+    const chan = addMessageNameKey(`${name}\n${key}`);
+    if (chan) {
+        if (chan.crypto[-1] === 1) {
+            if (index(primaryChannelPresets, name) == -1) {
                 print("Bad primary channel name\n");
             }
-            primaryChannel = channel;
+            primaryChannel = chan;
         }
-        channelByName[name] = channel;
+        channelByName[name] = chan;
     }
 };
 
@@ -87,7 +87,10 @@ export function getLocalChannelByName(name)
     return channelByName[name];
 };
 
-export function getChannelByNameKey(name, key)
+export function getChannelByNameKey(namekey)
 {
-    return channelByNameKey[`${name}:${key}`];
+    if (!namekey) {
+        return primaryChannel;
+    }
+    return channelByNameKey[namekey];
 };

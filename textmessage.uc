@@ -20,8 +20,7 @@ function addMessage(msg)
     loadMessages();
     push(messages, {
         from: msg.from,
-        channel_name: msg.channel_name,
-        channel_key: msg.channel_key,
+        namekey: msg.namekey,
         when: msg.rx_time,
         text: msg.data.text_message
     });
