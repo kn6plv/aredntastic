@@ -43,7 +43,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (node.forMe(msg) && msg.data?.user) {
+    if (msg.data?.user && node.forMe(msg)) {
         nodedb.updateUser(msg.from, msg.data.user);
     }
 };

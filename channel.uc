@@ -87,6 +87,11 @@ export function getLocalChannelByName(name)
     return channelByName[name];
 };
 
+export function getLocalChannelByNameKey(namekey)
+{
+    return getLocalChannelByName(split(namekey, "\n")[0]);
+};
+
 export function getChannelByNameKey(namekey)
 {
     if (!namekey) {

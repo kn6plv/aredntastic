@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as timers from "timers";
+import * as node from "node";
 
 const PUB = "/var/run/arednlink/publish";
 
@@ -30,23 +31,21 @@ export function tick()
         const alist = [];
         const pubs = fs.lsdir(PUB);
         if (pubs) {
+            const mid = node.id();
             for (let i = 0; i < length(pubs); i++) {
                 const file = `${PUB}/${pubs[i]}`;
                 if (fs.lstat(file).size) {
-                    const f = fs.open(file);
-                    if (f) {
-                        for (let line = f.read("line"); length(line); line = f.read("line")) {
-                            try {
-                                const record = json(line);
-                                if (record.type == "aredntastic" && record.ip && record.id) {
-                                    push(alist, record.ip);
-                                    ilist[record.id] = record.ip;
-                                }
-                            }
-                            catch (_) {
+                    try {
+                        const pub = json(fs.readfile(file));
+                        for (let i = 0; i < length(pub.data); i++) {
+                            const record = pub.data[i];
+                            if (record.type == "KN6PLV.aredntastic" && record.ip && record.id && record.id !== mid) {
+                                push(alist, record.ip);
+                                ilist[record.id] = record.ip;
                             }
                         }
-                        f.close();
+                    }
+                    catch (_) {
                     }
                 }
             }

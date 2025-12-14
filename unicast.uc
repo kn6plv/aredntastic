@@ -1,6 +1,6 @@
 import * as socket from "socket";
 import * as node from "node";
-import * as aredn from "aredn";
+import * as platform from "platform";
 
 const PORT = 4404;
 
@@ -28,7 +28,7 @@ export function recv()
 export function send(to, data)
 {
     if (to === node.BROADCAST) {
-        const addresses = aredn.getOtherInstances();
+        const addresses = platform.getOtherInstances();
         for (let i = 0; i < length(addresses); i++) {
             const r = s.send(data, 0, {
                 address: addresses[i],
@@ -40,7 +40,7 @@ export function send(to, data)
         }
     }
     else {
-        const address = aredn.getInstance(to);
+        const address = platform.getInstance(to);
         if (address) {
             const r = s.send(data, 0, {
                 address: address,

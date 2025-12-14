@@ -36,7 +36,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (node.forMe(msg) && msg.data?.telemetry?.device_metrics) {
+    if (msg.data?.telemetry?.device_metrics && node.forMe(msg)) {
         nodedb.updateDeviceMetrics(msg.from, msg.data.telemetry.device_metrics);
     }
 };

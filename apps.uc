@@ -6,7 +6,7 @@ import * as position from "position";
 import * as traceroute from "traceroute";
 import * as device from "device";
 import * as environmental from "environmental_weewx";
-import * as aredn from "aredn";
+import * as platform from "platform";
 
 export function setup()
 {
@@ -16,7 +16,7 @@ export function setup()
     router.registerApp(traceroute);
     router.registerApp(device);
     router.registerApp(environmental);
-    router.registerApp(aredn);
+    router.registerApp(platform);
 };
 
 export function tick()

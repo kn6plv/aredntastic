@@ -60,7 +60,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (node.forMe(msg) && msg.data?.position) {
+    if (msg.data?.position && node.forMe(msg)) {
         nodedb.updatePosition(msg.from, msg.data.position);
         if (node.toMe(msg) && msg.data.want_response) {
             router.queue(message.createReplyMessage(msg, "position", position()));

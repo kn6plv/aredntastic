@@ -121,7 +121,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (node.forMe(msg) && msg.data?.telemetry?.environment_metrics) {
+    if (msg.data?.telemetry?.environment_metrics && node.forMe(msg)) {
         nodedb.updateEnvironmentMetrics(msg.from, msg.data.telemetry.environment_metrics);
     }
 };
