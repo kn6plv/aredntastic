@@ -1,7 +1,7 @@
 
 import * as protobuf from "protobuf";
 import * as crypto from "crypto";
-import * as channels from "channels";
+import * as channel from "channel";
 
 /*
  * Known port numbers
@@ -164,15 +164,15 @@ export function decodePacket(pkt)
     if (!msg.encrypted) {
         return decodePacketData(msg);
     }
-    const hashchannels = channels.getChannelsByHash(msg.channel);
+    const hashchannels = channel.getChannelsByHash(msg.channel);
     if (!hashchannels) {
         return null;
     }
     for (let i = 0; i < length(hashchannels); i++) {
-        const channel = hashchannels[i];
-        msg.decoded = crypto.decrypt(msg.from, msg.id, channel.crypto, msg.encrypted);
-        msg.channel_name = channel.name;
-        msg.channel_key = channel.key;
+        const chan = hashchannels[i];
+        msg.decoded = crypto.decrypt(msg.from, msg.id, chan.crypto, msg.encrypted);
+        msg.channel_name = chan.name;
+        msg.channel_key = chan.key;
         if (decodePacketData(msg)) {
             return msg;
         }
@@ -200,9 +200,9 @@ export function encodePacket(msg)
     }
     msg.decoded = protobuf.encode("data", msg.data);
     delete msg.data;
-    const channel = channels.getChannelByName(msg.channel_name);
-    if (channel) {
-        msg.encrypted = crypto.encrypt(msg.from, msg.id, channel.crypto, msg.decoded);
+    const chan = channel.getChannelByNameKey(msg.channel_name, msg.channel_key);
+    if (chan) {
+        msg.encrypted = crypto.encrypt(msg.from, msg.id, chan.crypto, msg.decoded);
         delete msg.decoded;
     }
     return protobuf.encode("packet", msg);

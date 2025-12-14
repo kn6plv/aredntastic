@@ -23,7 +23,7 @@ function addMessage(msg)
         channel_name: msg.channel_name,
         channel_key: msg.channel_key,
         when: msg.rx_time,
-        text: text
+        text: msg.data.text_message
     });
     sort(messages, (a, b) => a.when - b.when);
     saveMessages();

@@ -5,6 +5,7 @@ import * as node from "node";
 import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
+import * as channel from "channel";
 
 const MAX_RECENT = 128;
 const recent = [];
@@ -70,6 +71,9 @@ export function tick()
             try {
                 const msg = json(pkt);
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
+                if (msg.channel_name && msg.channel_key) {
+                    channel.addMessageKey(msg.channel_name, msg.channel_key);
+                }
                 queue(msg);
             }
             catch (_) {

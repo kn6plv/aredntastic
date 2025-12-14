@@ -1,6 +1,6 @@
 import * as math from "math";
 import * as node from "node";
-import * as channels from "channels";
+import * as channel from "channel";
 import * as parse from "parse";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
@@ -32,14 +32,14 @@ parse.registerProto(
 
 export function createMessage(to, from, channel_name, type, payload, extra)
 {
-    const channel = channels.getChannelByName(channel_name);
+    const chan = channel.getLocalChannelByName(channel_name);
     const fid = from ?? node.id(); // From me by default;
     const msg = {
         from: fid,
         to: to ?? node.BROADCAST,
-        channel_name: channel.name,
-        channel_key: channel.key,
-        channel: channel.hash,
+        channel_name: chan.name,
+        channel_key: chan.key,
+        channel: chan.hash,
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,

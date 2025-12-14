@@ -18,6 +18,11 @@ export function getInstance(id)
     return id2address[id];
 };
 
+export function getLocation()
+{
+    return [ 37.888, -122.268, 10 ];
+};
+
 export function tick()
 {
     if (timers.tick("aredn")) {
