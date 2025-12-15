@@ -4,6 +4,7 @@ import * as node from "node";
 import * as nodedb from "nodedb";
 import * as timers from "timers";
 import * as parse from "parse";
+import * as crypto from "crypto";
 
 const PRIVATE_HW = 255;
  
@@ -28,11 +29,6 @@ export function tick()
 {
     if (timers.tick("user")) {
         const me = node.getInfo();
-        let pubkey = "";
-        for (let i = 0; i < length(me.public_key); i++) {
-            const v = me.public_key[i];
-            pubkey += chr((v >> 8) & 255, v & 255);
-        }
         router.queue(message.createMessage(null, null, null, "user", {
             id: sprintf("!%08x", me.id),
             long_name: me.long_name,
@@ -40,7 +36,7 @@ export function tick()
             macaddr: me.macaddr,
             hw_model: PRIVATE_HW,
             role: me.role,
-            public_key: pubkey,
+            public_key: crypto.pKeyToString(me.public_key),
             is_unmessagable: false
         }));
     }

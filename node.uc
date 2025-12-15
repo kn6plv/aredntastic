@@ -22,6 +22,11 @@ export function forMe(msg)
     return msg.to === BROADCAST || msg.to === me.id;
 };
 
+export function isBroadcast(msg)
+{
+    return msg.to === BROADCAST;
+};
+
 export function toMe(msg)
 {
     return msg.to === me.id;

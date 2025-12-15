@@ -1,7 +1,10 @@
-
+import * as struct from "struct";
+import * as digest from "digest";
 import * as protobuf from "protobuf";
 import * as crypto from "crypto";
 import * as channel from "channel";
+import * as node from "node";
+import * as nodedb from "nodedb";
 
 /*
  * Known port numbers
@@ -165,15 +168,38 @@ export function decodePacket(pkt)
         return decodePacketData(msg);
     }
     const hashchannels = channel.getChannelsByHash(msg.channel);
-    if (!hashchannels) {
-        return null;
+    if (hashchannels) {
+        for (let i = 0; i < length(hashchannels); i++) {
+            const chan = hashchannels[i];
+            msg.decoded = crypto.decrypt(msg.from, msg.id, chan.crypto, msg.encrypted, null);
+            msg.namekey = chan.namekey;
+            if (decodePacketData(msg)) {
+                delete msg.encrypted;
+                return msg;
+            }
+        }
     }
-    for (let i = 0; i < length(hashchannels); i++) {
-        const chan = hashchannels[i];
-        msg.decoded = crypto.decrypt(msg.from, msg.id, chan.crypto, msg.encrypted);
-        msg.namekey = chan.namekey;
-        if (decodePacketData(msg)) {
-            return msg;
+    if (!node.isBroadcast(msg)) {
+        const frompublic = nodedb.getNode(msg.from)?.user?.public_key;
+        const toprivate = node.toMe(msg) ? node.getInfo().private_key : nodedb.getNode(msg.to)?.user?.private_key;
+        //print("pub ", frompublic, " priv ", toprivate, "\n");
+        if (frompublic && toprivate) {
+            const sharedkey = crypto.getSharedKey(toprivate, crypto.stringToPKey(frompublic));
+            //print("sharedkey ", sharedkey, "\n");
+            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(join("", map(sharedkey, v => chr(v))))));
+            //print("hash ", hash, "\n");
+            const ciphertext = substr(msg.encrypted, 0, -12);
+            const auth = ubstr(msg.encrypted, -12, 8);
+            const xnonce = substr(msg.encrypted, -4);
+            msg.decoded = crypto.decrypt(msg.from, msg.id, hash, ciphertext, xnonce);
+            //for (let i = 0; i < length(msg.decoded); i++) {
+            //    printf("%02x ", ord(msg.decoded, i));
+            //}
+            //print("\n");
+            if (decodePacketData(msg)) {
+                delete msg.encrypted;
+                return msg;
+            }
         }
     }
     return null;

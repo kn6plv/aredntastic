@@ -3,7 +3,7 @@ import * as math from "math";
 import * as aes from "aes";
 import * as x25519 from "x25519";
 
-export function decrypt(from, id, key, encrypted)
+export function decrypt(from, id, key, encrypted, xnonce)
 {
     let plain = "";
 
@@ -12,6 +12,12 @@ export function decrypt(from, id, key, encrypted)
     const ekey = aes.AES_ExpandKey(slice(key));
 
     const counter = struct.unpack("16B", struct.pack("QIII", id, from, 0, 0));
+    if (xnonce) {
+        counter[4] = ord(xnonce, 0);
+        counter[5] = ord(xnonce, 1);
+        counter[6] = ord(xnonce, 2);
+        counter[7] = ord(xnonce, 3);
+    }
     let ecounterIdx = 16;
     let ecounter;
 
@@ -46,14 +52,37 @@ export function generateKeyPair()
     for (let i = 0; i < 16; i++) {
         kprivate[i] = (math.rand(255) << 8) | math.rand(255);
     }
-    const kpublic = x25519.curve25519(kprivate);
     return {
-        public: kpublic,
-        private: kprivate
+        private: kprivate,
+        public: x25519.curve25519(kprivate)
     };
 };
 
-export function generateSharedKey(myprivatekey, theirpublickey)
+export function getSharedKey(myprivatekey, theirpublickey)
 {
-    return x25519.curve25519(myprivatekey, theirpublickey);
+    const sk = x25519.curve25519(myprivatekey, theirpublickey);
+    const bk = [];
+    for (let i = 0; i < length(sk); i++) {
+        push(bk, sk[i] & 255, (sk[i] >> 8) & 255);
+    }
+    return bk;
+};
+
+export function pKeyToString(key)
+{
+    let str = "";
+    for (let i = 0; i < length(key); i++) {
+        const v = key[i];
+        str += chr(v & 255, (v >> 8) & 255);
+    }
+    return str;
+};
+
+export function stringToPKey(str)
+{
+    const key = [];
+    for (let i = 0; i < length(str); i += 2) {
+        push(key, ord(str, i) | (ord(str, i + 1) << 8));
+    }
+    return key;
 };
