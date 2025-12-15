@@ -1,10 +1,10 @@
-import * as fs from "fs";
 import * as timers from "timers";
 import * as router from "router";
 import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as parse from "parse";
+import * as platform from "platform";
 import * as telemetry from "telemetry";
 
 timers.setTimeout("environmental_metrics", 30 * 60);
@@ -37,7 +37,6 @@ parse.registerProto(
     }
 );
 
-const CURL = "/usr/bin/curl";
 let weewxurl;
 
 function convert(tounit, value)
@@ -94,27 +93,22 @@ export function setURL(url)
 export function tick()
 {
     if (timers.tick("environmental_metrics")) {
-        const p = fs.popen(`${CURL} --max-time 2 --silent --output - ${weewxurl}`);
-        if (p) {
-            const all = p.read("all");
-            p.close();
-            try {
-                const c = json(all).current;
-                router.queue(message.createMessage(null, null, null, "telemetry", {
-                    time: time(),
-                    environment_metrics: {
-                        temperature: convert("C", c.temperature),
-                        relative_humidity: c.humidity?.value,
-                        barometric_pressure: convert("hPA", c.barometer),
-                        wind_direction: c["wind direction"]?.value,
-                        wind_speed: convert("m/s", c["wind speed"]),
-                        wind_gust: convert("m/s", c["wind gust"]),
-                        rainfall_1h: convert("mm/h", c["rain rate"])
-                    }
-                }));
-            }
-            catch (_) {
-            }
+        try {
+            const c = json(platform.fetch(weewxurl)).current;
+            router.queue(message.createMessage(null, null, null, "telemetry", {
+                time: time(),
+                environment_metrics: {
+                    temperature: convert("C", c.temperature),
+                    relative_humidity: c.humidity?.value,
+                    barometric_pressure: convert("hPA", c.barometer),
+                    wind_direction: c["wind direction"]?.value,
+                    wind_speed: convert("m/s", c["wind speed"]),
+                    wind_gust: convert("m/s", c["wind gust"]),
+                    rainfall_1h: convert("mm/h", c["rain rate"])
+                }
+            }));
+        }
+        catch (_) {
         }
     }
 };

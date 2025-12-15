@@ -28,14 +28,17 @@ export function recv()
 export function send(to, data)
 {
     if (to === node.BROADCAST) {
-        const addresses = platform.getOtherInstances();
-        for (let i = 0; i < length(addresses); i++) {
-            const r = s.send(data, 0, {
-                address: addresses[i],
-                port: PORT
-            });
-            if (r == null) {
-                print(socket.error(), "\n");
+        const mid = node.id();
+        const instances = platform.getAllInstances();
+        for (let id in instances) {
+            if (id !== mid) {
+                const r = s.send(data, 0, {
+                    address: instances[id],
+                    port: PORT
+                });
+                if (r == null) {
+                    print(socket.error(), "\n");
+                }
             }
         }
     }

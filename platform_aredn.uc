@@ -1,17 +1,39 @@
 import * as fs from "fs";
 import * as timers from "timers";
-import * as node from "node";
 
+const ROOT = "/tmp/at";
 const PUB = "/var/run/arednlink/publish";
+const CURL = "/usr/bin/curl";
 
 let id2address = {};
-let addresses = [];
 
 timers.setTimeout("aredn", 1 * 60);
 
-export function getOtherInstances()
+export function load(name)
 {
-    return addresses;
+    const data = fs.readfile(`${ROOT}/${name}.json`);
+    return data ? json(data) : null;
+};
+
+export function store(name, data)
+{
+    fs.writefile(`${ROOT}/${name}.json`, sprintf("%.02J", data));
+};
+
+export function fetch(url)
+{
+    const p = fs.popen(`${CURL} --max-time 2 --silent --output - ${url}`);
+    if (!p) {
+        return null;
+    }
+    const all = p.read("all");
+    p.close();
+    return all;
+};
+
+export function getAllInstances()
+{
+    return id2address;
 };
 
 export function getInstance(id)
@@ -28,10 +50,8 @@ export function tick()
 {
     if (timers.tick("aredn")) {
         const ilist = {};
-        const alist = [];
         const pubs = fs.lsdir(PUB);
         if (pubs) {
-            const mid = node.id();
             for (let i = 0; i < length(pubs); i++) {
                 const file = `${PUB}/${pubs[i]}`;
                 if (fs.lstat(file).size) {
@@ -39,8 +59,7 @@ export function tick()
                         const pub = json(fs.readfile(file));
                         for (let i = 0; i < length(pub.data); i++) {
                             const record = pub.data[i];
-                            if (record.type == "KN6PLV.aredntastic" && record.ip && record.id && record.id !== mid) {
-                                push(alist, record.ip);
+                            if (record.type == "KN6PLV.aredntastic" && record.ip && record.id) {
                                 ilist[record.id] = record.ip;
                             }
                         }
@@ -51,7 +70,6 @@ export function tick()
             }
         }
         id2address = ilist;
-        addresses = alist;
     }
 };
 

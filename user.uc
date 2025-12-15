@@ -28,6 +28,11 @@ export function tick()
 {
     if (timers.tick("user")) {
         const me = node.getInfo();
+        let pubkey = "";
+        for (let i = 0; i < length(me.public_key); i++) {
+            const v = me.public_key[i];
+            pubkey += chr((v >> 8) & 255, v & 255);
+        }
         router.queue(message.createMessage(null, null, null, "user", {
             id: sprintf("!%08x", me.id),
             long_name: me.long_name,
@@ -35,7 +40,7 @@ export function tick()
             macaddr: me.macaddr,
             hw_model: PRIVATE_HW,
             role: me.role,
-            public_key: substr(me.public_key, -32),
+            public_key: pubkey,
             is_unmessagable: false
         }));
     }

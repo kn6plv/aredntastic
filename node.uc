@@ -1,7 +1,7 @@
 import * as struct from "struct";
 import * as math from "math";
 import * as crypto from "crypto";
-import * as datastore from "datastore";
+import * as platform from "platform";
 
 const LOCATION_PRECISION = 16;
 
@@ -34,7 +34,7 @@ export function fromMe(msg)
 
 function save()
 {
-    datastore.store("node", me);
+    platform.store("node", me);
 };
 
 function createNode()
@@ -61,7 +61,7 @@ function createNode()
 
 export function setup()
 {
-    me = datastore.load("node") ?? createNode();
+    me = platform.load("node") ?? createNode();
 };
 
 export function getInfo()

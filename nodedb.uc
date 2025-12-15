@@ -1,11 +1,11 @@
-import * as datastore from "datastore";
+import * as platform from "platform";
 
 let nodedb;
 
 export function getNode(id)
 {
     if (!nodedb) {
-        nodedb = datastore.load("nodedb") ?? {};
+        nodedb = platform.load("nodedb") ?? {};
     }
     return nodedb[id] ?? { id: id };
 };
@@ -13,7 +13,7 @@ export function getNode(id)
 function saveNode(node)
 {
     nodedb[node.id] = node;
-    datastore.store("nodedb", nodedb);
+    platform.store("nodedb", nodedb);
 }
 
 function isdiff(a, b)

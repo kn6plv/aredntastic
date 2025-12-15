@@ -1,4 +1,4 @@
-import * as datastore from "datastore";
+import * as platform from "platform";
 import * as node from "node";
 import * as channel from "channel";
 
@@ -6,7 +6,7 @@ let messages;
 
 function loadMessages(namekey)
 {
-    return datastore.load(`messages.${namekey}`) ?? {
+    return platform.load(`messages.${namekey}`) ?? {
         index: {},
         messages: []
     };
@@ -14,7 +14,7 @@ function loadMessages(namekey)
 
 function saveMessages(namekey, messages)
 {
-    datastore.store(`messages.${namekey}`, messages);
+    platform.store(`messages.${namekey}`, messages);
 }
 
 function addMessage(msg)

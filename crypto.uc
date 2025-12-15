@@ -1,8 +1,7 @@
 import * as struct from "struct";
-import * as fs from "fs";
-import * as aes from "./aes.uc";
-
-const OPENSSL = "/usr/bin/openssl";
+import * as math from "math";
+import * as aes from "aes";
+import * as x25519 from "x25519";
 
 export function decrypt(from, id, key, encrypted)
 {
@@ -43,14 +42,18 @@ export function encrypt(from, id, key, plain)
 
 export function generateKeyPair()
 {
-    const privatefile = "/tmp/private_key.der";
-    const publicfile = "/tmp/public_key.der";
-    system(`${OPENSSL} genpkey -algorithm X25519 -outform DER -out ${privatefile}; ${OPENSSL} pkey -inform DER -in ${privatefile} -pubout -outform DER -out ${publicfile}`);
-    const keys = {
-        public: fs.readfile(publicfile),
-        private: fs.readfile(privatefile)
+    const kprivate = [];
+    for (let i = 0; i < 16; i++) {
+        kprivate[i] = (math.rand(255) << 8) | math.rand(255);
+    }
+    const kpublic = x25519.curve25519(kprivate);
+    return {
+        public: kpublic,
+        private: kprivate
     };
-    fs.unlink(privatefile);
-    fs.unlink(publicfile);
-    return keys;
+};
+
+export function generateSharedKey(myprivatekey, theirpublickey)
+{
+    return x25519.curve25519(myprivatekey, theirpublickey);
 };
