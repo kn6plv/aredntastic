@@ -52,11 +52,11 @@ export function decryptCCM(from, id, key, encrypted, xnonce, auth)
     const counter = struct.unpack("16B", struct.pack("B", 1) + substr(nonce, 0, 13) + struct.pack("2B", 0, 0));
     const a = aes.AES_Encrypt(slice(counter), ekey);
     let t = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < length(auth); i++) {
         push(t, ord(auth, i) ^ a[i]);
     }
-    counter[15]++;
 
+    counter[15] = 1;
     let ecounterIdx = 16;
     let ecounter;
     for (let i = 0; i < length(encrypted); i++) {
@@ -99,8 +99,58 @@ export function decryptCCM(from, id, key, encrypted, xnonce, auth)
     return plain;
 };
 
-export function encryptCCM(from, id, key, plain, xnonce, auth)
+export function encryptCCM(from, id, key, plain, xnonce, authlen)
 {
+    let encrypted = "";
+
+    aes.AES_Init();
+
+    const ekey = aes.AES_ExpandKey(slice(key));
+
+    const nonce = struct.pack("<I", id) + xnonce + struct.pack("<II", from, 0);
+
+    const x = struct.unpack("16B", struct.pack("B", 1|((authlen - 2) << 2)) + substr(nonce, 0, 13) + struct.pack(">H", length(plain)));
+    aes.AES_Encrypt(x, ekey);
+    let xcounterIdx = 0;
+    for (let i = 0; i < length(plain); i++) {
+        if (xcounterIdx === 16) {
+            aes.AES_Encrypt(x, ekey);
+            xcounterIdx = 0;
+        }
+        x[xcounterIdx++] ^= ord(plain, i);
+    }
+    if (length(plain) % 16) {
+        aes.AES_Encrypt(x, ekey);
+    }
+
+    const counter = struct.unpack("16B", struct.pack("B", 1) + substr(nonce, 0, 13) + struct.pack("2B", 0, 0));
+    const a = aes.AES_Encrypt(slice(counter), ekey);
+    let auth = "";
+    for (let i = 0; i < authlen; i++) {
+        auth += chr(x[i] ^ a[i]);
+    }
+
+    counter[15] = 1;
+    let dcounterIdx = 16;
+    let dcounter;
+    for (let i = 0; i < length(plain); i++) {
+        if (dcounterIdx === 16) {
+            dcounter = aes.AES_Encrypt(slice(counter), ekey);
+            dcounterIdx = 0;
+            for (let j = 15; j >= 0; j--) {
+                if (counter[j] !== 255) {
+                    counter[j]++;
+                    break;
+                }
+                counter[j] = 0;
+            }
+        }
+        encrypted += chr(ord(plain, i) ^ dcounter[dcounterIdx++]);
+    }
+
+    aes.AES_Done();
+
+    return encrypted + auth;
 };
 
 export function generateKeyPair()
