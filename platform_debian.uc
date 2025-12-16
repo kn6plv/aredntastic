@@ -1,10 +1,6 @@
 import * as fs from "fs";
-import * as node from "node";
 
 let ROOT = "/tmp";
-const CURL = "/usr/bin/curl";
-
-let id2address = {};
 
 export function setup(config)
 {
@@ -24,7 +20,7 @@ export function store(name, data)
 
 export function fetch(url)
 {
-    const p = fs.popen(`${CURL} --max-time 2 --silent --output - ${url}`);
+    const p = fs.popen(`curl --max-time 2 --silent --output - ${url}`);
     if (!p) {
         return null;
     }
@@ -35,12 +31,12 @@ export function fetch(url)
 
 export function getAllInstances()
 {
-    return id2address;
+    return {};
 };
 
 export function getInstance(id)
 {
-    return id2address[id];
+    return null;
 };
 
 export function tick()

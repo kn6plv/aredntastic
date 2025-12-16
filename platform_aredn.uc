@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as timers from "timers";
 
-const ROOT = "/tmp/at";
 const PUB = "/var/run/arednlink/publish";
 const CURL = "/usr/bin/curl";
 
@@ -9,18 +8,30 @@ let id2address = {};
 
 export function setup()
 {
+    fs.mkdir("/etc/aredntastic.d/");
+    fs.mkdir("/tmp/aredntastic.d/");
     timers.setTimeout("aredn", 1 * 60);
 };
 
+function path(name)
+{
+    switch (name) {
+        case "node":
+            return `/etc/aredntastic.d/${node}.json`;
+        default:
+            return `/tmp/aredntastic.d/${name}.json`;
+    }
+}
+
 export function load(name)
 {
-    const data = fs.readfile(`${ROOT}/${name}.json`);
+    const data = fs.readfile(path(name));
     return data ? json(data) : null;
 };
 
 export function store(name, data)
 {
-    fs.writefile(`${ROOT}/${name}.json`, sprintf("%.02J", data));
+    fs.writefile(path(name), sprintf("%.02J", data));
 };
 
 export function fetch(url)
@@ -46,7 +57,32 @@ export function getInstance(id)
 
 export function getLocation()
 {
-    return [ 37.888, -122.268, 10 ];
+    const loc = {
+        latitide: 0, longitude: 0, altitude: 0
+    };
+    // Don't use uci as this may be loaded on non-uci platforms and we dont want it to error.
+    const f = fs.open("/etc/config/aredn");
+    if (f) {
+        for (let line = f.read("line"); length(line); line = f.read("line")) {
+            let m = match(line, /option lat '(.*)'/);
+            if (m) {
+                loc.latitide = 0.0 + m[1];
+                loc.percision = 0;
+            }
+            m = match(line, /option lon '(.*)'/);
+            if (m) {
+                loc.longitude = 0.0 + m[1];
+                loc.percision = 0;
+            }
+            m = match(line, /option height '(.*)'/);
+            if (m) {
+                loc.altitude = 0.0 + m[1];
+                loc.percision = 0;
+            }
+        }
+        f.close();
+    }
+    return loc;
 };
 
 export function tick()

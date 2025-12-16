@@ -28,3 +28,49 @@ parse.registerProto(
         "22": "float soil_temperature"
     }
 );
+
+export function convert(tounit, value)
+{
+    if (!value) {
+        return null;
+    }
+    const fromunit = value.units;
+    let v = value.value;
+    switch (tounit) {
+        case "C":
+            switch(substr(fromunit, -1)) {
+                case "F":
+                    v = (v - 32) / 1.8;
+                    break;
+                default:
+                    break;
+            }
+        case "hPA":
+            switch (fromunit) {
+                case "inHg":
+                    v *= 33.86389;
+                    break;
+                default:
+                    break;
+            }
+        case "m/s":
+            switch (fromunit) {
+                case "mph":
+                    v *= 0.44704;
+                    break;
+                default:
+                    break;
+            }
+        case "mm/h":
+            switch (fromunit) {
+                case "in/h":
+                    v *= 25.4;
+                    break;
+                default:
+                    break;
+            }
+        default:
+            break;
+    }
+    return v;
+};
