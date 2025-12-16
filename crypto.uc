@@ -51,15 +51,14 @@ export function decryptCCM(from, id, key, encrypted, xnonce, auth)
     const nonce = struct.pack("<I", id) + xnonce + struct.pack("<II", from, 0);
     const counter = struct.unpack("16B", struct.pack("B", 1) + substr(nonce, 0, 13) + struct.pack("2B", 0, 0));
     const a = aes.AES_Encrypt(slice(counter), ekey);
-    let cauth = [];
+    let t = [];
     for (let i = 0; i < 8; i++) {
-        push(cauth, ord(auth, i) ^ a[i]);
+        push(t, ord(auth, i) ^ a[i]);
     }
     counter[15]++;
 
     let ecounterIdx = 16;
     let ecounter;
-
     for (let i = 0; i < length(encrypted); i++) {
         if (ecounterIdx === 16) {
             ecounter = aes.AES_Encrypt(slice(counter), ekey);
@@ -75,7 +74,27 @@ export function decryptCCM(from, id, key, encrypted, xnonce, auth)
         plain += chr(ord(encrypted, i) ^ ecounter[ecounterIdx++]);
     }
 
+    const x = struct.unpack("16B", struct.pack("B", 1|((length(auth) - 2) << 2)) + substr(nonce, 0, 13) + struct.pack(">H", length(plain)));
+    aes.AES_Encrypt(x, ekey);
+    let xcounterIdx = 0;
+    for (let i = 0; i < length(plain); i++) {
+        if (xcounterIdx === 16) {
+            aes.AES_Encrypt(x, ekey);
+            xcounterIdx = 0;
+        }
+        x[xcounterIdx++] ^= ord(plain, i);
+    }
+    if (length(plain) % 16) {
+        aes.AES_Encrypt(x, ekey);
+    }
+
     aes.AES_Done();
+
+    for (let i = 0; i < length(t); i++) {
+        if (x[i] !== t[i]) {
+            return null;
+        }
+    }
 
     return plain;
 };

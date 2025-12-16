@@ -190,6 +190,7 @@ export function decodePacket(pkt)
             const xnonce = substr(msg.encrypted, -4);
             msg.decoded = crypto.decryptCCM(msg.from, msg.id, hash, ciphertext, xnonce, auth);
             if (decodePacketData(msg)) {
+                msg.namekey = `Private\nPrivate`;
                 delete msg.encrypted;
                 return msg;
             }
