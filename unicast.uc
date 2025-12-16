@@ -1,6 +1,5 @@
 import * as socket from "socket";
 import * as node from "node";
-import * as platform from "platform";
 
 const PORT = 4404;
 

@@ -6,8 +6,6 @@ import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
 import * as channel from "channel";
-import * as nodedb from "nodedb";
-import * as platform from "platform";
 
 const MAX_RECENT = 128;
 const recent = [];
@@ -33,6 +31,12 @@ export function process()
 
         // Forward the message if it's not just to me. We never forward encrypted traffic.
         if (!node.toMe(msg) && !msg.encrypted) {
+            if (!node.fromMe(msg)) {
+                msg.hop_limit--;
+                if (msg.hop_limit <= 0) {
+                    return;
+                }
+            }
             const transport = msg.transport_mechanism;
             if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;

@@ -1,4 +1,3 @@
-import * as platform from "platform";
 
 let nodedb;
 

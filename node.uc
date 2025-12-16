@@ -1,7 +1,6 @@
 import * as struct from "struct";
 import * as math from "math";
 import * as crypto from "crypto";
-import * as platform from "platform";
 
 const LOCATION_PRECISION = 16;
 
@@ -64,38 +63,35 @@ function createNode()
     save();
 };
 
-export function setup()
+export function setup(config)
 {
     me = platform.load("node") ?? createNode();
+    const location = config?.location ?? platform.getLocation();
+    me.lat = location.latitude ?? me.lat;
+    me.lon = location.longitude ?? me.lon;
+    me.alt = location.altitude ?? me.alt;
+    me.percision = location.percision ?? me.percision;
+    if (config?.long_name) {
+        me.long_name = config.long_name;
+    }
+    if (config?.short_name) {
+        me.short_name = config.short_name;
+    }
+    switch (config?.role) {
+        case "client":
+            me.role = ROLE_CLIENT;
+            break;
+        case "client_mute":
+            me.role = ROLE_CLIENT_MUTE;
+            break;
+        default:
+            print(`Unknown role: ${config?.role}\n`);
+            break;
+    }
+    save();
 };
 
 export function getInfo()
 {
     return me;
-};
-
-export function setLocation(lat, lon, alt, percision)
-{
-    me.lat = lat ?? me.lat;
-    me.lon = lon ?? me.lon;
-    me.alt = alt ?? me.alt;
-    me.percision = percision ?? me.percision;
-    save();
-};
-
-export function setNames(long_name, short_name)
-{
-    if (me.long_name != long_name || me.short_name != short_name) {
-        me.long_name = long_name ?? me.long_name;
-        me.short_name = short_name ?? me.short_name;
-        save();
-    }
-};
-
-export function setRole(role)
-{
-    if (me.role != role) {
-        me.role = role ?? ROLE_CLIENT_MUTE;
-        save();
-    }
 };

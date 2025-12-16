@@ -7,7 +7,10 @@ const CURL = "/usr/bin/curl";
 
 let id2address = {};
 
-timers.setTimeout("aredn", 1 * 60);
+export function setup()
+{
+    timers.setTimeout("aredn", 1 * 60);
+};
 
 export function load(name)
 {

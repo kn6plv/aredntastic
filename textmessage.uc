@@ -1,4 +1,3 @@
-import * as platform from "platform";
 import * as node from "node";
 import * as channel from "channel";
 
