@@ -2,6 +2,7 @@ import * as math from "math";
 import * as node from "node";
 import * as channel from "channel";
 import * as parse from "parse";
+import * as crypto from "crypto";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const DEFAULT_HOPS = 5;
@@ -38,7 +39,7 @@ export function createMessage(to, from, namekey, type, payload, extra)
         from: fid,
         to: to ?? node.BROADCAST,
         namekey: namekey,
-        channel: chan.hash,
+        channel: chan?.hash ?? 0,
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,

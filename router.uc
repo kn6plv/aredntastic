@@ -6,6 +6,8 @@ import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
 import * as channel from "channel";
+import * as nodedb from "nodedb";
+import * as platform from "platform";
 
 const MAX_RECENT = 128;
 const recent = [];
@@ -37,8 +39,13 @@ export function process()
                 unicast.send(msg.to, sprintf("%J", msg));
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
-                msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
-                multicast.send(parse.encodePacket(msg));
+                if (node.isBroadcast(msg) || !platform.getAllInstances()[node.to]) {
+                    msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
+                    const pkt = parse.encodePacket(msg);
+                    if (pkt) {
+                        multicast.send(pkt);
+                    }
+                }
             }
         }
     }

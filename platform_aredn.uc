@@ -60,7 +60,7 @@ export function tick()
                         for (let i = 0; i < length(pub.data); i++) {
                             const record = pub.data[i];
                             if (record.type == "KN6PLV.aredntastic" && record.ip && record.id) {
-                                ilist[record.id] = record.ip;
+                                ilist[record.id] = { ip: record.ip, private_key: record.private_key };
                             }
                         }
                     }

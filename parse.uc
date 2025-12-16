@@ -181,7 +181,7 @@ export function decodePacket(pkt)
     }
     if (!node.isBroadcast(msg)) {
         const frompublic = nodedb.getNode(msg.from)?.user?.public_key;
-        const toprivate = node.toMe(msg) ? node.getInfo().private_key : nodedb.getNode(msg.to)?.user?.private_key;
+        const toprivate = node.toMe(msg) ? node.getInfo().private_key : platform.getInstance(msg.to)?.private_key;
         if (frompublic && toprivate) {
             const sharedkey = crypto.getSharedKey(toprivate, crypto.stringToPKey(frompublic));
             const hash = struct.unpack("32B", struct.pack("X", digest.sha256(sharedkey)));
@@ -223,6 +223,19 @@ export function encodePacket(msg)
     if (chan) {
         msg.encrypted = crypto.encryptCTR(msg.from, msg.id, chan.crypto, msg.decoded);
         delete msg.decoded;
+        return protobuf.encode("packet", msg);
     }
-    return protobuf.encode("packet", msg);
+    else if (!node.isBroadcast(msg)) {
+        const topublic = nodedb.getNode(msg.to)?.user?.public_key;
+        const fromprivate = node.fromMe(msg) ? node.getInfo().private_key : platform.getInstance(msg.from)?.private_key;
+        if (topublic && fromprivate) {
+            const sharedkey = crypto.getSharedKey(fromprivate, crypto.stringToPKey(topublic));
+            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(sharedkey)));
+            const xnonce = struct.pack("4B", math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255);
+            msg.encrypted = crypto.encryptCCM(msg.from, msg.id, hash, msg.decoded, xnonce, 8) + xnonce;
+            delete msg.decoded;
+            return protobuf.encode("packet", msg);
+        }
+    }
+    return null;
 };
