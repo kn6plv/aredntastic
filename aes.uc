@@ -173,7 +173,7 @@ export function AES_ExpandKey(key) {
     if (i % kl == 0) {
       temp = [ AES_Sbox[temp[1]] ^ Rcon, AES_Sbox[temp[2]], AES_Sbox[temp[3]], AES_Sbox[temp[0]] ]; 
       if ((Rcon <<= 1) >= 256)
-	Rcon ^= 0x11b;
+	      Rcon ^= 0x11b;
     }
     else if ((kl > 24) && (i % kl == 16))
       temp = [ AES_Sbox[temp[0]], AES_Sbox[temp[1]], AES_Sbox[temp[2]], AES_Sbox[temp[3]] ];       

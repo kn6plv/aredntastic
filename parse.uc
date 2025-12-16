@@ -171,7 +171,7 @@ export function decodePacket(pkt)
     if (hashchannels) {
         for (let i = 0; i < length(hashchannels); i++) {
             const chan = hashchannels[i];
-            msg.decoded = crypto.decrypt(msg.from, msg.id, chan.crypto, msg.encrypted, null);
+            msg.decoded = crypto.decryptCTR(msg.from, msg.id, chan.crypto, msg.encrypted);
             msg.namekey = chan.namekey;
             if (decodePacketData(msg)) {
                 delete msg.encrypted;
@@ -182,20 +182,13 @@ export function decodePacket(pkt)
     if (!node.isBroadcast(msg)) {
         const frompublic = nodedb.getNode(msg.from)?.user?.public_key;
         const toprivate = node.toMe(msg) ? node.getInfo().private_key : nodedb.getNode(msg.to)?.user?.private_key;
-        //print("pub ", frompublic, " priv ", toprivate, "\n");
         if (frompublic && toprivate) {
             const sharedkey = crypto.getSharedKey(toprivate, crypto.stringToPKey(frompublic));
-            //print("sharedkey ", sharedkey, "\n");
-            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(join("", map(sharedkey, v => chr(v))))));
-            //print("hash ", hash, "\n");
+            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(sharedkey)));
             const ciphertext = substr(msg.encrypted, 0, -12);
-            const auth = ubstr(msg.encrypted, -12, 8);
+            const auth = substr(msg.encrypted, -12, 8);
             const xnonce = substr(msg.encrypted, -4);
-            msg.decoded = crypto.decrypt(msg.from, msg.id, hash, ciphertext, xnonce);
-            //for (let i = 0; i < length(msg.decoded); i++) {
-            //    printf("%02x ", ord(msg.decoded, i));
-            //}
-            //print("\n");
+            msg.decoded = crypto.decryptCCM(msg.from, msg.id, hash, ciphertext, xnonce, auth);
             if (decodePacketData(msg)) {
                 delete msg.encrypted;
                 return msg;
@@ -227,7 +220,7 @@ export function encodePacket(msg)
     delete msg.data;
     const chan = channel.getChannelByNameKey(msg.namekey);
     if (chan) {
-        msg.encrypted = crypto.encrypt(msg.from, msg.id, chan.crypto, msg.decoded);
+        msg.encrypted = crypto.encryptCTR(msg.from, msg.id, chan.crypto, msg.decoded);
         delete msg.decoded;
     }
     return protobuf.encode("packet", msg);
