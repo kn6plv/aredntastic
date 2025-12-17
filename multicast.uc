@@ -5,12 +5,26 @@ const PORT = 4403;
 
 let s = null;
 
-export function setup()
+export function setup(config)
 {
+    const address = config.network?.address;
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
-    s.bind({
-        port: PORT
-    });
+    if (!address) {
+        s.bind({
+            port: PORT
+        });
+    }
+    else {
+        let r = s.bind({
+            address: address,
+            port: PORT
+        });
+        print(r,"\n");
+        r = s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, {
+            address: address
+        });
+        print(r, "\n");
+    }
     s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
         multiaddr: ADDRESS
     });

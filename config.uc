@@ -16,9 +16,6 @@ import * as platform_debian from "platform_debian";
 
 export function setup()
 {
-    unicast.setup();
-    multicast.setup();
-
     const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile("./aredntastic.conf"));
 
     switch (config.platform?.type) {
@@ -35,6 +32,8 @@ export function setup()
     global.platform.setup(config);
     router.registerApp(global.platform);
 
+    unicast.setup(config);
+    multicast.setup(config);
     node.setup(config);
 
     router.registerApp(user);
