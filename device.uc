@@ -7,6 +7,7 @@ import * as parse from "parse";
 import * as telemetry from "telemetry";
 
 const GRID_POWER = 101;
+let startTime = 0;
  
 parse.registerProto(
     "device_metrics", null,
@@ -21,6 +22,7 @@ parse.registerProto(
 
 export function setup(config)
 {
+    startTime = clock(true)[0];
     timers.setInterval("device_metrics", config.telemetry?.device?.interval ?? 30 * 60);
 };
 
@@ -31,7 +33,7 @@ export function tick()
             time: time(),
             device_metrics: {
                 battery_level: GRID_POWER,
-                uptime_seconds: clock(true)[0]
+                uptime_seconds: clock(true)[0] - startTime
             }
         }));
     }
