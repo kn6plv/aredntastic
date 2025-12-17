@@ -5,6 +5,7 @@ let ROOT = "/tmp";
 export function setup(config)
 {
     ROOT = config.platform.store;
+    fs.mkdir(ROOT);
 };
 
 export function load(name)

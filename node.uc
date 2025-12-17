@@ -61,6 +61,7 @@ function createNode()
         role: ROLE_CLIENT_MUTE
     };
     save();
+    return me;
 };
 
 export function setup(config)
