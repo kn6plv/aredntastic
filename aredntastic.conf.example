@@ -1,7 +1,7 @@
 {
     "preset": "MediumFast",
     "role": "client",
-    "network": {
+    "multicast": {
         "address": "192.168.51.113"
     },
     "location": {

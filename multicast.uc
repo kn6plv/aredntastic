@@ -7,7 +7,7 @@ let s = null;
 
 export function setup(config)
 {
-    const address = config.network?.address ?? platform.getMulticastDeviceIP();
+    const address = config.multicast?.address ?? platform.getMulticastDeviceIP();
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
     s.bind({
         port: PORT
@@ -42,11 +42,13 @@ export function recv()
 
 export function send(data)
 {
-    const r = s.send(data, 0, {
-        address: ADDRESS,
-        port: PORT
-    });
-    if (r == null) {
-        print(socket.error(), "\n");
+    if (s !== null) {
+        const r = s.send(data, 0, {
+            address: ADDRESS,
+            port: PORT
+        });
+        if (r == null) {
+            print(socket.error(), "\n");
+        }
     }
 };

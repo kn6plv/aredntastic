@@ -30,7 +30,7 @@ export function process()
         }
 
         // Forward the message if it's not just to me. We never forward encrypted traffic.
-        if (!node.toMe(msg) && !msg.encrypted) {
+        if (!node.toMe(msg) && !msg.encrypted && node.canForward()) {
             if (!node.fromMe(msg)) {
                 msg.hop_limit--;
                 if (msg.hop_limit <= 0) {
@@ -76,7 +76,9 @@ export function tick()
     process();
     const us = unicast.handle();
     const ms = multicast.handle();
-    const v = socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ], [ ms, socket.POLLIN ]);
+    const v = ms ?
+        socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ], [ ms, socket.POLLIN ]) :
+        socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ]);
     if (v[0][1]) {
             const pkt = unicast.recv();
             try {
@@ -90,7 +92,7 @@ export function tick()
             catch (_) {
             }
     }
-    if (v[1][1]) {
+    if (v[1] && v[1][1]) {
         const msg = parse.decodePacket(multicast.recv());
         if (msg) {
             msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;

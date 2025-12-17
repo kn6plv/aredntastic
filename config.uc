@@ -33,7 +33,9 @@ export function setup()
     router.registerApp(global.platform);
 
     unicast.setup(config);
-    multicast.setup(config);
+    if (config.multicast) {
+        multicast.setup(config);
+    }
     node.setup(config);
 
     user.setup(config);

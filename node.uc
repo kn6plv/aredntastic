@@ -4,8 +4,19 @@ import * as crypto from "crypto";
 
 const LOCATION_PRECISION = 16;
 
-export const ROLE_CLIENT = 0;
-export const ROLE_CLIENT_MUTE = 1;
+const ROLE_CLIENT = 0;
+const ROLE_CLIENT_MUTE = 1;
+const ROLE_ROUTER = 2;
+const ROLE_ROUTER_CLIENT = 3;
+const ROLE_REPEATER = 4;
+const ROLE_TRACKER = 5;
+const ROLE_SENSOR = 6;
+const ROLE_TAK = 7;
+const ROLE_CLIENT_HIDDEN = 8;
+const ROLE_LOST_AND_FOUND = 9;
+const ROLE_TAK_TRACKER = 10;
+const ROLE_ROUTER_LATE = 11;
+const ROLE_CLIENT_BASE = 12;
 
 let me = null;
 
@@ -36,6 +47,11 @@ export function fromMe(msg)
     return msg.from === me.id;
 };
 
+export function canForward()
+{
+    return me.role == ROLE_CLIENT;
+};
+
 function save()
 {
     platform.store("node", me);
@@ -64,14 +80,26 @@ function createNode()
     return me;
 };
 
+function maskLoc(v, p)
+{
+    if (p !== 32) {
+        v = int(v * 10000000);
+        const mask = -1 << p;
+        const nmask = ~mask;
+        v = (v & mask) | (math.rand(nmask) & nmask);
+        v = v / 10000000.0;
+    }
+    return v;
+}
+
 export function setup(config)
 {
     me = platform.load("node") ?? createNode();
     const location = config?.location ?? platform.getLocation();
-    me.lat = location.latitude ?? me.lat;
-    me.lon = location.longitude ?? me.lon;
+    me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision));
+    me.lat = maskLoc(location.latitude ?? me.lat);
+    me.lon = maskLoc(location.longitude ?? me.lon);
     me.alt = location.altitude ?? me.alt;
-    me.precision = location.precision ?? me.precision;
     if (config?.long_name) {
         me.long_name = config.long_name;
     }
