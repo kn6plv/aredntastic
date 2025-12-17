@@ -67,17 +67,17 @@ export function getLocation()
             let m = match(line, /option lat '(.*)'/);
             if (m) {
                 loc.latitide = 0.0 + m[1];
-                loc.percision = 0;
+                loc.precision = 0;
             }
             m = match(line, /option lon '(.*)'/);
             if (m) {
                 loc.longitude = 0.0 + m[1];
-                loc.percision = 0;
+                loc.precision = 0;
             }
             m = match(line, /option height '(.*)'/);
             if (m) {
                 loc.altitude = 0.0 + m[1];
-                loc.percision = 0;
+                loc.precision = 0;
             }
         }
         f.close();

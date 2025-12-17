@@ -57,7 +57,7 @@ function createNode()
         lat: 0.0,
         lon: 0.0,
         alt: 0,
-        percision: LOCATION_PRECISION,
+        precision: LOCATION_PRECISION,
         role: ROLE_CLIENT_MUTE
     };
     save();
@@ -71,7 +71,7 @@ export function setup(config)
     me.lat = location.latitude ?? me.lat;
     me.lon = location.longitude ?? me.lon;
     me.alt = location.altitude ?? me.alt;
-    me.percision = location.percision ?? me.percision;
+    me.precision = location.precision ?? me.precision;
     if (config?.long_name) {
         me.long_name = config.long_name;
     }

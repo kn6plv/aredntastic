@@ -47,7 +47,7 @@ function position()
         altitude: me.alt,
         time: time(),
         location_source: LOCATION_SOURCE_MANUAL,
-        precision_bits: me.percision
+        precision_bits: me.precision
     };
 }
 
