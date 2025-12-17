@@ -9,23 +9,23 @@ export function setup(config)
 {
     const address = config.network?.address;
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
+    s.bind({
+        port: PORT
+    });
     if (!address) {
-        s.bind({
-            port: PORT
+        s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
+            multiaddr: ADDRESS
         });
     }
     else {
-        s.bind({
-            address: address,
-            port: PORT
-        });
         s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, {
             address: address
         });
+        s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
+            address: address,
+            multiaddr: ADDRESS
+        });
     }
-    s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
-        multiaddr: ADDRESS
-    });
     s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0);
     s.listen();
 };
