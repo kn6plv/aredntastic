@@ -15,15 +15,13 @@ export function setup(config)
         });
     }
     else {
-        let r = s.bind({
+        s.bind({
             address: address,
             port: PORT
         });
-        print(r,"\n");
-        r = s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, {
+        s.setopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, {
             address: address
         });
-        print(r, "\n");
     }
     s.setopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, {
         multiaddr: ADDRESS
