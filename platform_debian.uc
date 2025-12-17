@@ -1,22 +1,30 @@
 import * as fs from "fs";
 
-let ROOT = "/tmp";
+let rootdir = "/tmp/aredntastic";
 
 export function setup(config)
 {
-    ROOT = config.platform.store;
-    fs.mkdir(ROOT);
+    rootdir = config.platform?.store ?? rootdir;
+    function mkdirp(p)
+    {
+        const d = fs.dirname(p);
+        if (d && d !== "." && d !== "/") {
+            mkdirp(d);
+        }
+        fs.mkdir(p);
+    }
+    mkdirp(rootdir);
 };
 
 export function load(name)
 {
-    const data = fs.readfile(`${ROOT}/${name}.json`);
+    const data = fs.readfile(`${rootdir}/${name}.json`);
     return data ? json(data) : null;
 };
 
 export function store(name, data)
 {
-    fs.writefile(`${ROOT}/${name}.json`, sprintf("%.02J", data));
+    fs.writefile(`${rootdir}/${name}.json`, sprintf("%.02J", data));
 };
 
 export function fetch(url)
