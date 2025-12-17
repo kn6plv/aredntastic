@@ -69,6 +69,14 @@ export function convert(tounit, value)
                 default:
                     break;
             }
+        case "mm":
+            switch (fromunit) {
+                case "in":
+                    v *= 25.4;
+                    break;
+                default:
+                    break;
+            }
         default:
             break;
     }

@@ -17,7 +17,9 @@ export function tick()
 {
     if (timers.tick("environmental_metrics")) {
         try {
-            const c = json(platform.fetch(weewxurl)).current;
+            const j = json(platform.fetch(weewxurl));
+            const c = j.current;
+            const d = j.day;
             router.queue(message.createMessage(null, null, null, "telemetry", {
                 time: time(),
                 environment_metrics: {
@@ -27,7 +29,8 @@ export function tick()
                     wind_direction: c["wind direction"]?.value,
                     wind_speed: environmental.convert("m/s", c["wind speed"]),
                     wind_gust: environmental.convert("m/s", c["wind gust"]),
-                    rainfall_1h: environmental.convert("mm/h", c["rain rate"])
+                    rainfall_1h: environmental.convert("mm/h", c["rain rate"]),
+                    rainfall_24h: environmental.convert("mm", d["rain total"])
                 }
             }));
         }
