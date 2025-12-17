@@ -101,10 +101,10 @@ export function setup(config)
     me.lon = maskLoc(location.longitude ?? me.lon);
     me.alt = location.altitude ?? me.alt;
     if (config?.long_name) {
-        me.long_name = config.long_name;
+        me.long_name = substr(config.long_name, 0, 36);
     }
     if (config?.short_name) {
-        me.short_name = config.short_name;
+        me.short_name = substr(config.short_name, 0, 4);
     }
     switch (config?.role) {
         case "client":
