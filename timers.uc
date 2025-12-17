@@ -1,8 +1,22 @@
 
 const timers = {};
 
-export function setTimeout(name, timeout)
+export function setInterval(name, timeout)
 {
+    if (type(timeout) === "string") {
+        switch (substr(timeout, -1)) {
+            case "m":
+                timeout = int(v) * 60;
+                break;
+            case "h":
+                timeout = int(v) * 60 * 60;
+                break;
+            case "s":
+            default:
+                timeout = int(v);
+                break;
+        }
+    }
     timers[name] = { next: clock()[0], timeout: timeout };
 };
 

@@ -1,8 +1,6 @@
 import * as node from "node";
 import * as channel from "channel";
 
-let messages;
-
 function loadMessages(namekey)
 {
     return platform.load(`messages.${namekey}`) ?? {
@@ -30,6 +28,10 @@ function addMessage(msg)
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
     }
+};
+
+export function setup(config)
+{
 };
 
 export function tick()

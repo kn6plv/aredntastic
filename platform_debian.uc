@@ -40,6 +40,17 @@ export function getInstance(id)
     return null;
 };
 
+export function getLocation()
+{
+    print("Location not set\n");
+    return null;
+};
+
+export function getMulticastDeviceIP()
+{
+    return null;
+};
+
 export function tick()
 {
 };

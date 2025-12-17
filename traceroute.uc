@@ -15,6 +15,10 @@ parse.registerProto(
 
 const ROUTE_SIZE = 8;
 
+export function setup(config)
+{
+};
+
 export function tick()
 {
 };

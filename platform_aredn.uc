@@ -4,13 +4,51 @@ import * as timers from "timers";
 const PUB = "/var/run/arednlink/publish";
 const CURL = "/usr/bin/curl";
 
+const ucdata = {};
 let id2address = {};
+
+function readData()
+{
+    // Don't use uci as this may be loaded on non-uci platforms and we dont want it to error.
+    let f = fs.open("/etc/config/aredn");
+    if (f) {
+        for (let line = f.read("line"); length(line); line = f.read("line")) {
+            let m = match(line, /option lat '(.*)'/);
+            if (m) {
+                ucdata.latitide = 0.0 + m[1];
+                ucdata.precision = 0;
+            }
+            m = match(line, /option lon '(.*)'/);
+            if (m) {
+                ucdata.longitude = 0.0 + m[1];
+                ucdata.precision = 0;
+            }
+            m = match(line, /option height '(.*)'/);
+            if (m) {
+                ucdata.height = int(m[1]);
+                ucdata.precision = 0;
+            }
+        }
+        f.close();
+    }
+    f = fs.open("/etc/config.mesh/setup");
+    if (f) {
+        for (let line = f.read("line"); length(line); line = f.read("line")) {
+            let m = match(line, /option dmz_lan_ip '(.*)'/);
+            if (m) {
+                ucdata.lan_ip = m[1];
+            }
+        }
+        f.close();
+    }
+}
 
 export function setup()
 {
     fs.mkdir("/etc/aredntastic.d/");
     fs.mkdir("/tmp/aredntastic.d/");
-    timers.setTimeout("aredn", 1 * 60);
+    readData();
+    timers.setInterval("aredn", 1 * 60);
 };
 
 function path(name)
@@ -57,32 +95,14 @@ export function getInstance(id)
 
 export function getLocation()
 {
-    const loc = {
-        latitide: 0, longitude: 0, altitude: 0
+    return {
+        latitide: ucdata.latitide, longitude: ucdata.longitude, altitude: ucdata.height, precision: ucdata.precision
     };
-    // Don't use uci as this may be loaded on non-uci platforms and we dont want it to error.
-    const f = fs.open("/etc/config/aredn");
-    if (f) {
-        for (let line = f.read("line"); length(line); line = f.read("line")) {
-            let m = match(line, /option lat '(.*)'/);
-            if (m) {
-                loc.latitide = 0.0 + m[1];
-                loc.precision = 0;
-            }
-            m = match(line, /option lon '(.*)'/);
-            if (m) {
-                loc.longitude = 0.0 + m[1];
-                loc.precision = 0;
-            }
-            m = match(line, /option height '(.*)'/);
-            if (m) {
-                loc.altitude = 0.0 + m[1];
-                loc.precision = 0;
-            }
-        }
-        f.close();
-    }
-    return loc;
+};
+
+export function getMulticastDeviceIP()
+{
+    return ucdata.lan_ip;
 };
 
 export function tick()

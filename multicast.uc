@@ -7,7 +7,7 @@ let s = null;
 
 export function setup(config)
 {
-    const address = config.network?.address;
+    const address = config.network?.address ?? platform.getMulticastDeviceIP();
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
     s.bind({
         port: PORT

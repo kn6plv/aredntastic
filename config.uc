@@ -36,10 +36,15 @@ export function setup()
     multicast.setup(config);
     node.setup(config);
 
+    user.setup(config);
     router.registerApp(user);
+    textmessage.setup(config);
     router.registerApp(textmessage);
+    position.setup(config);
     router.registerApp(position);
+    traceroute.setup(config);
     router.registerApp(traceroute);
+    device.setup(config);
     router.registerApp(device);
 
     if (config.environmental) {

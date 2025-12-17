@@ -8,8 +8,6 @@ import * as crypto from "crypto";
 
 const PRIVATE_HW = 255;
  
-timers.setTimeout("user", 3 * 60 * 60);
-
 parse.registerProto(
     "user", 4,
     {
@@ -24,6 +22,11 @@ parse.registerProto(
         "9": "bool is_unmessagable"
     }
 );
+
+export function setup(config)
+{
+    timers.setInterval("user", config.user?.interval ?? 3 * 60 * 60);
+};
 
 export function tick()
 {

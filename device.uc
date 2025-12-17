@@ -8,8 +8,6 @@ import * as telemetry from "telemetry";
 
 const GRID_POWER = 101;
  
-timers.setTimeout("device_metrics", 30 * 60);
-
 parse.registerProto(
     "device_metrics", null,
     {
@@ -20,6 +18,11 @@ parse.registerProto(
         "5": "uint32 uptime_seconds"
     }
 );
+
+export function setup(config)
+{
+    timers.setInterval("device_metrics", config.telemetry?.device?.interval ?? 30 * 60);
+};
 
 export function tick()
 {

@@ -7,8 +7,6 @@ import * as parse from "parse";
 
 const LOCATION_SOURCE_MANUAL = 1;
 
-timers.setTimeout("position", 15 * 60);
-
 parse.registerProto(
     "position", 3,
     {
@@ -37,6 +35,11 @@ parse.registerProto(
         "23": "uint32 precision_bits"
     }
 );
+
+export function setup(config)
+{
+    timers.setInterval("position", config.position?.interval ?? 15 * 60);
+};
 
 function position()
 {
