@@ -42,9 +42,9 @@ function position()
 {
     const me = node.getInfo();
     return {
-        latitude_i: me.lat * 10000000,
-        longitude_i: me.lon * 10000000,
-        altitude: me.alt,
+        latitude_i: int(me.lat * 10000000),
+        longitude_i: int(me.lon * 10000000),
+        altitude: int(me.alt),
         time: time(),
         location_source: LOCATION_SOURCE_MANUAL,
         precision_bits: me.precision
