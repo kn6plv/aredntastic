@@ -3,8 +3,8 @@ import * as router from "router";
 import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
-import * as environmental from "environmental";
 import * as telemetry from "telemetry";
+import * as environmental from "telemetry_environmental";
 
 let weewxurl;
 

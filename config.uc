@@ -9,8 +9,8 @@ import * as user from "user";
 import * as textmessage from "textmessage";
 import * as position from "position";
 import * as traceroute from "traceroute";
-import * as device from "device";
-import * as environmental_weewx from "environmental_weewx";
+import * as device from "telemetry_device";
+import * as environmental_weewx from "telemetry_environmental_weewx";
 import * as platform_aredn from "platform_aredn";
 import * as platform_debian from "platform_debian";
 
