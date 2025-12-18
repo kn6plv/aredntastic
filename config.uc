@@ -49,8 +49,8 @@ export function setup()
     device.setup(config);
     router.registerApp(device);
 
-    if (config.environmental) {
-        switch (config.environmental.type) {
+    if (config.telemetry?.environmental) {
+        switch (config.telemetry.environmental.type) {
             case "weewx":
                 environmental_weewx.setup(config);
                 router.registerApp(environmental_weewx);

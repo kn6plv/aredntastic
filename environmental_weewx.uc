@@ -9,7 +9,7 @@ let weewxurl;
 
 export function setup(config)
 {
-    weewxurl = config.environmental.url;
+    weewxurl = config.telemetry?.environmental?.url;
     timers.setInterval("environmental_metrics", config.telemetry?.environmental?.interval ?? 30 * 60);
 };
 
