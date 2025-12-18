@@ -24,11 +24,19 @@ export function tick(name)
 {
     const now = clock()[0];
     const timer = timers[name];
-    if (now >= timer.next) {
+    if (timer && now >= timer.next) {
         timer.next = timer.next + timer.timeout;
         return true;
     }
     return false;
+};
+
+export function trigger(name)
+{
+    const timer = timers[name];
+    if (timer) {
+        timer.next = clock()[0];
+    }
 };
 
 export function minTimeout(limit)
