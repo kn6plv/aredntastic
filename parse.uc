@@ -11,7 +11,7 @@ import * as nodedb from "nodedb";
  *
  *  2 - hardware
  *  3 - position
- *  4 - user
+ *  4 - nodeinfo
  *  5 - routing
  *  6 - admin
  *  7 - compressed
@@ -180,7 +180,7 @@ export function decodePacket(pkt)
         }
     }
     if (!node.isBroadcast(msg)) {
-        const frompublic = nodedb.getNode(msg.from)?.user?.public_key;
+        const frompublic = nodedb.getNode(msg.from)?.nodeinfo?.public_key;
         const toprivate = node.toMe(msg) ? node.getInfo().private_key : platform.getInstance(msg.to)?.private_key;
         if (frompublic && toprivate) {
             const sharedkey = crypto.getSharedKey(toprivate, crypto.stringToPKey(frompublic));
@@ -226,7 +226,7 @@ export function encodePacket(msg)
         return protobuf.encode("packet", msg);
     }
     else if (!node.isBroadcast(msg)) {
-        const topublic = nodedb.getNode(msg.to)?.user?.public_key;
+        const topublic = nodedb.getNode(msg.to)?.nodeinfo?.public_key;
         const fromprivate = node.fromMe(msg) ? node.getInfo().private_key : platform.getInstance(msg.from)?.private_key;
         if (topublic && fromprivate) {
             const sharedkey = crypto.getSharedKey(fromprivate, crypto.stringToPKey(topublic));

@@ -26,29 +26,49 @@ parse.registerProto(
 
 export function setup(config)
 {
-    timers.setInterval("nodeinfo", config.user?.interval ?? DEFAULT_INTERVAL);
+    timers.setInterval("nodeinfo", config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
 };
+
+function createNodeinfoMessage(to, extra)
+{
+    const me = node.getInfo();
+    return message.createMessage(to, null, null, "nodeinfo", {
+        id: sprintf("!%08x", me.id),
+        long_name: me.long_name,
+        short_name: me.short_name,
+        macaddr: me.macaddr,
+        hw_model: PRIVATE_HW,
+        role: me.role,
+        public_key: crypto.pKeyToString(me.public_key),
+        is_unmessagable: false
+    }, extra);
+}
 
 export function tick()
 {
     if (timers.tick("nodeinfo")) {
-        const me = node.getInfo();
-        router.queue(message.createMessage(null, null, null, "nodeinfo", {
-            id: sprintf("!%08x", me.id),
-            long_name: me.long_name,
-            short_name: me.short_name,
-            macaddr: me.macaddr,
-            hw_model: PRIVATE_HW,
-            role: me.role,
-            public_key: crypto.pKeyToString(me.public_key),
-            is_unmessagable: false
-        }));
+        router.queue(createNodeinfoMessage(null));
     }
 };
 
 export function process(msg)
 {
-    if (msg.data?.user && node.forMe(msg)) {
-        nodedb.updateUser(msg.from, msg.data.user);
+    if (msg.data?.nodeinfo) {
+        nodedb.updateNodeinfo(msg.from, msg.data.nodeinfo);
+        if (node.toMe(msg) && msg.data.want_response) {
+            router.queue(createNodeinfoMessage(msg.from, {
+                data: {
+                    request_id: msg.id
+                }
+            }));
+        }
+    }
+    else if (!nodedb.getNode(msg.from, false) && !node.fromMe(msg)) {
+        nodedb.createNode(msg.from);
+        router.queue(createNodeinfoMessage(msg.from, {
+            data: {
+                want_response: true
+            }
+        }));
     }
 };

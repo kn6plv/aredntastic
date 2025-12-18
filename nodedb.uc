@@ -1,12 +1,12 @@
 
 let nodedb;
 
-export function getNode(id)
+export function getNode(id, create)
 {
     if (!nodedb) {
         nodedb = platform.load("nodedb") ?? {};
     }
-    return nodedb[id] ?? { id: id };
+    return nodedb[id] ?? (create === false ? null : { id: id });
 };
 
 function saveNode(node)
@@ -20,11 +20,18 @@ function isdiff(a, b)
     return sprintf("%J", a) != sprintf("%J", b);
 }
 
-export function updateUser(id, user)
+export function createNode(id)
+{
+    if (!nodedb[id]) {
+        saveNode(getNode(id));
+    }
+};
+
+export function updateNodeinfo(id, nodeinfo)
 {
     const node = getNode(id);
-    if (isdiff(node.user, user)) {
-        node.user = user;
+    if (isdiff(node.nodeinfo, nodeinfo)) {
+        node.nodeinfo = nodeinfo;
         saveNode(node);
     }
 };
