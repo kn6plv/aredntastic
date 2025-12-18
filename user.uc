@@ -7,6 +7,7 @@ import * as parse from "parse";
 import * as crypto from "crypto";
 
 const PRIVATE_HW = 255;
+const DEFAULT_INTERVAL = 3 * 60 * 60;
  
 parse.registerProto(
     "user", 4,
@@ -25,7 +26,7 @@ parse.registerProto(
 
 export function setup(config)
 {
-    timers.setInterval("user", config.user?.interval ?? 3 * 60 * 60);
+    timers.setInterval("user", config.user?.interval ?? DEFAULT_INTERVAL);
 };
 
 export function tick()

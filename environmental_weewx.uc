@@ -4,6 +4,7 @@ import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as environmental from "environmental";
+import * as telemetry from "telemetry";
 
 let weewxurl;
 
@@ -11,7 +12,7 @@ export function setup(config)
 {
     weewxurl = config.telemetry?.environmental?.url;
     if (weewxurl) {
-        timers.setInterval("environmental_metrics", config.telemetry?.environmental?.interval ?? 30 * 60);
+        timers.setInterval("environmental_metrics", config.telemetry?.environmental?.interval ?? telemetry.DEFAULT_INTERVAL);
     }
 };
 

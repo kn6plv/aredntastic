@@ -13,3 +13,5 @@ parse.registerProto(
         "8": "proto host_metrics host_metrics"
     }
 );
+
+export const DEFAULT_INTERVAL = 30 * 60;

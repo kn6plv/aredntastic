@@ -6,6 +6,7 @@ import * as node from "node";
 import * as parse from "parse";
 
 const LOCATION_SOURCE_MANUAL = 1;
+const DEFAULT_INTERVAL = 60 * 60;
 
 parse.registerProto(
     "position", 3,
@@ -38,7 +39,7 @@ parse.registerProto(
 
 export function setup(config)
 {
-    timers.setInterval("position", config.position?.interval ?? 15 * 60);
+    timers.setInterval("position", config.position?.interval ?? DEFAULT_INTERVAL);
 };
 
 function position()

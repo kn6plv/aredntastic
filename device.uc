@@ -23,7 +23,7 @@ parse.registerProto(
 export function setup(config)
 {
     startTime = clock(true)[0];
-    timers.setInterval("device_metrics", config.telemetry?.device?.interval ?? 30 * 60);
+    timers.setInterval("device_metrics", config.telemetry?.device?.interval ?? telemetry.DEFAULT_INTERVAL);
 };
 
 export function tick()
