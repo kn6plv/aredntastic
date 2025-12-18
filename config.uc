@@ -16,7 +16,7 @@ import * as platform_debian from "platform_debian";
 
 export function setup()
 {
-    const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile("./aredntastic.conf"));
+    const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/aredntastic.conf`));
 
     switch (config.platform?.type) {
         case "aredn":

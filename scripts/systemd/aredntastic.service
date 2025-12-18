@@ -1,0 +1,12 @@
+[Unit]
+Description=AREDNtastic
+Wants=network-online.target
+After=network-online.targe
+
+[Service]
+Type=simple
+StandardOutput=journal
+ExecStart=/root/aredntastic/main.uc
+
+[Install]
+WantedBy=default.target
