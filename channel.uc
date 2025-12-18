@@ -10,6 +10,8 @@ const primaryChannelPresets = [
     "LongMod"
 ];
 
+const MAX_NAME_LENGTH = 13;
+
 const channelByName = {};
 const channelByNameKey = {};
 const channelsByHash = {};
@@ -47,7 +49,7 @@ export function addMessageNameKey(namekey)
     if (channelByNameKey[namekey]) {
         return null;
     }
-    const nk = split(namekey, "\n");
+    const nk = split(namekey, " ");
     const crypto = getCryptoKey(nk[1]);
     const hash = getHash(nk[0], crypto);
     const chan = { namekey: namekey, crypto: crypto, hash: hash };
@@ -59,7 +61,8 @@ export function addMessageNameKey(namekey)
 
 export function setChannel(name, key)
 {
-    const chan = addMessageNameKey(`${name}\n${key}`);
+    name = substr(name, 0, MAX_NAME_LENGTH);
+    const chan = addMessageNameKey(`${name} ${key}`);
     if (chan) {
         if (chan.crypto[-1] === 1) {
             if (index(primaryChannelPresets, name) == -1) {
@@ -89,7 +92,7 @@ export function getLocalChannelByName(name)
 
 export function getLocalChannelByNameKey(namekey)
 {
-    return getLocalChannelByName(split(namekey, "\n")[0]);
+    return getLocalChannelByName(split(namekey, " ")[0]);
 };
 
 export function getChannelByNameKey(namekey)

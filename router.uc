@@ -61,7 +61,7 @@ export function process()
 export function queue(msg)
 {
     // Remember messages we queued for a little while and don't queue them again.
-    const key = `${msg.from}\n${msg.id}`;
+    const key = `${msg.from}:${msg.id}`;
     if (index(recent, key) === -1) {
         push(recent, key);
         if (length(recent) > MAX_RECENT) {

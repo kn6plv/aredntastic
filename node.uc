@@ -4,6 +4,9 @@ import * as crypto from "crypto";
 
 const LOCATION_PRECISION = 16;
 
+const MAX_SHORT_NAME_LENGTH = 4;
+const MAX_LONG_NAME_LENGTH = 36;
+
 const ROLE_CLIENT = 0;
 const ROLE_CLIENT_MUTE = 1;
 const ROLE_ROUTER = 2;
@@ -101,10 +104,10 @@ export function setup(config)
     me.lon = maskLoc(location.longitude ?? me.lon);
     me.alt = location.altitude ?? me.alt;
     if (config?.long_name) {
-        me.long_name = substr(config.long_name, 0, 36);
+        me.long_name = substr(config.long_name, 0, MAX_LONG_NAME_LENGTH);
     }
     if (config?.short_name) {
-        me.short_name = substr(config.short_name, 0, 4);
+        me.short_name = substr(config.short_name, 0, MAX_SHORT_NAME_LENGTH);
     }
     switch (config?.role) {
         case "client":
