@@ -5,7 +5,7 @@ import * as node from "node";
 import * as unicast from "unicast";
 import * as multicast from "multicast";
 
-import * as user from "user";
+import * as nodeinfo from "nodeinfo";
 import * as textmessage from "textmessage";
 import * as position from "position";
 import * as traceroute from "traceroute";
@@ -36,8 +36,8 @@ export function setup()
     multicast.setup(config);
     node.setup(config);
 
-    user.setup(config);
-    router.registerApp(user);
+    nodeinfo.setup(config);
+    router.registerApp(nodeinfo);
     textmessage.setup(config);
     router.registerApp(textmessage);
     position.setup(config);

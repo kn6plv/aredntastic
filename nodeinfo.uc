@@ -10,7 +10,7 @@ const PRIVATE_HW = 255;
 const DEFAULT_INTERVAL = 3 * 60 * 60;
  
 parse.registerProto(
-    "user", 4,
+    "nodeinfo", 4,
     {
         "1": "string id",
         "2": "string long_name",
@@ -26,14 +26,14 @@ parse.registerProto(
 
 export function setup(config)
 {
-    timers.setInterval("user", config.user?.interval ?? DEFAULT_INTERVAL);
+    timers.setInterval("nodeinfo", config.user?.interval ?? DEFAULT_INTERVAL);
 };
 
 export function tick()
 {
-    if (timers.tick("user")) {
+    if (timers.tick("nodeinfo")) {
         const me = node.getInfo();
-        router.queue(message.createMessage(null, null, null, "user", {
+        router.queue(message.createMessage(null, null, null, "nodeinfo", {
             id: sprintf("!%08x", me.id),
             long_name: me.long_name,
             short_name: me.short_name,

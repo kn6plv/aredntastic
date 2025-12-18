@@ -1,6 +1,8 @@
 import * as node from "node";
 import * as channel from "channel";
 
+let enabled = false;
+
 function loadMessages(namekey)
 {
     return platform.load(`messages.${namekey}`) ?? {
@@ -32,6 +34,9 @@ function addMessage(msg)
 
 export function setup(config)
 {
+    if (config.messages) {
+        enabled = true;
+    }
 };
 
 export function tick()
@@ -40,7 +45,7 @@ export function tick()
 
 export function process(msg)
 {
-    if (msg.data?.text_message && node.forMe(msg) && channel.getLocalChannelByNameKey(msg.namekey)) {
+    if (enabled && msg.data?.text_message && node.forMe(msg) && channel.getLocalChannelByNameKey(msg.namekey)) {
         addMessage(msg);
     }
 };
