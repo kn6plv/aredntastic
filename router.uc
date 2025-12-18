@@ -30,8 +30,11 @@ export function process()
         }
 
         // Forward the message if it's not just to me. We never forward encrypted traffic.
-        if (!node.toMe(msg) && !msg.encrypted && node.canForward()) {
+        if (!node.toMe(msg) && !msg.encrypted) {
             if (!node.fromMe(msg)) {
+                if (!node.canForward()) {
+                    return;
+                }
                 msg.hop_limit--;
                 if (msg.hop_limit <= 0) {
                     return;

@@ -7,7 +7,10 @@ let s = null;
 
 export function setup(config)
 {
-    const address = config.multicast?.address ?? platform.getMulticastDeviceIP();
+    if (!config.multicast) {
+        return;
+    }
+    const address = config.multicast.address ?? platform.getMulticastDeviceIP();
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
     s.bind({
         port: PORT
