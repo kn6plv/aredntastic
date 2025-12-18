@@ -61,7 +61,7 @@ export function addMessageNameKey(namekey)
 
 export function setChannel(name, key)
 {
-    name = substr(name, 0, MAX_NAME_LENGTH);
+    name = substr(replace(name, /[ \t\r\n]/g, ""), 0, MAX_NAME_LENGTH);
     const chan = addMessageNameKey(`${name} ${key}`);
     if (chan) {
         if (chan.crypto[-1] === 1) {
