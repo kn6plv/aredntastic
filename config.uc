@@ -21,7 +21,7 @@ export function setup()
     switch (config.platform?.type) {
         case "aredn":
         case "debian":
-            global.platform = require(`platform_${config.platform?.type}`);
+            global.platform = require(`platforms.${config.platform?.type}.platform_${config.platform?.type}`);
             break;
         default:
             print(`Unknown platform: ${config.platform?.type}\n`);
