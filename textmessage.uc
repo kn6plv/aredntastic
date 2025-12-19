@@ -39,6 +39,11 @@ export function setup(config)
     }
 };
 
+export function isMessagable()
+{
+    return enabled;
+};
+
 export function tick()
 {
 };

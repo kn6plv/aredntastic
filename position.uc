@@ -42,23 +42,23 @@ export function setup(config)
     timers.setInterval("position", config.position?.interval ?? DEFAULT_INTERVAL);
 };
 
-function position()
+function position(precise)
 {
-    const me = node.getInfo();
+    const loc = node.getLocation(precise);
     return {
-        latitude_i: int(me.lat * 10000000),
-        longitude_i: int(me.lon * 10000000),
-        altitude: int(me.alt),
+        latitude_i: int(loc.lat * 10000000),
+        longitude_i: int(loc.lon * 10000000),
+        altitude: int(loc.alt),
         time: time(),
         location_source: LOCATION_SOURCE_MANUAL,
-        precision_bits: me.precision
+        precision_bits: loc.precision
     };
 }
 
 export function tick()
 {
     if (timers.tick("position")) {
-        router.queue(message.createMessage(null, null, null, "position", position()));
+        router.queue(message.createMessage(null, null, null, "position", position(false)));
     }
 };
 
@@ -67,7 +67,7 @@ export function process(msg)
     if (msg.data?.position && node.forMe(msg)) {
         nodedb.updatePosition(msg.from, msg.data.position);
         if (node.toMe(msg) && msg.data.want_response) {
-            router.queue(message.createReplyMessage(msg, "position", position()));
+            router.queue(message.createReplyMessage(msg, "position", position(node.isPrivate(msg))));
         }
     }
 };

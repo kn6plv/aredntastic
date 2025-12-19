@@ -4,6 +4,7 @@ import * as node from "node";
 import * as nodedb from "nodedb";
 import * as timers from "timers";
 import * as parse from "parse";
+import * as textmessage from "textmessage";
 import * as crypto from "crypto";
 
 const PRIVATE_HW = 255;
@@ -32,6 +33,7 @@ export function setup(config)
 function createNodeinfoMessage(to, extra)
 {
     const me = node.getInfo();
+    print(message,"\n");
     return message.createMessage(to, null, null, "nodeinfo", {
         id: sprintf("!%08x", me.id),
         long_name: me.long_name,
@@ -40,7 +42,7 @@ function createNodeinfoMessage(to, extra)
         hw_model: PRIVATE_HW,
         role: me.role,
         public_key: crypto.pKeyToString(me.public_key),
-        is_unmessagable: false
+        is_unmessagable: !textmessage.isMessagable()
     }, extra);
 }
 

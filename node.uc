@@ -22,6 +22,8 @@ const ROLE_ROUTER_LATE = 11;
 const ROLE_CLIENT_BASE = 12;
 
 let me = null;
+let fuzzyLocation = null;
+let preciseLocation = null;
 
 export const BROADCAST = 0xffffffff;
 
@@ -48,6 +50,11 @@ export function toMe(msg)
 export function fromMe(msg)
 {
     return msg.from === me.id;
+};
+
+export function isPrivate(msg)
+{
+    return msg.namekey === "Private Private";
 };
 
 export function canForward()
@@ -100,9 +107,21 @@ export function setup(config)
     me = platform.load("node") ?? createNode();
     const location = config?.location ?? platform.getLocation();
     me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision));
-    me.lat = maskLoc(location.latitude ?? me.lat);
-    me.lon = maskLoc(location.longitude ?? me.lon);
+    me.lat = location.latitude ?? me.lat;
+    me.lon = location.longitude ?? me.lon;
     me.alt = location.altitude ?? me.alt;
+    preciseLocation = {
+        lat: me.lat,
+        lon: me.lon,
+        alt: me.alt,
+        precision: 32
+    };
+    fuzzyLocation = {
+        lat: maskLoc(me.lat),
+        lon: maskLoc(me.lon),
+        alt: me.alt,
+        precision: me.precision
+    };
     if (config?.long_name) {
         me.long_name = substr(config.long_name, 0, MAX_LONG_NAME_LENGTH);
     }
@@ -126,4 +145,9 @@ export function setup(config)
 export function getInfo()
 {
     return me;
+};
+
+export function getLocation(precise)
+{
+    return precise ? preciseLocation : fuzzyLocation;
 };
