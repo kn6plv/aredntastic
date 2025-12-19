@@ -59,7 +59,16 @@ export function isPrivate(msg)
 
 export function canForward()
 {
-    return me.role == ROLE_CLIENT;
+    switch (me.role) {
+        case ROLE_CLIENT_MUTE:
+        case ROLE_CLIENT_HIDDEN:
+        case ROLE_TRACKER:
+        case ROLE_LOST_AND_FOUND:
+        case ROLE_SENSOR:
+            return false;
+        default:
+            return true;
+    }
 };
 
 function save()
