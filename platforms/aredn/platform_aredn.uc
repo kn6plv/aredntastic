@@ -5,8 +5,8 @@ import * as services from "aredn.services";
 
 const CURL = "/usr/bin/curl";
 
-const pubid = "KN6PLV.AREDNtastic.v1.1";
-const pubtopic = "KN6PLV.AREDNtastic.v1";
+const pubID = "KN6PLV.AREDNtastic.v1.1";
+const pubTopic = "KN6PLV.AREDNtastic.v1";
 
 const ucdata = {};
 let id2address = {};
@@ -84,10 +84,10 @@ function path(name)
 
 /* export */ function publish(me)
 {
-    services.publish({ id: pubid, topic: pubtopic, ip: ucdata.main_ip, role: me.role, private_key: me.private_key });
+    services.publish(pubID, pubTopic, { ip: ucdata.main_ip, role: me.role, key: me.private_key });
     function unpublish()
     {
-        services.unpublish(pubid);
+        services.unpublish(pubID);
     }
     signal("SIGHUP", unpublish);
     signal("SIGINT", unpublish);
@@ -98,11 +98,11 @@ function path(name)
 {
     if (timers.tick("aredn")) {
         const ilist = {};
-        const published = services.getPublished(pubtopic);
+        const published = services.published(pubTopic);
         for (let i = 0; i < length(published); i++) {
-            const pub = published[i];
-            if (pub[i].ip) {
-                ilist[record.id] = { ip: pub.ip, role: pub.role, private_key: pub.private_key };
+            const data = published[i];
+            if (data.ip) {
+                ilist[record.id] = { ip: data.ip, role: data.role, private_key: data.key };
             }
         }
         id2address = ilist;
