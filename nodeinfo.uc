@@ -33,7 +33,6 @@ export function setup(config)
 function createNodeinfoMessage(to, extra)
 {
     const me = node.getInfo();
-    print(message,"\n");
     return message.createMessage(to, null, null, "nodeinfo", {
         id: sprintf("!%08x", me.id),
         long_name: me.long_name,

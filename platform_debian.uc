@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 let rootdir = "/tmp/aredntastic";
 
-export function setup(config)
+/* export */ function setup(config)
 {
     rootdir = config.platform?.store ?? rootdir;
     function mkdirp(p)
@@ -14,20 +14,20 @@ export function setup(config)
         fs.mkdir(p);
     }
     mkdirp(rootdir);
-};
+}
 
-export function load(name)
+/* export */ function load(name)
 {
     const data = fs.readfile(`${rootdir}/${name}.json`);
     return data ? json(data) : null;
-};
+}
 
-export function store(name, data)
+/* export */ function store(name, data)
 {
     fs.writefile(`${rootdir}/${name}.json`, sprintf("%.02J", data));
-};
+}
 
-export function fetch(url)
+/* export */ function fetch(url)
 {
     const p = fs.popen(`curl --max-time 2 --silent --output - ${url}`);
     if (!p) {
@@ -36,33 +36,53 @@ export function fetch(url)
     const all = p.read("all");
     p.close();
     return all;
-};
+}
 
-export function getAllInstances()
+/* export */ function getAllInstances()
 {
     return {};
-};
+}
 
-export function getInstance(id)
+/* export */ function getInstance(id)
 {
     return null;
-};
+}
 
-export function getLocation()
+/* export */ function getLocation()
 {
     print("Location not set\n");
     return null;
-};
+}
 
-export function getMulticastDeviceIP()
+/* export */ function getMulticastDeviceIP()
 {
     return null;
-};
+}
 
-export function tick()
+/* export */ function publish()
 {
-};
+}
 
-export function process(msg)
+/* export */ function tick()
 {
+}
+
+/* export */ function process(msg)
+{
+}
+
+print(global,"\n");
+
+return {
+    setup,
+    load,
+    store,
+    fetch,
+    getAllInstances,
+    getInstance,
+    getLocation,
+    getMulticastDeviceIP,
+    publish,
+    tick,
+    process
 };

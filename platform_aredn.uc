@@ -1,55 +1,32 @@
 import * as fs from "fs";
 import * as timers from "timers";
+import * as uci from "uci";
+import * as services from "aredn.services";
 
-const PUB = "/var/run/arednlink/publish";
 const CURL = "/usr/bin/curl";
+
+const pubid = "KN6PLV.AREDNtastic.v1.1";
+const pubtopic = "KN6PLV.AREDNtastic.v1";
 
 const ucdata = {};
 let id2address = {};
 
-function readData()
-{
-    // Don't use uci as this may be loaded on non-uci platforms and we dont want it to error.
-    let f = fs.open("/etc/config/aredn");
-    if (f) {
-        for (let line = f.read("line"); length(line); line = f.read("line")) {
-            let m = match(line, /option lat '(.*)'/);
-            if (m) {
-                ucdata.latitide = 0.0 + m[1];
-                ucdata.precision = 0;
-            }
-            m = match(line, /option lon '(.*)'/);
-            if (m) {
-                ucdata.longitude = 0.0 + m[1];
-                ucdata.precision = 0;
-            }
-            m = match(line, /option height '(.*)'/);
-            if (m) {
-                ucdata.height = int(m[1]);
-                ucdata.precision = 0;
-            }
-        }
-        f.close();
-    }
-    f = fs.open("/etc/config.mesh/setup");
-    if (f) {
-        for (let line = f.read("line"); length(line); line = f.read("line")) {
-            let m = match(line, /option dmz_lan_ip '(.*)'/);
-            if (m) {
-                ucdata.lan_ip = m[1];
-            }
-        }
-        f.close();
-    }
-}
-
-export function setup()
+/* export */ function setup()
 {
     fs.mkdir("/etc/aredntastic.d/");
     fs.mkdir("/tmp/aredntastic.d/");
-    readData();
+
+    const c = uci.cursor();
+    ucdata.latitide = c.get("aredn", "@location[0]", "lat");
+    ucdata.longitude = c.get("aredn", "@location[0]", "lat");
+    ucdata.height = c.get("aredn", "@location[0]", "height") ?? 0;
+
+    const cm = uci.cursor("/etc/config.mesh");
+    ucdata.main_ip = cm.get("setup", "globals", "wifi_ip");
+    ucdata.lan_ip = cm.get("setup", "globals", "dmz_lan_ip");
+
     timers.setInterval("aredn", 1 * 60);
-};
+}
 
 function path(name)
 {
@@ -61,18 +38,18 @@ function path(name)
     }
 }
 
-export function load(name)
+/* export */ function load(name)
 {
     const data = fs.readfile(path(name));
     return data ? json(data) : null;
-};
+}
 
-export function store(name, data)
+/* export */ function store(name, data)
 {
     fs.writefile(path(name), sprintf("%.02J", data));
-};
+}
 
-export function fetch(url)
+/* export */ function fetch(url)
 {
     const p = fs.popen(`${CURL} --max-time 2 --silent --output - ${url}`);
     if (!p) {
@@ -81,57 +58,71 @@ export function fetch(url)
     const all = p.read("all");
     p.close();
     return all;
-};
+}
 
-export function getAllInstances()
+/* export */ function getAllInstances()
 {
     return id2address;
-};
+}
 
-export function getInstance(id)
+/* export */ function getInstance(id)
 {
     return id2address[id];
-};
+}
 
-export function getLocation()
+/* export */ function getLocation()
 {
     return {
-        latitide: ucdata.latitide, longitude: ucdata.longitude, altitude: ucdata.height, precision: ucdata.precision
+        latitide: ucdata.latitide, longitude: ucdata.longitude, altitude: ucdata.height, precision: 0
     };
-};
+}
 
-export function getMulticastDeviceIP()
+/* export */ function getMulticastDeviceIP()
 {
     return ucdata.lan_ip;
-};
+}
 
-export function tick()
+/* export */ function publish(me)
+{
+    services.publish({ id: pubid, topic: pubtopic, ip: ucdata.main_ip, role: me.role, private_key: me.private_key });
+    function unpublish()
+    {
+        services.unpublish(pubid);
+    }
+    signal("SIGHUP", unpublish);
+    signal("SIGINT", unpublish);
+    signal("SIGTERM", unpublish);
+}
+
+/* export */ function tick()
 {
     if (timers.tick("aredn")) {
         const ilist = {};
-        const pubs = fs.lsdir(PUB);
-        if (pubs) {
-            for (let i = 0; i < length(pubs); i++) {
-                const file = `${PUB}/${pubs[i]}`;
-                if (fs.lstat(file).size) {
-                    try {
-                        const pub = json(fs.readfile(file));
-                        for (let i = 0; i < length(pub.data); i++) {
-                            const record = pub.data[i];
-                            if (record.type == "KN6PLV.aredntastic" && record.ip && record.id) {
-                                ilist[record.id] = { ip: record.ip, private_key: record.private_key };
-                            }
-                        }
-                    }
-                    catch (_) {
-                    }
-                }
+        const published = services.getPublished(pubtopic);
+        for (let i = 0; i < length(published); i++) {
+            const pub = published[i];
+            if (pub[i].ip) {
+                ilist[record.id] = { ip: pub.ip, role: pub.role, private_key: pub.private_key };
             }
         }
         id2address = ilist;
     }
-};
+}
 
-export function process(msg)
+/* export */ function process(msg)
 {
+}
+
+return {
+    setup,
+    load,
+    store,
+    fetch,
+    getAllInstances,
+    getInstance,
+    getLocation,
+    getMulticastDeviceIP,
+    publish,
+    tick,
+    process
 };

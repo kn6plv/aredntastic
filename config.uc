@@ -11,8 +11,6 @@ import * as position from "position";
 import * as traceroute from "traceroute";
 import * as device from "telemetry_device";
 import * as environmental_weewx from "telemetry_environmental_weewx";
-import * as platform_aredn from "platform_aredn";
-import * as platform_debian from "platform_debian";
 
 export function setup()
 {
@@ -20,10 +18,8 @@ export function setup()
 
     switch (config.platform?.type) {
         case "aredn":
-            global.platform = platform_aredn;
-            break;
         case "debian":
-            global.platform = platform_debian;
+            global.platform = require(`platform_${config.platform?.type}`);
             break;
         default:
             print(`Unknown platform: ${config.platform?.type}\n`);
@@ -35,6 +31,8 @@ export function setup()
     unicast.setup(config);
     multicast.setup(config);
     node.setup(config);
+
+    platform.publish();
 
     nodeinfo.setup(config);
     router.registerApp(nodeinfo);

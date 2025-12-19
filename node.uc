@@ -89,10 +89,10 @@ function createNode()
         macaddr: struct.pack("6B", id[0], id[1], id[2], id[3], id[4], id[5]),
         private_key: keypair.private,
         public_key: keypair.public,
-        lat: 0.0,
-        lon: 0.0,
-        alt: 0,
-        precision: LOCATION_PRECISION,
+        lat: null,
+        lon: null,
+        alt: null,
+        precision: null,
         role: ROLE_CLIENT_MUTE
     };
     save();
@@ -115,22 +115,24 @@ export function setup(config)
 {
     me = platform.load("node") ?? createNode();
     const location = config?.location ?? platform.getLocation();
-    me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision));
-    me.lat = location.latitude ?? me.lat;
-    me.lon = location.longitude ?? me.lon;
-    me.alt = location.altitude ?? me.alt;
-    preciseLocation = {
-        lat: me.lat,
-        lon: me.lon,
-        alt: me.alt,
-        precision: 32
-    };
-    fuzzyLocation = {
-        lat: maskLoc(me.lat),
-        lon: maskLoc(me.lon),
-        alt: me.alt,
-        precision: me.precision
-    };
+    if (location) {
+        me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision ?? 0));
+        me.lat = location.latitude ?? me.lat;
+        me.lon = location.longitude ?? me.lon;
+        me.alt = location.altitude ?? me.alt;
+        preciseLocation = {
+            lat: me.lat,
+            lon: me.lon,
+            alt: me.alt,
+            precision: 32
+        };
+        fuzzyLocation = {
+            lat: maskLoc(me.lat),
+            lon: maskLoc(me.lon),
+            alt: me.alt,
+            precision: me.precision
+        };
+    }
     if (config?.long_name) {
         me.long_name = substr(config.long_name, 0, MAX_LONG_NAME_LENGTH);
     }
