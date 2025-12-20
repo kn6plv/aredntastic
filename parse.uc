@@ -91,49 +91,6 @@ registerProto(
     }
 );
 
-/* --- Unused ---
-
-registerProto(
-    "storeandforward", 65,
-    {
-        "1": "enum rr",
-        "2": "proto statistics stats",
-        "3": "proto history history",
-        "4": "proto heartbeat heartbeat",
-        "5": "bytes text"
-    }
-);
-registerProto(
-    "heartbeat", null,
-    {
-        "1": "uint32 period",
-        "2": "uint32 secondary"
-    }
-);
-registerProto(
-    "power_metrics", null,
-    {
-        "1": "float ch1_voltage",
-        "2": "float ch1_current",
-        "3": "float ch2_voltage",
-        "4": "float ch2_current",
-        "5": "float ch3_voltage",
-        "6": "float ch3_current",
-        "7": "float ch4_voltage",
-        "8": "float ch4_current",
-        "9": "float ch5_voltage",
-        "10": "float ch5_current",
-        "11": "float ch6_voltage",
-        "12": "float ch6_current",
-        "13": "float ch7_voltage",
-        "14": "float ch7_current",
-        "15": "float ch8_voltage",
-        "16": "float ch8_current"
-    }
-);
-
- --- */
-
  function decodePacketData(msg)
  {
     if (msg.decoded) {

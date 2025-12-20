@@ -8,6 +8,7 @@ import * as multicast from "multicast";
 import * as nodeinfo from "nodeinfo";
 import * as textmessage from "textmessage";
 import * as position from "position";
+import * as neighborinfo from "neighborinfo";
 import * as traceroute from "traceroute";
 import * as device from "telemetry_device";
 import * as environmental_weewx from "telemetry_environmental_weewx";
@@ -56,6 +57,8 @@ export function setup()
     router.registerApp(traceroute);
     device.setup(config);
     router.registerApp(device);
+    neighborinfo.setup(config);
+    router.registerApp(neighborinfo);
 
     if (config.telemetry?.environmental) {
         switch (config.telemetry.environmental.type) {

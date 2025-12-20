@@ -12,6 +12,12 @@ export function registerProto(name, proto)
     for (let id in proto) {
         const keys = split(proto[id], " ");
         switch (length(keys)) {
+            case 4:
+                if (keys[0] === "repeated" && keys[1] === "proto") {
+                    decode[id] = { name: keys[3], repeatedproto: keys[2] };
+                    encode[keys[2]] = { id: int(id), repeatedproto: keys[2] };
+                }
+                break;
             case 3:
                 switch (keys[0]) {
                     case "repeated":
@@ -104,6 +110,13 @@ export function decode(name, buf)
             if (proto[vi].proto) {
                 if (type(d) === "string") {
                     d = decode(proto[vi].proto, d);
+                }
+            }
+            else if (proto[vi].repeatedproto) {
+                if (type(d) === "string") {
+                    const v = decode(proto[vi].repeatedproto, d);
+                    d = r[k] || [];
+                    push(d, v);
                 }
             }
             else if (proto[vi].repeated) {
@@ -277,6 +290,13 @@ export function encode(name, data)
         else if (p.proto) {
             const buf = encode(p.proto, v);
             d = tag(p.id, 2) + varint(length(buf)) + buf;
+        }
+        else if (p.repeatedproto) {
+            d = "";
+            for (let i = 0; i < length(v); i++) {
+                const buf = encode(p.repeatedproto, v[i]);
+                d += tag(p.id, 2) + varint(length(buf)) + buf;
+            }
         }
         else if (p.repeated) {
             d = "";
