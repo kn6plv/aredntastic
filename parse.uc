@@ -1,10 +1,10 @@
 import * as struct from "struct";
-import * as sha256 from "sha256";
 import * as protobuf from "protobuf";
 import * as crypto from "crypto";
 import * as channel from "channel";
 import * as node from "node";
 import * as nodedb from "nodedb";
+import * as sha256 from "crypto.sha256";
 
 /*
  * Known port numbers

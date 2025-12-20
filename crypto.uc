@@ -1,7 +1,7 @@
 import * as struct from "struct";
 import * as math from "math";
-import * as aes from "aes";
-import * as x25519 from "x25519";
+import * as aes from "crypto.aes";
+import * as x25519 from "crypto.x25519";
 
 export function decryptCTR(from, id, key, encrypted)
 {
