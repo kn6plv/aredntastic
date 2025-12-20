@@ -1,6 +1,7 @@
 {
     "preset": "MediumFast",
     "role": "client",
+    "debug": true,
     "multicast": {
         "address": "192.168.51.113"
     },

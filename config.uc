@@ -18,6 +18,16 @@ export function setup()
 
     const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/aredntastic.conf`));
 
+    if (config.debug) {
+        global.dprintf = function(a, b, c, d, e)
+        {
+            printf(a, b, c, d, e);
+        };
+    }
+    else {
+        global.dprintf = function(){};
+    }
+
     switch (config.platform?.type) {
         case "aredn":
         case "debian":

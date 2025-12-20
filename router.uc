@@ -22,7 +22,7 @@ export function process()
     while (length(q) > 0) {
         const msg = shift(q);
 
-        printf("%.2J\n", msg);
+        dprintf("%.2J\n", msg);
 
         // Give each app a chance at the message
         for (let i = 0; i < length(apps); i++) {

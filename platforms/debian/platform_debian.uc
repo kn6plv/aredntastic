@@ -71,8 +71,6 @@ let rootdir = "/tmp/aredntastic";
 {
 }
 
-print(global,"\n");
-
 return {
     setup,
     load,
