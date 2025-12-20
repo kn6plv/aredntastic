@@ -16,7 +16,7 @@ parse.registerProto(
         "1": "uint32 node_id",
         "2": "uint32 last_sent_by_id",
         "3": "uint32 node_broadcast_interval_secs",
-        "4": "repeated proto neighbor neighbors"
+        "4": "repeated unpacked neighbor neighbors"
     }
 );
 

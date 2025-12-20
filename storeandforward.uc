@@ -1,6 +1,27 @@
 import * as parse from "parse";
 
-
+parse.registerProto(
+    "statistics", null,
+    {
+        "1": "uint32 messages_total",
+        "2": "uint32 messages_saved",
+        "3": "uint32 messages_max",
+        "4": "uint32 up_time",
+        "5": "uint32 requests",
+        "6": "uint32 requests_history",
+        "7": "bool heartbeat",
+        "8": "uint32 return_max",
+        "9": "uint32 return_window"
+    }
+);
+parse.registerProto(
+    "history", null,
+    {
+        "1": "uint32 history_messages",
+        "2": "uint32 window",
+        "3": "uint32 last_request"
+    }
+);
 parse.registerProto(
     "heartbeat", null,
     {

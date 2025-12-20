@@ -13,16 +13,22 @@ export function registerProto(name, proto)
         const keys = split(proto[id], " ");
         switch (length(keys)) {
             case 4:
-                if (keys[0] === "repeated" && keys[1] === "proto") {
-                    decode[id] = { name: keys[3], repeatedproto: keys[2] };
-                    encode[keys[2]] = { id: int(id), repeatedproto: keys[2] };
+                if (keys[0] === "repeated") {
+                    if (keys[1] === "unpacked") {
+                        decode[id] = { name: keys[3], repeatedunpacked: keys[2] };
+                        encode[keys[2]] = { id: int(id), repeatedunpacked: keys[2] };
+                    }
+                    else if (keys[1] === "packed") {
+                        decode[id] = { name: keys[3], repeatedpacked: keys[2] };
+                        encode[keys[2]] = { id: int(id), repeatedpacked: keys[2] };
+                    }
                 }
                 break;
             case 3:
                 switch (keys[0]) {
                     case "repeated":
-                        decode[id] = { name: keys[2], repeated: keys[1] };
-                        encode[keys[2]] = { id: int(id), repeated: keys[1] };
+                        decode[id] = { name: keys[2], repeatedpacked: keys[1] };
+                        encode[keys[2]] = { id: int(id), repeatedpacked: keys[1] };
                         break;
                     case "proto":
                         decode[id] = { name: keys[2], proto: keys[1] };
@@ -112,16 +118,26 @@ export function decode(name, buf)
                     d = decode(proto[vi].proto, d);
                 }
             }
-            else if (proto[vi].repeatedproto) {
-                if (type(d) === "string") {
-                    const v = decode(proto[vi].repeatedproto, d);
-                    d = r[k] || [];
+            else if (proto[vi].repeatedunpacked) {
+                let v = d;
+                d = r[k] || [];
+                if (type(v) === "string") {
+                    switch (proto[vi].repeatedunpacked) {
+                        case "bytes":
+                        case "string":
+                            break;
+                        default:
+                            v = decode(proto[vi].repeatedunpacked, v);
+                            break;
+                    }
+                }
+                if (v !== null) {
                     push(d, v);
                 }
             }
-            else if (proto[vi].repeated) {
+            else if (proto[vi].repeatedpacked) {
                 if (type(d) === "string") {
-                    switch (proto[vi].repeated) {
+                    switch (proto[vi].repeatedpacked) {
                         case "fixed32":
                             d = struct.unpack(sprintf("<%dI", length(d) / 4), d);
                             break;
@@ -163,7 +179,7 @@ export function decode(name, buf)
                                     }
                                     s += 7;
                                 }
-                                switch (proto[vi].repeated) {
+                                switch (proto[vi].repeatedpacked) {
                                     case "int32":
                                     case "int64":
                                         if (v <= 0xffffffff) {
@@ -291,18 +307,77 @@ export function encode(name, data)
             const buf = encode(p.proto, v);
             d = tag(p.id, 2) + varint(length(buf)) + buf;
         }
-        else if (p.repeatedproto) {
+        else if (p.repeatedunpacked) {
             d = "";
             for (let i = 0; i < length(v); i++) {
-                const buf = encode(p.repeatedproto, v[i]);
-                d += tag(p.id, 2) + varint(length(buf)) + buf;
+                const vi = v[i];
+                if (type(vi) === "string") {
+                    let buf = null;
+                    switch (p.repeatedunpacked) {
+                        case "bytes":
+                        case "string":
+                            buf = vi;
+                            break;
+                        default:
+                            buf = encode(p.repeatedunpacked, vi);
+                            break;
+                    }
+                    if (buf !== null) {
+                        d += tag(p.id, 2) + varint(length(buf)) + buf;
+                    }
+                }
+                else {
+                    switch (p.repeatedunpacked) {
+                        case "varint":
+                        case "uint32":
+                        case "uint64":
+                        case "int32":
+                        case "int64":
+                        case "enum":
+                            d += tag(p.id, 0) + varint(vi);
+                            break;
+                        case "bool":
+                            d += tag(p.id, 0) + varint(vi ? 1 : 0);
+                            break;
+                        case "sint32":
+                        case "sint64":
+                            if (v >= 0) {
+                                v <<= 1;
+                            }
+                            else {
+                                v = (math.abs(vi) << 1) - 1;
+                            }
+                            d += tag(p.id, 0) + varint(vi);
+                            break;
+                        case "float":
+                            d += tag(p.id, 5) + struct.pack("<f", vi);
+                            break;
+                        case "double":
+                            d += tag(p.id, 1) + struct.pack("<d", vi);
+                            break;
+                        case "fixed32":
+                            d += tag(p.id, 5) + struct.pack("<I", vi);
+                            break;
+                        case "sfixed32":
+                            d += tag(p.id, 5) + struct.pack("<i", vi);
+                            break;
+                        case "fixed64":
+                            d += tag(p.id, 5) + struct.pack("<Q", vi);
+                            break;
+                        case "sfixed64":
+                            d += tag(p.id, 1) + struct.pack("<q", vi);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
-        else if (p.repeated) {
+        else if (p.repeatedpacked) {
             d = "";
             for (let i = 0; i < length(v); i++) {
                 let vi = v[i];
-                switch (p.repeated) {
+                switch (p.repeatedpaced) {
                     case "varint":
                     case "uint32":
                     case "uint64":
