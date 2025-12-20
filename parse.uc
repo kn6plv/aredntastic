@@ -1,5 +1,5 @@
 import * as struct from "struct";
-import * as digest from "digest";
+import * as sha256 from "sha256";
 import * as protobuf from "protobuf";
 import * as crypto from "crypto";
 import * as channel from "channel";
@@ -184,7 +184,7 @@ export function decodePacket(pkt)
         const toprivate = node.toMe(msg) ? node.getInfo().private_key : platform.getTarget(msg.to)?.key;
         if (frompublic && toprivate) {
             const sharedkey = crypto.getSharedKey(toprivate, crypto.stringToPKey(frompublic));
-            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(sharedkey)));
+            const hash = struct.unpack("32B", struct.pack("X", sha256.sha256(sharedkey)));
             const ciphertext = substr(msg.encrypted, 0, -12);
             const auth = substr(msg.encrypted, -12, 8);
             const xnonce = substr(msg.encrypted, -4);
@@ -230,7 +230,7 @@ export function encodePacket(msg)
         const fromprivate = node.fromMe(msg) ? node.getInfo().private_key : platform.getTarget(msg.from)?.key;
         if (topublic && fromprivate) {
             const sharedkey = crypto.getSharedKey(fromprivate, crypto.stringToPKey(topublic));
-            const hash = struct.unpack("32B", struct.pack("X", digest.sha256(sharedkey)));
+            const hash = struct.unpack("32B", struct.pack("X", sha256.sha256(sharedkey)));
             const xnonce = struct.pack("4B", math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255);
             msg.encrypted = crypto.encryptCCM(msg.from, msg.id, hash, msg.decoded, xnonce, 8) + xnonce;
             delete msg.decoded;
