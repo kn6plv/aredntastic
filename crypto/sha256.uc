@@ -11,7 +11,7 @@ function rightShift(value, amount)
 	return (((value >> 1) & 0x7fffffff) >> (amount - 1));
 }
 
-export function sha256(data)
+export function hash(data)
 {
 	const maxWord = 0x100000000;
 	const words = [];
@@ -77,12 +77,12 @@ export function sha256(data)
 		}
 	}
 
-	let result = "";
+	const aresult = [];
 	for (let i = 0; i < 8; i++) {
 		for (let j = 3; j + 1; j--) {
 			const b = (hash[i] >> (j * 8)) & 255;
-			result += sprintf("%02x", b);
+			push(aresult, b);
 		}
 	}
-	return result;
+	return aresult;
 };
