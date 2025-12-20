@@ -1,6 +1,6 @@
 import * as struct from "struct";
 import * as math from "math";
-import * as crypto from "crypto";
+import * as crypto from "crypto.crypto";
 
 const LOCATION_PRECISION = 16;
 

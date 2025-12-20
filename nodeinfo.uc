@@ -5,7 +5,7 @@ import * as nodedb from "nodedb";
 import * as timers from "timers";
 import * as parse from "parse";
 import * as textmessage from "textmessage";
-import * as crypto from "crypto";
+import * as crypto from "crypto.crypto";
 
 const PRIVATE_HW = 255;
 const DEFAULT_INTERVAL = 3 * 60 * 60;

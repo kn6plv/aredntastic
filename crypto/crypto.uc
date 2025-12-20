@@ -1,7 +1,8 @@
 import * as struct from "struct";
 import * as math from "math";
-import * as aes from "crypto.aes";
-import * as x25519 from "crypto.x25519";
+import * as aes from "aes";
+import * as x25519 from "x25519";
+import * as sha256 from "sha256";
 
 export function decryptCTR(from, id, key, encrypted)
 {
@@ -174,6 +175,11 @@ export function getSharedKey(myprivatekey, theirpublickey)
         str += chr(v & 255, (v >> 8) & 255);
     }
     return str;
+};
+
+export function hash(data)
+{
+    return sha256.hash(data);
 };
 
 export function pKeyToString(key)

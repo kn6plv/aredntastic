@@ -2,7 +2,6 @@ import * as math from "math";
 import * as node from "node";
 import * as channel from "channel";
 import * as parse from "parse";
-import * as crypto from "crypto";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const DEFAULT_HOPS = 5;
