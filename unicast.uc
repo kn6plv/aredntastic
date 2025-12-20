@@ -26,14 +26,15 @@ export function recv()
 
 export function send(to, data)
 {
-    const address = platform.getInstance(to);
-    if (to === node.BROADCAST || !address) {
+    const targets = platform.getAllTargets();
+    const target = to === node.BROADCAST ? null : filter(targets, i => i.id === to)[0];
+    if (!target) {
         const mid = node.id();
-        const instances = platform.getAllInstances();
-        for (let id in instances) {
-            if (id !== mid) {
+        for (let i = 0; i < length(targets); i++) {
+            const target = targets[i];
+            if (target.id !== mid) {
                 const r = s.send(data, 0, {
-                    address: instances[id].ip,
+                    address: target.ip,
                     port: PORT
                 });
                 if (r == null) {
@@ -44,7 +45,7 @@ export function send(to, data)
     }
     else {
         const r = s.send(data, 0, {
-            address: address.ip,
+            address: target.ip,
             port: PORT
         });
         if (r == null) {

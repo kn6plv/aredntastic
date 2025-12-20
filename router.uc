@@ -46,7 +46,7 @@ export function process()
                 unicast.send(msg.to, sprintf("%J", msg));
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
-                if (node.isBroadcast(msg) || !platform.getAllInstances()[node.to]) {
+                if (node.isBroadcast(msg) || !platform.getTarget(node.to)) {
                     msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
                     const pkt = parse.encodePacket(msg);
                     if (pkt) {

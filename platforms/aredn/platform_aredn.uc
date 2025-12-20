@@ -9,12 +9,12 @@ const pubID = "KN6PLV.AREDNtastic.v1.1";
 const pubTopic = "KN6PLV.AREDNtastic.v1";
 
 const ucdata = {};
-let id2address = {};
+let published = {};
 
 /* export */ function setup()
 {
-    fs.mkdir("/etc/aredntastic.d/");
-    fs.mkdir("/tmp/aredntastic.d/");
+    fs.mkdir("/etc/aredntastic/");
+    fs.mkdir("/tmp/aredntastic/");
 
     const c = uci.cursor();
     ucdata.latitide = c.get("aredn", "@location[0]", "lat");
@@ -32,9 +32,9 @@ function path(name)
 {
     switch (name) {
         case "node":
-            return `/etc/aredntastic.d/${node}.json`;
+            return `/etc/aredntastic/${node}.json`;
         default:
-            return `/tmp/aredntastic.d/${name}.json`;
+            return `/tmp/aredntastic/${name}.json`;
     }
 }
 
@@ -60,14 +60,14 @@ function path(name)
     return all;
 }
 
-/* export */ function getAllInstances()
+/* export */ function getAllTargets()
 {
-    return id2address;
+    return published;
 }
 
-/* export */ function getInstance(id)
+/* export */ function getTarget(id)
 {
-    return id2address[id];
+    return filter(published, i => i.id === id)[0];
 }
 
 /* export */ function getLocation()
@@ -84,7 +84,7 @@ function path(name)
 
 /* export */ function publish(me)
 {
-    services.publish(pubID, pubTopic, { ip: ucdata.main_ip, role: me.role, key: me.private_key });
+    services.publish(pubID, pubTopic, { id: me.id(), ip: ucdata.main_ip, role: me.role, key: me.private_key });
     function unpublish()
     {
         services.unpublish(pubID);
@@ -97,15 +97,7 @@ function path(name)
 /* export */ function tick()
 {
     if (timers.tick("aredn")) {
-        const ilist = {};
-        const published = services.published(pubTopic);
-        for (let i = 0; i < length(published); i++) {
-            const data = published[i];
-            if (data.ip) {
-                ilist[record.id] = { ip: data.ip, role: data.role, private_key: data.key };
-            }
-        }
-        id2address = ilist;
+        published = services.published(pubTopic);
     }
 }
 
@@ -118,8 +110,8 @@ return {
     load,
     store,
     fetch,
-    getAllInstances,
-    getInstance,
+    getAllTargets,
+    getTarget,
     getLocation,
     getMulticastDeviceIP,
     publish,
