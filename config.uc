@@ -22,13 +22,13 @@ export function setup()
     const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/aredntastic.conf`));
 
     if (config.debug) {
-        global.dprintf = function(a, b, c, d, e)
+        global.DEBUG = function(...a)
         {
-            printf(a, b, c, d, e);
+            printf(...a);
         };
     }
     else {
-        global.dprintf = function(){};
+        global.DEBUG = function(){};
     }
 
     switch (config.platform?.type) {

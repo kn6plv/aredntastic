@@ -15,8 +15,9 @@ let bynamekey = {};
 let byid = {};
 let forwarders = [];
 let myid;
+let unicastEnabled = false;
 
-/* export */ function setup()
+/* export */ function setup(config)
 {
     fs.mkdir("/etc/aredntastic/");
     fs.mkdir("/tmp/aredntastic/");
@@ -29,6 +30,10 @@ let myid;
     const cm = uci.cursor("/etc/config.mesh");
     ucdata.main_ip = cm.get("setup", "globals", "wifi_ip");
     ucdata.lan_ip = cm.get("setup", "globals", "dmz_lan_ip");
+
+    if (config.unicast) {
+        unicastEnabled = true;
+    }
 
     timers.setInterval("aredn", 1 * 60);
 }
@@ -118,6 +123,9 @@ function path(name)
 
 /* export */ function publish(me, channels)
 {
+    if (!unicastEnabled) {
+        return;
+    }
     myid = me.id;
     services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: me.private_key, channels: map(channels, c => c.namekey) });
     function unpublish()

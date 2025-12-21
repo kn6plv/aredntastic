@@ -22,7 +22,7 @@ export function process()
     while (length(q) > 0) {
         const msg = shift(q);
 
-        dprintf("%.2J\n", msg);
+        DEBUG("%.2J\n", msg);
 
         // Give each app a chance at the message
         for (let i = 0; i < length(apps); i++) {
@@ -77,26 +77,41 @@ export function tick()
         apps[i].tick();
     }
     process();
+    const sockets = [];
     const us = unicast.handle();
-    const ms = multicast.handle();
-    const v = ms ?
-        socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ], [ ms, socket.POLLIN ]) :
-        socket.poll(timers.minTimeout(60) * 1000, [ us, socket.POLLIN ]);
-    if (v[0][1]) {
-            const pkt = unicast.recv();
-            try {
-                const msg = json(pkt);
-                msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                queue(msg);
-            }
-            catch (_) {
-            }
+    if (us) {
+        push(sockets, [ us, socket.POLLIN, "unicast" ]);
     }
-    if (v[1] && v[1][1]) {
-        const msg = parse.decodePacket(multicast.recv());
-        if (msg) {
-            msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
-            queue(msg);
+    const ms = multicast.handle();
+    if (ms) {
+        push(sockets, [ ms, socket.POLLIN, "multicast" ])
+    }
+    const v = socket.poll(timers.minTimeout(60) * 1000, ...sockets);
+    for (let i = 0; i < length(v); i++) {
+        if (v[i] && v[i][1]) {
+            switch (v[i][2]) {
+                case "unicast":
+                    try {
+                        const msg = json(unicast.recv());
+                        msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
+                        queue(msg);
+                    }
+                    catch (_) {
+                    }
+                    break;
+                case "multicast":
+                    try {
+                        const msg = parse.decodePacket(multicast.recv());
+                        if (msg) {
+                            msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
+                            queue(msg);
+                        }
+                    }
+                    catch (_)
+                    {
+                    }
+                    break;
+            }
         }
     }
 };

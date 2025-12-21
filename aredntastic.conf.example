@@ -5,6 +5,7 @@
     "multicast": {
         "address": "192.168.51.113"
     },
+    "unicast": {},
     "location": {
         "latitude": 37.888,
         "longitude": -122.268,

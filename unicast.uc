@@ -4,8 +4,11 @@ const PORT = 4404;
 
 let s = null;
 
-export function setup()
+export function setup(config)
 {
+    if (!config.unicast) {
+        return;
+    }
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
     s.bind({
         port: PORT
