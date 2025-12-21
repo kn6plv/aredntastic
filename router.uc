@@ -87,9 +87,6 @@ export function tick()
             try {
                 const msg = json(pkt);
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                if (msg.namekey) {
-                    channel.addMessageNameKey(msg.namekey);
-                }
                 queue(msg);
             }
             catch (_) {

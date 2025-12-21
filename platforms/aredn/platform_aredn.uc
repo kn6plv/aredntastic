@@ -3,6 +3,7 @@ import * as timers from "timers";
 import * as uci from "uci";
 import * as services from "aredn.services";
 import * as node from "node";
+import * as channel from "channel";
 
 const CURL = "/usr/bin/curl";
 
@@ -143,7 +144,11 @@ function path(name)
                 const nchannels = {};
                 for (let j = 0; j < length(service.channels); j++) {
                     const namekey = service.channels[j];
-                    pushd(bynamekey[namekey] || (bynamekey[namekey] = []), service);
+                    if (!bynamekey[namekey]) {
+                        bynamekey[namekey] = [];
+                        channel.addMessageNameKey(namekey);
+                    }
+                    pushd(bynamekey[namekey], service);
                     nchannels[namekey] = true;
                 }
                 service.channels = nchannels;
