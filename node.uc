@@ -57,9 +57,9 @@ export function isPrivate(msg)
     return msg.namekey === "Private Private";
 };
 
-export function canForward()
+export function canRoleForward(role)
 {
-    switch (me.role) {
+    switch (role) {
         case ROLE_CLIENT_MUTE:
         case ROLE_CLIENT_HIDDEN:
         case ROLE_TRACKER:
@@ -69,6 +69,11 @@ export function canForward()
         default:
             return true;
     }
+};
+
+export function canForward()
+{
+    return canRoleForward(me.role);
 };
 
 function save()

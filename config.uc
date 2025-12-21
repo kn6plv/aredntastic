@@ -47,8 +47,6 @@ export function setup()
     multicast.setup(config);
     node.setup(config);
 
-    platform.publish();
-
     nodeinfo.setup(config);
     router.registerApp(nodeinfo);
     textmessage.setup(config);
@@ -90,6 +88,8 @@ export function setup()
             channel.setChannel(name, channels[name]);
         }
     }
+
+    platform.publish(node.getInfo(), channel.getAllChannels());
 };
 
 export function tick()

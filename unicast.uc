@@ -1,5 +1,4 @@
 import * as socket from "socket";
-import * as node from "node";
 
 const PORT = 4404;
 
@@ -24,32 +23,16 @@ export function recv()
     return s.recvmsg(65535).data;
 };
 
-export function send(to, data)
+export function send(to, namekey, data)
 {
-    const targets = platform.getAllTargets();
-    const target = to === node.BROADCAST ? null : filter(targets, i => i.id === to)[0];
-    if (!target) {
-        const mid = node.id();
-        for (let i = 0; i < length(targets); i++) {
-            const target = targets[i];
-            if (target.id !== mid) {
-                const r = s.send(data, 0, {
-                    address: target.ip,
-                    port: PORT
-                });
-                if (r == null) {
-                    print(socket.error(), "\n");
-                }
-            }
-        }
-    }
-    else {
+    const targets = platform.getTargetsByIdAndNamekey(to, namekey);
+    for (let i = 0; i < length(targets); i++) {
         const r = s.send(data, 0, {
-            address: target.ip,
+            address: targets[i].ip,
             port: PORT
         });
-        if (r == null) {
-            print(socket.error(), "\n");
+        if (r === null) {
+            printf("unicast:send error: %s\n", socket.error());
         }
     }
 };

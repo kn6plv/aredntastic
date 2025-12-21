@@ -38,12 +38,12 @@ let rootdir = "/tmp/aredntastic";
     return all;
 }
 
-/* export */ function getAllTargets()
+/* export */ function getTargetsByIdAndNamekey()
 {
     return [];
 }
 
-/* export */ function getTarget(id)
+/* export */ function getTargetById(id)
 {
     return null;
 }
@@ -76,8 +76,8 @@ return {
     load,
     store,
     fetch,
-    getAllTargets,
-    getTarget,
+    getTargetsByIdAndNamekey,
+    getTargetById,
     getLocation,
     getMulticastDeviceIP,
     publish,

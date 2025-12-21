@@ -68,11 +68,7 @@ export function hash(data)
 			const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
 				+ ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2])); // maj
 
-			const ohash = hash;
-			hash = [0xffffffff & (temp1 + temp2) | 0];
-			for (let h = 0; h < 7; h++) {
-				push(hash, ohash[h]);
-			}
+			hash = [0xffffffff & (temp1 + temp2) | 0, ...hash];
 			hash[4] = (hash[4] + temp1) | 0;
 		}
 
@@ -81,12 +77,14 @@ export function hash(data)
 		}
 	}
 
-	const aresult = [];
-	for (let i = 0; i < 8; i++) {
-		for (let j = 3; j + 1; j--) {
-			const b = (hash[i] >> (j * 8)) & 255;
-			push(aresult, b);
-		}
-	}
-	return aresult;
+	return [
+		(hash[0] >> 24) & 255, (hash[0] >> 16) & 255, (hash[0] >> 8) & 255, hash[0] & 255,
+		(hash[1] >> 24) & 255, (hash[1] >> 16) & 255, (hash[1] >> 8) & 255, hash[1] & 255,
+		(hash[2] >> 24) & 255, (hash[2] >> 16) & 255, (hash[2] >> 8) & 255, hash[2] & 255,
+		(hash[3] >> 24) & 255, (hash[3] >> 16) & 255, (hash[3] >> 8) & 255, hash[3] & 255,
+		(hash[4] >> 24) & 255, (hash[4] >> 16) & 255, (hash[4] >> 8) & 255, hash[4] & 255,
+		(hash[5] >> 24) & 255, (hash[5] >> 16) & 255, (hash[5] >> 8) & 255, hash[5] & 255,
+		(hash[6] >> 24) & 255, (hash[6] >> 16) & 255, (hash[6] >> 8) & 255, hash[6] & 255,
+		(hash[7] >> 24) & 255, (hash[7] >> 16) & 255, (hash[7] >> 8) & 255, hash[7] & 255
+	];
 };

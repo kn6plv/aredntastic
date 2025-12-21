@@ -102,3 +102,8 @@ export function getChannelByNameKey(namekey)
     }
     return channelByNameKey[namekey];
 };
+
+export function getAllChannels()
+{
+    return values(channelByName);
+};

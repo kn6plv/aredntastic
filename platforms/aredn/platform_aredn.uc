@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as timers from "timers";
 import * as uci from "uci";
 import * as services from "aredn.services";
+import * as node from "node";
 
 const CURL = "/usr/bin/curl";
 
@@ -9,7 +10,10 @@ const pubID = "KN6PLV.AREDNtastic.v1.1";
 const pubTopic = "KN6PLV.AREDNtastic.v1";
 
 const ucdata = {};
-let published = {};
+let bynamekey = {};
+let byid = {};
+let forwarders = [];
+let myid;
 
 /* export */ function setup()
 {
@@ -32,7 +36,7 @@ function path(name)
 {
     switch (name) {
         case "node":
-            return `/etc/aredntastic/${node}.json`;
+            return `/etc/aredntastic/${name}.json`;
         default:
             return `/tmp/aredntastic/${name}.json`;
     }
@@ -60,14 +64,43 @@ function path(name)
     return all;
 }
 
-/* export */ function getAllTargets()
+/* export */ function getTargetsByIdAndNamekey(id, namekey)
 {
-    return published;
+    if (id === node.BROADCAST) {
+        const services = bynamekey[namekey];
+        if (services) {
+            const targets = slice(services);
+            for (let i = 0; i < length(forwarders); i++) {
+                const forwarder = forwarders[i];
+                if (!forwarder.channels[namekey]) {
+                    push(targets, forwarder);
+                }
+            }
+            return targets;
+        }
+        else {
+            return forwarders;
+        }
+    }
+    else {
+        const target = byid[id];
+        if (target) {
+            if (target.channels[namekey]) {
+                return [ target ];
+            }
+            else {
+                return [];
+            }
+        }
+        else {
+            return forwarders;
+        }
+    }
 }
 
-/* export */ function getTarget(id)
+/* export */ function getTargetById(id)
 {
-    return filter(published, i => i.id === id)[0];
+    return byid[id];
 }
 
 /* export */ function getLocation()
@@ -82,12 +115,14 @@ function path(name)
     return ucdata.lan_ip;
 }
 
-/* export */ function publish(me)
+/* export */ function publish(me, channels)
 {
-    services.publish(pubID, pubTopic, { id: me.id(), ip: ucdata.main_ip, role: me.role, key: me.private_key });
+    myid = me.id;
+    services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: me.private_key, channels: map(channels, c => c.namekey) });
     function unpublish()
     {
         services.unpublish(pubID);
+        exit(0);
     }
     signal("SIGHUP", unpublish);
     signal("SIGINT", unpublish);
@@ -97,7 +132,26 @@ function path(name)
 /* export */ function tick()
 {
     if (timers.tick("aredn")) {
-        published = services.published(pubTopic);
+        const published = services.published(pubTopic);
+        byid = {};
+        bynamekey = {};
+        forwarders = [];
+        for (let i = 0; i < length(published); i++) {
+            const service = published[i];
+            if (service.id !== myid) {
+                byid[service.id] = service;
+                const nchannels = {};
+                for (let j = 0; j < length(service.channels); j++) {
+                    const namekey = service.channels[j];
+                    pushd(bynamekey[namekey] || (bynamekey[namekey] = []), service);
+                    nchannels[namekey] = true;
+                }
+                service.channels = nchannels;
+                if (node.canRoleForward(service.role)) {
+                    push(forwarders, service);
+                }
+            }
+        }
     }
 }
 
@@ -110,8 +164,8 @@ return {
     load,
     store,
     fetch,
-    getAllTargets,
-    getTarget,
+    getTargetsByIdAndNamekey,
+    getTargetById,
     getLocation,
     getMulticastDeviceIP,
     publish,
