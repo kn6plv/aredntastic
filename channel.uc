@@ -59,7 +59,7 @@ export function addMessageNameKey(namekey)
     return chan;
 };
 
-export function setChannel(name, key)
+function setChannel(name, key)
 {
     name = substr(replace(name, /[ \t\r\n]/g, ""), 0, MAX_NAME_LENGTH);
     const chan = addMessageNameKey(`${name} ${key}`);
@@ -106,4 +106,28 @@ export function getChannelByNameKey(namekey)
 export function getAllChannels()
 {
     return values(channelByName);
+};
+
+export function setup(config)
+{
+    if (!config.preset) {
+        print("No preset\n");
+    }
+    else {
+        setChannel(config.preset, "AQ==");
+    }
+    const channels = config.channels?.shared;
+    if (channels) {
+        for (let name in channels) {
+            setChannel(name, channels[name]);
+        }
+    }
+};
+
+export function tick()
+{
+};
+
+export function process(msg)
+{
 };

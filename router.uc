@@ -36,7 +36,7 @@ export function process()
                     return;
                 }
                 msg.hop_limit--;
-                if (msg.hop_limit <= 0) {
+                if (msg.hop_limit < 0) {
                     return;
                 }
             }

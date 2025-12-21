@@ -8,6 +8,7 @@ import * as multicast from "multicast";
 import * as nodeinfo from "nodeinfo";
 import * as textmessage from "textmessage";
 import * as position from "position";
+import * as favorite from "favorite";
 import * as storeandforward from "storeandforward";
 import * as neighborinfo from "neighborinfo";
 import * as traceroute from "traceroute";
@@ -61,6 +62,8 @@ export function setup()
     router.registerApp(neighborinfo);
     storeandforward.setup(config);
     router.registerApp(storeandforward);
+    channel.setup(config);
+    router.registerApp(channel);
 
     if (config.telemetry?.environmental) {
         switch (config.telemetry.environmental.type) {
@@ -77,17 +80,8 @@ export function setup()
     power.setup(config);
     router.registerApp(power);
 
-    if (!config.preset) {
-        print("No preset\n");
-        exit(-1);
-    }
-    channel.setChannel(config.preset, "AQ==");
-    const channels = config.channels?.shared;
-    if (channels) {
-        for (let name in channels) {
-            channel.setChannel(name, channels[name]);
-        }
-    }
+    favorite.setup(config);
+    router.registerApp(favorite);
 
     platform.publish(node.getInfo(), channel.getAllChannels());
 };
