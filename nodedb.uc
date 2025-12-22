@@ -16,11 +16,6 @@ function saveNode(node)
     platform.store("nodedb", nodedb);
 }
 
-function isdiff(a, b)
-{
-    return sprintf("%J", a) != sprintf("%J", b);
-}
-
 export function createNode(id)
 {
     if (!nodedb[id]) {
@@ -31,37 +26,29 @@ export function createNode(id)
 export function updateNodeinfo(id, nodeinfo)
 {
     const node = getNode(id);
-    if (isdiff(node.nodeinfo, nodeinfo)) {
-        node.nodeinfo = nodeinfo;
-        saveNode(node);
-    }
+    node.nodeinfo = nodeinfo;
+    saveNode(node);
 };
 
 export function updatePosition(id, position)
 {
     const node = getNode(id);
-    if (isdiff(node.position, position)) {
-        node.position = position;
-        saveNode(node);
-    }
+    node.position = position;
+    saveNode(node);
 };
 
 export function updateDeviceMetrics(id, metrics)
 {
     const node = getNode(id);
     const telemetry = node.telemetry ?? (node.telemetry = {});
-    if (isdiff(telemetry.device_metrics, metrics)) {
-        telemetry.device_metrics = metrics;  
-        saveNode(node);
-    }
+    telemetry.device_metrics = metrics;  
+    saveNode(node);
 };
 
 export function updateEnvironmentMetrics(id, metrics)
 {
     const node = getNode(id);
     const telemetry = node.telemetry ?? (node.telemetry = {});
-    if (isdiff(telemetry.environment_metrics, metrics)) {
-        telemetry.environment_metrics = metrics;  
-        saveNode(node);
-    }
+    telemetry.environment_metrics = metrics;  
+    saveNode(node);
 };
