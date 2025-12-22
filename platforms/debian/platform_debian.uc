@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-let rootdir = "/tmp/meshchatter";
+let rootdir = "/tmp/raven";
 
 /* export */ function setup(config)
 {

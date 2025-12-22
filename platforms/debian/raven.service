@@ -1,12 +1,12 @@
 [Unit]
-Description=Meshchatter
+Description=raven
 Wants=network-online.target
 After=network-online.targe
 
 [Service]
 Type=simple
 StandardOutput=journal
-ExecStart=/root/meshchatter/main.uc
+ExecStart=/root/raven/main.uc
 
 [Install]
 WantedBy=default.target

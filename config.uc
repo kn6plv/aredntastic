@@ -20,7 +20,7 @@ export function setup()
 {
     push(REQUIRE_SEARCH_PATH, `${fs.dirname(SCRIPT_NAME)}/*.uc`);
 
-    const config = json(fs.readfile("/etc/meshchatter.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/meshchatter.conf`));
+    const config = json(fs.readfile("/etc/raven.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`));
 
     if (config.debug) {
         global.DEBUG = function(...a)

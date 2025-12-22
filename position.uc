@@ -5,7 +5,6 @@ import * as nodedb from "nodedb";
 import * as node from "node";
 import * as parse from "parse";
 
-const LOCATION_SOURCE_MANUAL = 1;
 const DEFAULT_INTERVAL = 60 * 60;
 
 parse.registerProto(
@@ -52,7 +51,7 @@ function position(precise)
         longitude_i: int(loc.lon * 10000000),
         altitude: int(loc.alt),
         time: time(),
-        location_source: LOCATION_SOURCE_MANUAL,
+        location_source: loc.source,
         precision_bits: loc.precision
     };
 }

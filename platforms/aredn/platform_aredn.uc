@@ -7,8 +7,10 @@ import * as channel from "channel";
 
 const CURL = "/usr/bin/curl";
 
-const pubID = "KN6PLV.meshchatter.v1.1";
-const pubTopic = "KN6PLV.meshchatter.v1";
+const pubID = "KN6PLV.raven.v1.1";
+const pubTopic = "KN6PLV.raven.v1";
+
+const LOCATION_SOURCE_INTERNAL = 2;
 
 const ucdata = {};
 let bynamekey = {};
@@ -19,8 +21,8 @@ let unicastEnabled = false;
 
 /* export */ function setup(config)
 {
-    fs.mkdir("/etc/meshchatter/");
-    fs.mkdir("/tmp/meshchatter/");
+    fs.mkdir("/etc/raven/");
+    fs.mkdir("/tmp/raven/");
 
     const c = uci.cursor();
     ucdata.latitide = c.get("aredn", "@location[0]", "lat");
@@ -54,6 +56,9 @@ let unicastEnabled = false;
     if (location.precision === null) {
         location.precision = 0;
     }
+    if (location.source === null && fs.readfile("/tmp/timesync") === "gps") {
+        location.source = LOCATION_SOURCE_INTERNAL;
+    }
 
     if (config.multicast && config.multicast?.address === null) {
         config.multicast.address = ucdata.lan_ip;
@@ -78,9 +83,9 @@ function path(name)
 {
     switch (name) {
         case "node":
-            return `/etc/meshchatter/${name}.json`;
+            return `/etc/raven/${name}.json`;
         default:
-            return `/tmp/meshchatter/${name}.json`;
+            return `/tmp/raven/${name}.json`;
     }
 }
 

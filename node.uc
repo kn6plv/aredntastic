@@ -3,6 +3,7 @@ import * as math from "math";
 import * as crypto from "crypto.crypto";
 
 const LOCATION_PRECISION = 16;
+const LOCATION_SOURCE_MANUAL = 1;
 
 const MAX_SHORT_NAME_LENGTH = 4;
 const MAX_LONG_NAME_LENGTH = 36;
@@ -129,13 +130,16 @@ export function setup(config)
             lat: me.lat,
             lon: me.lon,
             alt: me.alt,
-            precision: 32
+            precision: 32,
+            source: location.source ?? LOCATION_SOURCE_MANUAL
+
         };
         fuzzyLocation = {
             lat: maskLoc(me.lat),
             lon: maskLoc(me.lon),
             alt: me.alt,
-            precision: me.precision
+            precision: me.precision,
+            source: location.source ?? LOCATION_SOURCE_MANUAL
         };
     }
     if (config?.long_name) {
@@ -146,7 +150,12 @@ export function setup(config)
     }
     switch (config?.role) {
         case "client":
-            me.role = ROLE_CLIENT;
+            if (config.unicast && config.mulicast) {
+                me.role = ROLE_CLIENT;
+            }
+            else {
+                me.role = ROLE_CLIENT_MUTE;
+            }
             break;
         case "client_mute":
             me.role = ROLE_CLIENT_MUTE;
