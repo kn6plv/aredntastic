@@ -7,8 +7,8 @@ import * as channel from "channel";
 
 const CURL = "/usr/bin/curl";
 
-const pubID = "KN6PLV.AREDNtastic.v1.1";
-const pubTopic = "KN6PLV.AREDNtastic.v1";
+const pubID = "KN6PLV.meshchatter.v1.1";
+const pubTopic = "KN6PLV.meshchatter.v1";
 
 const ucdata = {};
 let bynamekey = {};
@@ -19,8 +19,8 @@ let unicastEnabled = false;
 
 /* export */ function setup(config)
 {
-    fs.mkdir("/etc/aredntastic/");
-    fs.mkdir("/tmp/aredntastic/");
+    fs.mkdir("/etc/meshchatter/");
+    fs.mkdir("/tmp/meshchatter/");
 
     const c = uci.cursor();
     ucdata.latitide = c.get("aredn", "@location[0]", "lat");
@@ -42,9 +42,9 @@ function path(name)
 {
     switch (name) {
         case "node":
-            return `/etc/aredntastic/${name}.json`;
+            return `/etc/meshchatter/${name}.json`;
         default:
-            return `/tmp/aredntastic/${name}.json`;
+            return `/tmp/meshchatter/${name}.json`;
     }
 }
 

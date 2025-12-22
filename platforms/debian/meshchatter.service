@@ -1,12 +1,12 @@
 [Unit]
-Description=AREDNtastic
+Description=Meshchatter
 Wants=network-online.target
 After=network-online.targe
 
 [Service]
 Type=simple
 StandardOutput=journal
-ExecStart=/root/aredntastic/main.uc
+ExecStart=/root/meshchatter/main.uc
 
 [Install]
 WantedBy=default.target

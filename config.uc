@@ -20,7 +20,7 @@ export function setup()
 {
     push(REQUIRE_SEARCH_PATH, `${fs.dirname(SCRIPT_NAME)}/*.uc`);
 
-    const config = json(fs.readfile("/etc/aredntastic.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/aredntastic.conf`));
+    const config = json(fs.readfile("/etc/meshchatter.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/meshchatter.conf`));
 
     if (config.debug) {
         global.DEBUG = function(...a)
