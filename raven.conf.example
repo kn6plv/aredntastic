@@ -16,6 +16,7 @@
         "type": "debian",
         "store": "/tmp/at"
     },
+    "maxhops": 7,
     "messages": {},
     "channels": {
         "AREDN": "og=="

@@ -34,6 +34,9 @@ let unicastEnabled = false;
     ucdata.main_ip = cm.get("setup", "globals", "wifi_ip");
     ucdata.lan_ip = cm.get("setup", "globals", "dmz_lan_ip");
 
+    const cu = uci.cursor("/etc/local/uci");
+    ucdata.macaddress = map(split(cu.get("hsmmmesh", "settings", "wifimac"), ":"), v => hex(v));
+
     if (config.unicast) {
         unicastEnabled = true;
     }
@@ -76,6 +79,10 @@ let unicastEnabled = false;
     }
     if (config.short_name === null) {
         config.short_name = substr(split(ucdata.hostname, "-", 2)[0], -4);
+    }
+
+    if (config.macaddress === null) {
+        config.macaddress = ucdata.macaddress;
     }
 }
 

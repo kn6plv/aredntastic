@@ -22,9 +22,12 @@ export const ROLE_TAK_TRACKER = 10;
 export const ROLE_ROUTER_LATE = 11;
 export const ROLE_CLIENT_BASE = 12;
 
+const DEFAULT_HOPS = 5;
+
 let me = null;
 let fuzzyLocation = null;
 let preciseLocation = null;
+let maxHops = DEFAULT_HOPS;
 
 export const BROADCAST = 0xffffffff;
 
@@ -77,20 +80,23 @@ export function canForward()
     return canRoleForward(me.role);
 };
 
+export function hopLimit()
+{
+    return maxHops;
+};
+
 function save()
 {
     platform.store("node", me);
 };
 
-function createNode()
+function createNode(config)
 {
-    const id = [
-        math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255
-    ];
+    const id = config.macaddress ?? [ math.rand(255), math.rand(255), math.rand(255), math.rand(255), math.rand(255), math.rand(255) ];
     const keypair = crypto.generateKeyPair();
     me = {
         id: (id[2] << 24) + (id[3] << 16) + (id[4] << 8) + id[5],
-        long_name: sprintf("Meshtastic %02x%02x", id[4], id[5]),
+        long_name: sprintf("Raven %02x%02x", id[4], id[5]),
         short_name: sprintf("%02x%02x", id[4], id[5]),
         macaddr: struct.pack("6B", id[0], id[1], id[2], id[3], id[4], id[5]),
         private_key: keypair.private,
@@ -119,7 +125,7 @@ function maskLoc(v, p)
 
 export function setup(config)
 {
-    me = platform.load("node") ?? createNode();
+    me = platform.load("node") ?? createNode(config);
     const location = config.location;
     if (location) {
         me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision ?? 0));
@@ -164,6 +170,7 @@ export function setup(config)
             print(`Unknown role: ${config?.role}\n`);
             break;
     }
+    maxHops = config.maxhops || DEFAULT_HOPS;
     save();
 };
 

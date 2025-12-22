@@ -4,7 +4,6 @@ import * as channel from "channel";
 import * as parse from "parse";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
-const DEFAULT_HOPS = 5;
 const DEFAULT_PRIORITY = 64;
 const ACK_PRIORITY = 120;
 const BITFIELD_MQTT_OKAY = 1;
@@ -34,6 +33,7 @@ export function createMessage(to, from, namekey, type, payload, extra)
 {
     const chan = channel.getChannelByNameKey(namekey);
     const fid = from ?? node.id(); // From me by default;
+    const hops = node.hopLimit();
     const msg = {
         from: fid,
         to: to ?? node.BROADCAST,
@@ -42,10 +42,10 @@ export function createMessage(to, from, namekey, type, payload, extra)
         id: math.rand(),
         rx_time: time(),
         rx_snr: 0,
-        hop_limit: DEFAULT_HOPS,
+        hop_limit: hops,
         priority: DEFAULT_PRIORITY,
         rx_rssi: 0,
-        hop_start: DEFAULT_HOPS,
+        hop_start: hops,
         relay_node: fid & 255,
         transport_mechanism: TRANSPORT_MECHANISM_MULTICAST_UDP,
         data: {
