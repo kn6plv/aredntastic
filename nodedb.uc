@@ -12,6 +12,7 @@ export function getNode(id, create)
 function saveNode(node)
 {
     nodedb[node.id] = node;
+    node.lastseen = time();
     platform.store("nodedb", nodedb);
 }
 
