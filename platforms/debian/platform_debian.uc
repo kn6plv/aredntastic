@@ -16,6 +16,10 @@ let rootdir = "/tmp/meshchatter";
     mkdirp(rootdir);
 }
 
+/* export */ function mergePlatformConfig(config)
+{
+}
+
 /* export */ function load(name)
 {
     const data = fs.readfile(`${rootdir}/${name}.json`);
@@ -48,17 +52,6 @@ let rootdir = "/tmp/meshchatter";
     return null;
 }
 
-/* export */ function getLocation()
-{
-    print("Location not set\n");
-    return null;
-}
-
-/* export */ function getMulticastDeviceIP()
-{
-    return null;
-}
-
 /* export */ function publish()
 {
 }
@@ -73,13 +66,12 @@ let rootdir = "/tmp/meshchatter";
 
 return {
     setup,
+    mergePlatformConfig,
     load,
     store,
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,
-    getLocation,
-    getMulticastDeviceIP,
     publish,
     tick,
     process

@@ -119,7 +119,7 @@ function maskLoc(v, p)
 export function setup(config)
 {
     me = platform.load("node") ?? createNode();
-    const location = config?.location ?? platform.getLocation();
+    const location = config.location;
     if (location) {
         me.precision = max(LOCATION_PRECISION, min(32, location.precision ?? me.precision ?? 0));
         me.lat = location.latitude ?? me.lat;

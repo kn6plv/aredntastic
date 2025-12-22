@@ -25,7 +25,8 @@ let unicastEnabled = false;
     const c = uci.cursor();
     ucdata.latitide = c.get("aredn", "@location[0]", "lat");
     ucdata.longitude = c.get("aredn", "@location[0]", "lat");
-    ucdata.height = c.get("aredn", "@location[0]", "height") ?? 0;
+    ucdata.height = c.get("aredn", "@location[0]", "height");
+    ucdata.hostname = c.get("system", "@system[0]", "hostname");
 
     const cm = uci.cursor("/etc/config.mesh");
     ucdata.main_ip = cm.get("setup", "globals", "wifi_ip");
@@ -36,6 +37,41 @@ let unicastEnabled = false;
     }
 
     timers.setInterval("aredn", 1 * 60);
+}
+
+/* export */ function mergePlatformConfig(config)
+{
+    const location = config.location ?? (config.location = {});
+    if (location.latitude === null) {
+        location.latitide = ucdata.latitide;
+    }
+    if (location.longitude === null) {
+        location.longitude = ucdata.longitude;
+    }
+    if (location.altitude === null) {
+        location.altitude = ucdata.height;
+    }
+    if (location.precision === null) {
+        location.precision = 0;
+    }
+
+    if (config.multicast && config.multicast?.address === null) {
+        config.multicast.address = ucdata.lan_ip;
+    }
+
+    if (config.channels?.AREDN === null) {
+        if (!config.channels) {
+            config.channels = {};
+        }
+        config.channels.AREDN = "og==";
+    }
+
+    if (config.long_name === null) {
+        config.long_name = ucdata.hostname;
+    }
+    if (config.short_name === null) {
+        config.short_name = substr(split(ucdata.hostname, "-", 2)[0], -4);
+    }
 }
 
 function path(name)
@@ -109,18 +145,6 @@ function path(name)
     return byid[id];
 }
 
-/* export */ function getLocation()
-{
-    return {
-        latitide: ucdata.latitide, longitude: ucdata.longitude, altitude: ucdata.height, precision: 0
-    };
-}
-
-/* export */ function getMulticastDeviceIP()
-{
-    return ucdata.lan_ip;
-}
-
 /* export */ function publish(me, channels)
 {
     if (!unicastEnabled) {
@@ -174,13 +198,12 @@ function path(name)
 
 return {
     setup,
+    mergePlatformConfig,
     load,
     store,
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,
-    getLocation,
-    getMulticastDeviceIP,
     publish,
     tick,
     process

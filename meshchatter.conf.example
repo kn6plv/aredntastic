@@ -18,9 +18,7 @@
     },
     "messages": {},
     "channels": {
-        "shared": {
-            "AREDN": "og=="
-        }
+        "AREDN": "og=="
     },
     "environmental": {
         "type": "weewx",

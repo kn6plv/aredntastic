@@ -116,7 +116,7 @@ export function setup(config)
     else {
         setChannel(config.preset, "AQ==");
     }
-    const channels = config.channels?.shared;
+    const channels = config.channels;
     if (channels) {
         for (let name in channels) {
             setChannel(name, channels[name]);

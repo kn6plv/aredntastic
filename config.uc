@@ -44,6 +44,8 @@ export function setup()
     global.platform.setup(config);
     router.registerApp(global.platform);
 
+    global.platform.mergePlatformConfig(config);
+
     unicast.setup(config);
     multicast.setup(config);
     node.setup(config);
