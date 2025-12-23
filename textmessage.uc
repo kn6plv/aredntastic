@@ -23,13 +23,35 @@ function addMessage(msg)
     if (!chanmessages.index[idx]) {
         chanmessages.index[idx] = true;
         push(chanmessages.messages, {
+            id: idx,
             from: msg.from,
             when: msg.rx_time,
             text: msg.data.text_message
         });
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
+        cmd.notify(`newtext ${msg.namekey} ${idx}`);
     }
+};
+
+export function getMessages(namekey)
+{
+    return loadMessages(namekey).messages;
+};
+
+export function getMessage(namekey, id)
+{
+    const chanmessages = loadMessages(namekey);
+    if (chanmessages && chanmessages.index[id]) {
+        const messages = chanmessages.messages;
+        for (let i = length(messages) - 1; i >= 0; i--) {
+            const message = messages[i];
+            if (message.id === id) {
+                return message;
+            }
+        }
+    }
+    return null;
 };
 
 export function setup(config)

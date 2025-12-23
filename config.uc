@@ -7,6 +7,7 @@ import * as multicast from "multicast";
 import * as websocket from "websocket";
 import * as cmd from "cmd";
 
+import * as nodedb from "nodedb";
 import * as nodeinfo from "nodeinfo";
 import * as textmessage from "textmessage";
 import * as position from "position";
@@ -50,9 +51,14 @@ export function setup()
 
     unicast.setup(config);
     multicast.setup(config);
+    
     cmd.setup(config);
+    global.cmd = cmd;
+
     router.registerApp(cmd);
     websocket.setup(config);
+    nodedb.setup(config);
+    router.registerApp(nodedb);
     node.setup(config);
 
     nodeinfo.setup(config);

@@ -1,5 +1,8 @@
-
 let nodedb;
+
+export function setup(config)
+{
+};
 
 export function getNode(id, create)
 {
@@ -14,6 +17,7 @@ function saveNode(node)
     nodedb[node.id] = node;
     node.lastseen = time();
     platform.store("nodedb", nodedb);
+    cmd.notify("nodes");
 }
 
 export function createNode(id)
@@ -56,4 +60,17 @@ export function updateEnvironmentMetrics(id, metrics)
 export function getNodes()
 {
     return values(nodedb);
+};
+
+export function tick()
+{
+};
+
+export function process(msg)
+{
+    const node = getNode(msg.from, false);
+    if (node && msg.hop_start && msg.hop_limit) {
+        node.hops = msg.hop_start - msg.hop_limit;
+        saveNode(node);
+    }
 };
