@@ -17,7 +17,7 @@ function saveNode(node)
     nodedb[node.id] = node;
     node.lastseen = time();
     platform.store("nodedb", nodedb);
-    cmd.notify("nodes");
+    cmd.notify(`node ${node.id}`);
 }
 
 export function createNode(id)

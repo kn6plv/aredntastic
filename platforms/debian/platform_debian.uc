@@ -56,6 +56,10 @@ let rootdir = "/tmp/raven";
 {
 }
 
+/* export */ function badge(key, count)
+{
+}
+
 /* export */ function tick()
 {
 }
@@ -73,6 +77,7 @@ return {
     getTargetsByIdAndNamekey,
     getTargetById,
     publish,
+    badge,
     tick,
     process
 };

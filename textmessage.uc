@@ -1,5 +1,6 @@
 import * as node from "node";
 import * as channel from "channel";
+import * as message from "message";
 
 let enabled = false;
 
@@ -7,13 +8,30 @@ function loadMessages(namekey)
 {
     return platform.load(`messages.${namekey}`) ?? {
         index: {},
+        cursor: null,
         messages: []
     };
 }
 
-function saveMessages(namekey, messages)
+function saveMessages(namekey, chanmessages)
 {
-    platform.store(`messages.${namekey}`, messages);
+    let count = 0;
+    if (!chanmessages.cursor) {
+        count = length(chanmessages.messages);
+    }
+    else {
+        const messages = chanmessages.messages;
+        const cursor = chanmessages.cursor;
+        for (let i = length(messages) - 1; i >= 0; i--) {
+            if (messages[i].id === cursor) {
+                break;
+            }
+            count++;
+        }
+    }
+    chanmessages.count = count;
+    platform.store(`messages.${namekey}`, chanmessages);
+    platform.badge(`messages.${namekey}`, count);
 }
 
 function addMessage(msg)
@@ -30,7 +48,7 @@ function addMessage(msg)
         });
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
-        cmd.notify(`newtext ${msg.namekey} ${idx}`);
+        cmd.notify(`text ${msg.namekey} ${idx}`);
     }
 };
 
@@ -52,6 +70,26 @@ export function getMessage(namekey, id)
         }
     }
     return null;
+};
+
+export function createMessage(to, namekey, text)
+{
+    return message.createTextMessage(to, null, namekey, text);
+};
+
+export function catchUpMessagesTo(namekey, id)
+{
+    const chanmessages = loadMessages(namekey);
+    if (chanmessages.index[id] && id !== chanmessages.cursor) {
+        chanmessages.cursor = id;
+        saveMessages(chanmessages);
+    }
+    return chanmessages.count;
+};
+
+export function unread(namekey)
+{
+    return loadMessages(namekey).count;
 };
 
 export function setup(config)

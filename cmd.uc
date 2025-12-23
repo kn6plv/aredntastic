@@ -3,6 +3,7 @@ import * as timers from "timers";
 import * as nodedb from "nodedb";
 import * as channel from "channel";
 import * as textmessage from "textmessage";
+import * as router from "router";
 
 const q = [];
 let merge = {};
@@ -32,6 +33,30 @@ export function notify(event, delay)
     timers.trigger("cmd", delay);
 };
 
+function basicNode(node)
+{
+    const nodeinfo = node?.nodeinfo;
+    if (nodeinfo) {
+        return {
+            id: nodeinfo.id,
+            short_name: nodeinfo.short_name,
+            long_name: nodeinfo.long_name,
+            role: nodeinfo.role,
+            lastseen: node.lastseen,
+            hops: node.hops
+        };
+    }
+    return null;
+}
+
+function fullNode(node)
+{
+    const nodeinfo = node?.nodeinfo;
+    if (nodeinfo) {
+    }
+    return null;
+}
+
 export function tick()
 {
     if (timers.tick("cmd")) {
@@ -50,38 +75,57 @@ export function tick()
                 const raw = nodedb.getNodes();
                 const nodes = [];
                 for (let i = 0; i < length(raw); i++) {
-                    const node = raw[i];
-                    const nodeinfo = node.nodeinfo;
-                    if (nodeinfo) {
-                        push(nodes, {
-                            id: nodeinfo.id,
-                            short_name: nodeinfo.short_name,
-                            long_name: nodeinfo.long_name,
-                            role: nodeinfo.role,
-                            lastseen: node.lastseen,
-                            hops: node.hops
-                        });
+                    const node = basicNode(raw[i]);
+                    if (node) {
+                        push(nodes, node);
                     }
                 }
                 sort(nodes, (a, b) => b.lastseen - a.lastseen);
                 send({ reply: msg.cmd, nodes: nodes });
             }
+            else if (substr(msg.cmd, 0, 5) === "node ") {
+                const node = basicNode(nodedb.getNode(substr(msg.cmd, 5), false));
+                if (node) {
+                    send({ reply: msg.cmd, node: node });
+                }
+            }
+            else if (substr(msg.cmd, 0, 9) === "fullnode ") {
+                const node = fullNode(nodedb.getNode(substr(msg.cmd, 9), false));
+                if (node) {
+                    send({ reply: msg.cmd, node: node });
+                }
+            }
             else if (msg.cmd === "channels") {
-                const channels = map(channel.getAllChannels(), c => c.namekey);
+                const channels = map(channel.getAllChannels(), c => {
+                    return { namekey: c.namekey, unread: textmessage.unread(c.namekey) };
+                });
                 send({ reply: msg.cmd, channels: channels });
             }
+            else if (substr(msg.cmd, 0, 8) === "catchup ") {
+                const v = split(msg.cmd, " ");
+                const unread = textmessages.catchUpMessagesTo(`${v[1]} ${v[2]}`, v[3]);
+                send({ reply: msg.cmd, unread: unread });
+            }
             else if (substr(msg.cmd, 0, 6) === "texts ") {
-                const texts = textmessage.getMessages(substr(msg.cmd, 6));
+                const namekey = substr(msg.cmd, 6);
+                const texts = textmessage.getMessages(namekey);
                 if (texts) {
-                    send({ reply: msg.cmd, texts: texts });
+                    send({ reply: msg.cmd, texts: texts, unread: textmessage.unread(namekey) });
                 }
             }
-            else if (substr(msg.cmd, 0, 8) === "newtext ") {
+            else if (substr(msg.cmd, 0, 5) === "text ") {
                 const v = split(msg.cmd, " ");
-                const text = textmessage.getMessage(`${v[1]} ${v[2]}`, v[3]);
+                const namekey = `${v[1]} ${v[2]}`;
+                const text = textmessage.getMessage(namekey, v[3]);
                 if (text) {
-                    send({ reply: msg.cmd, text: text });
+                    send({ reply: msg.cmd, text: text, unread: textmessage.unread(namekey) });
                 }
+            }
+            else if (msg.cmd === "post") {
+                if (channel.getLocalChannelByNameKey(msg.namekey)) {
+                    const tmsg = textmessage.createMessage(null, msg.namekey, msg.text);
+                    router.queue(tmsg);
+                } 
             }
         }
         merge = {};

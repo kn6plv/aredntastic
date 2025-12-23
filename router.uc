@@ -6,7 +6,6 @@ import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
 import * as websocket from "websocket";
-import * as cmd from "cmd";
 
 const MAX_RECENT = 128;
 const recent = [];

@@ -18,6 +18,7 @@ let byid = {};
 let forwarders = [];
 let myid;
 let unicastEnabled = false;
+const badges = {};
 
 /* export */ function setup(config)
 {
@@ -174,6 +175,21 @@ function path(name)
     signal("SIGTERM", unpublish);
 }
 
+/* export */ function badge(key, count)
+{
+    if (count === null) {
+        delete badges[key];
+    }
+    else {
+        badges[key] = count;
+    }
+    let total = 0;
+    for (let k in badges) {
+        total += badges[k];
+    }
+    fs.writefile("/tmp/apps/raven/badge", total ? "" : `${total}`);
+}
+
 /* export */ function tick()
 {
     if (timers.tick("aredn")) {
@@ -217,6 +233,7 @@ return {
     getTargetsByIdAndNamekey,
     getTargetById,
     publish,
+    badge,
     tick,
     process
 };
