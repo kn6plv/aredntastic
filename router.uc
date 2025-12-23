@@ -5,7 +5,8 @@ import * as node from "node";
 import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
-import * as channel from "channel";
+import * as websocket from "websocket";
+import * as cmd from "cmd";
 
 const MAX_RECENT = 128;
 const recent = [];
@@ -86,6 +87,12 @@ export function tick()
     if (ms) {
         push(sockets, [ ms, socket.POLLIN, "multicast" ])
     }
+    const ws = websocket.handles();
+    if (ws) {
+        for (let i = 0; i < length(ws); i++) {
+            push(sockets, [ ws[i], socket.POLLIN, "websocket" ]);
+        }
+    }
     const v = socket.poll(timers.minTimeout(60) * 1000, ...sockets);
     for (let i = 0; i < length(v); i++) {
         if (v[i] && v[i][1]) {
@@ -109,6 +116,14 @@ export function tick()
                     }
                     catch (_)
                     {
+                    }
+                    break;
+                case "websocket":
+                    {
+                        const msgs = websocket.recv(v[i][0]);
+                        for (let i = 0; i < length(msgs); i++) {
+                            cmd.queue(json(msgs[i]));
+                        }
                     }
                     break;
             }

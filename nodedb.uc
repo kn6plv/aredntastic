@@ -52,3 +52,8 @@ export function updateEnvironmentMetrics(id, metrics)
     telemetry.environment_metrics = metrics;  
     saveNode(node);
 };
+
+export function getNodes()
+{
+    return values(nodedb);
+};

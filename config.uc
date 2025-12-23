@@ -4,6 +4,8 @@ import * as channel from "channel";
 import * as node from "node";
 import * as unicast from "unicast";
 import * as multicast from "multicast";
+import * as websocket from "websocket";
+import * as cmd from "cmd";
 
 import * as nodeinfo from "nodeinfo";
 import * as textmessage from "textmessage";
@@ -48,6 +50,9 @@ export function setup()
 
     unicast.setup(config);
     multicast.setup(config);
+    cmd.setup(config);
+    router.registerApp(cmd);
+    websocket.setup(config);
     node.setup(config);
 
     nodeinfo.setup(config);
