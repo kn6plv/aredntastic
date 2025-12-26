@@ -121,7 +121,7 @@ export function tick()
                     {
                         const msgs = websocket.recv(v[i][0]);
                         for (let i = 0; i < length(msgs); i++) {
-                            cmd.queue(json(msgs[i]));
+                            event.queue(json(msgs[i]));
                         }
                     }
                     break;

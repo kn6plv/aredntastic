@@ -5,7 +5,7 @@ import * as node from "node";
 import * as unicast from "unicast";
 import * as multicast from "multicast";
 import * as websocket from "websocket";
-import * as cmd from "cmd";
+import * as event from "event";
 
 import * as nodedb from "nodedb";
 import * as nodeinfo from "nodeinfo";
@@ -24,6 +24,26 @@ export function setup()
     push(REQUIRE_SEARCH_PATH, `${fs.dirname(SCRIPT_NAME)}/*.uc`);
 
     const config = json(fs.readfile("/etc/raven.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`));
+    const override = json(fs.readfile("/etc/raven.conf.override") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`) ?? "[]");
+    if (type(override) === "object") {
+        function f(c, o)
+        {
+            for (let k in o) {
+                if (o[k] === null) {
+                    delete c[k];
+                }
+                else switch (type(o[k])) {
+                    case "object":
+                        f(c[k], o[k]);
+                        break;
+                    default:
+                        c[k] = o[k];
+                        break;
+                }
+            }
+        }
+        f(config, override);
+    }
 
     if (config.debug) {
         global.DEBUG = function(...a)
@@ -52,10 +72,10 @@ export function setup()
     unicast.setup(config);
     multicast.setup(config);
     
-    cmd.setup(config);
-    global.cmd = cmd;
+    event.setup(config);
+    global.event = event;
+    router.registerApp(event);
 
-    router.registerApp(cmd);
     websocket.setup(config);
     nodedb.setup(config);
     router.registerApp(nodedb);
@@ -97,6 +117,17 @@ export function setup()
     router.registerApp(favorite);
 
     platform.publish(node.getInfo(), channel.getAllChannels());
+
+    function shutdown()
+    {
+        nodedb.shutdown();
+        textmessage.shutdown();
+        platform.shutdown();
+        exit(0);
+    }
+    signal("SIGHUP", shutdown);
+    signal("SIGINT", shutdown);
+    signal("SIGTERM", shutdown);
 };
 
 export function tick()

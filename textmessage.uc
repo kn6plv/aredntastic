@@ -1,16 +1,28 @@
 import * as node from "node";
 import * as channel from "channel";
 import * as message from "message";
+import * as timers from "timers";
 
 let enabled = false;
 
+const MAX_MESSAGES = 100;
+const SAVE_INTERVAL = 5 * 60;
+
+const channelmessages = {};
+const channelmessagesdirty = {};
+
 function loadMessages(namekey)
 {
-    return platform.load(`messages.${namekey}`) ?? {
-        index: {},
-        cursor: null,
-        messages: []
-    };
+    if (!channelmessages[namekey]) {
+        channelmessages[namekey] = platform.load(`messages.${namekey}`) ?? {
+            max: MAX_MESSAGES,
+            count: 0,
+            index: {},
+            cursor: null,
+            messages: []
+        };
+    }
+    return channelmessages[namekey];
 }
 
 function saveMessages(namekey, chanmessages)
@@ -30,7 +42,7 @@ function saveMessages(namekey, chanmessages)
         }
     }
     chanmessages.count = count;
-    platform.store(`messages.${namekey}`, chanmessages);
+    channelmessagesdirty[namekey] = true;
     platform.badge(`messages.${namekey}`, count);
 }
 
@@ -46,9 +58,13 @@ function addMessage(msg)
             when: msg.rx_time,
             text: msg.data.text_message
         });
+        while (length(chanmessages.messages) > chanmessages.max) {
+            const m = shift(chanmessages.messages);
+            delete chanmessages[m.id];
+        }
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
-        cmd.notify(`text ${msg.namekey} ${idx}`);
+        event.notify({ cmd: "text", namekey: msg.namekey, id: idx }, `text ${msg.namekey} ${idx}`);
     }
 };
 
@@ -96,7 +112,23 @@ export function setup(config)
 {
     if (config.messages) {
         enabled = true;
+        timers.setInterval("textmessages", SAVE_INTERVAL);
     }
+};
+
+function saveToPlatform()
+{
+    for (let namekey in channelmessages) {
+        if (channelmessagesdirty[namekey]) {
+            channelmessagesdirty[namekey] = false;
+            platform.store(`messages.${namekey}`, channelmessages[namekey]);
+        }
+    }
+}
+
+export function shutdown()
+{
+    saveToPlatform();
 };
 
 export function isMessagable()
@@ -106,6 +138,9 @@ export function isMessagable()
 
 export function tick()
 {
+    if (timers.tick("textmessages")) {
+        saveToPlatform();
+    }
 };
 
 export function process(msg)

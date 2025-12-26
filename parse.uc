@@ -95,7 +95,6 @@ registerProto(
  {
     if (msg.decoded) {
         const data = protobuf.decode("data", msg.decoded);
-        DEBUG("data = %J\n", data);
         if (data && data.portnum !== null && data.payload && data.bitfield !== null) {
             delete msg.decoded;
             if (data.portnum === 1) {

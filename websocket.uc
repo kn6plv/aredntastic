@@ -165,11 +165,13 @@ function read(ns)
             if (i !== -1) {
                 let key = null;
                 const lines = split(substr(state.incoming, 0, i), "\r\n");
-                for (let l = 0; l < length(lines); l++) {
-                    const line = lines[l];
-                    const kv = split(line, ": ");
-                    if (lc(kv[0]) === "sec-websocket-key") {
-                        key = kv[1];
+                if (platform.auth(lines)) {
+                    for (let l = 0; l < length(lines); l++) {
+                        const line = lines[l];
+                        const kv = split(line, ": ");
+                        if (lc(kv[0]) === "sec-websocket-key") {
+                            key = kv[1];
+                        }
                     }
                 }
                 if (!key) {

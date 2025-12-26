@@ -1,14 +1,22 @@
+import * as timers from "timers";
+
+const SAVE_INTERVAL = 60;
+
 let nodedb;
 
 export function setup(config)
 {
+    nodedb = platform.load("nodedb") ?? {};
+    timers.setInterval("nodedb", SAVE_INTERVAL);
+};
+
+export function shutdown()
+{
+    platform.store("nodedb", nodedb);
 };
 
 export function getNode(id, create)
 {
-    if (!nodedb) {
-        nodedb = platform.load("nodedb") ?? {};
-    }
     return nodedb[id] ?? (create === false ? null : { id: id });
 };
 
@@ -16,8 +24,7 @@ function saveNode(node)
 {
     nodedb[node.id] = node;
     node.lastseen = time();
-    platform.store("nodedb", nodedb);
-    cmd.notify(`node ${node.id}`);
+    event.notify({ cmd: "node", id: node.id }, `node ${node.id}`);
 }
 
 export function createNode(id)
@@ -64,6 +71,9 @@ export function getNodes()
 
 export function tick()
 {
+    if (timers.tick("nodedb")) {
+        platform.store("nodedb", nodedb);
+    }
 };
 
 export function process(msg)

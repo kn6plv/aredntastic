@@ -22,8 +22,16 @@ const badges = {};
 
 /* export */ function setup(config)
 {
-    fs.mkdir("/etc/raven/");
-    fs.mkdir("/tmp/raven/");
+    function mkdirp(p)
+    {
+        const d = fs.dirname(p);
+        if (d && !fs.access(d)) {
+            mkdirp(d);
+        }
+        fs.mkdir(p);
+    }
+    mkdirp("/usr/local/raven");
+    mkdirp("/tmp/apps/raven");
 
     const c = uci.cursor();
     ucdata.latitide = c.get("aredn", "@location[0]", "lat");
@@ -43,6 +51,11 @@ const badges = {};
     }
 
     timers.setInterval("aredn", 1 * 60);
+}
+
+/* export */ function shutdown()
+{
+    services.unpublish(pubID);
 }
 
 /* export */ function mergePlatformConfig(config)
@@ -89,12 +102,7 @@ const badges = {};
 
 function path(name)
 {
-    switch (name) {
-        case "node":
-            return `/etc/raven/${name}.json`;
-        default:
-            return `/tmp/raven/${name}.json`;
-    }
+    return `/etc/raven/${name}.json`;
 }
 
 /* export */ function load(name)
@@ -165,14 +173,6 @@ function path(name)
     }
     myid = me.id;
     services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: me.private_key, channels: map(channels, c => c.namekey) });
-    function unpublish()
-    {
-        services.unpublish(pubID);
-        exit(0);
-    }
-    signal("SIGHUP", unpublish);
-    signal("SIGINT", unpublish);
-    signal("SIGTERM", unpublish);
 }
 
 /* export */ function badge(key, count)
@@ -187,8 +187,37 @@ function path(name)
     for (let k in badges) {
         total += badges[k];
     }
-    fs.writefile("/tmp/apps/raven/badge", total ? "" : `${total}`);
+    fs.writefile("/tmp/apps/raven/badge", total == 0 ? "" : total >= 100 ? "99+" : `${total}`);
 }
+
+/* export */ function auth(headers)
+{
+    for (let i = 0; i < length(headers); i++) {
+        const kv = split(headers[i], ": ");
+        if (lc(kv[0]) === "cookie") {
+            const ca = split(kv[1], ";");
+            for (let j = 0; j < length(ca); j++) {
+                const cookie = trim(ca[j]);
+                if (index(cookie, "authV1=") === 0) {
+                    let key = null;
+                    const f = fs.open("/etc/shadow");
+                    if (f) {
+                        for (let l = f.read("line"); length(l); l = f.read("line")) {
+                            if (index(l, "root:") === 0) {
+                                key = trim(l);
+                                break;
+                            }
+                        }
+                        f.close();
+                    }
+                    return (key == b64dec(substr(cookie, 7)) ? true : false);
+                }
+            }
+            break;
+        }
+    }
+    return false;
+};
 
 /* export */ function tick()
 {
@@ -226,6 +255,7 @@ function path(name)
 
 return {
     setup,
+    shutdown,
     mergePlatformConfig,
     load,
     store,
@@ -234,6 +264,7 @@ return {
     getTargetById,
     publish,
     badge,
+    auth,
     tick,
     process
 };

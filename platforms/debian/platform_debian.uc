@@ -8,12 +8,16 @@ let rootdir = "/tmp/raven";
     function mkdirp(p)
     {
         const d = fs.dirname(p);
-        if (d && d !== "." && d !== "/") {
+        if (d && !fs.access(d)) {
             mkdirp(d);
         }
         fs.mkdir(p);
     }
     mkdirp(rootdir);
+}
+
+/* export */ function shutdown()
+{
 }
 
 /* export */ function mergePlatformConfig(config)
@@ -60,6 +64,11 @@ let rootdir = "/tmp/raven";
 {
 }
 
+/* export */ function auth(headers)
+{
+    return true;
+};
+
 /* export */ function tick()
 {
 }
@@ -70,6 +79,7 @@ let rootdir = "/tmp/raven";
 
 return {
     setup,
+    shutdown,
     mergePlatformConfig,
     load,
     store,
@@ -78,6 +88,7 @@ return {
     getTargetById,
     publish,
     badge,
+    auth,
     tick,
     process
 };
