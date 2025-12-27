@@ -16,6 +16,7 @@ export function setup(config)
 
 function send(msg)
 {
+    //print("send ", msg, "\n");
     websocket.send(sprintf("%J", msg));
 }
 
@@ -90,7 +91,7 @@ export function tick()
                 {
                     const raw = nodedb.getNodes();
                     const nodes = [];
-                    for (let i = 0; i < length(raw); i++) {
+                    for (let i = 0; i < length(raw) && i < 579; i++) {
                         const node = basicNode(raw[i]);
                         if (node) {
                             push(nodes, node);

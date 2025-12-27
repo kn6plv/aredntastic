@@ -16,6 +16,7 @@
     --unread-background-color: seagreen;
     --unread-color: white;
     --channel-selected-background-color: #f0f0f0;
+    --channel-hover-background-color: #e8e8e8;
 }
 *
 {
@@ -38,6 +39,19 @@ body
     color: var(--default-fg-color);
     background-color: var(--body-bg-color);
     font-family: var(--font-family);
+}
+dialog
+{
+    display: none;
+    outline: none;
+}
+dialog[open]
+{
+    display: flex;
+}
+dialog::backdrop
+{
+    background-color: rgba(0, 0, 0, 0.5);
 }
 #all
 {
@@ -64,6 +78,9 @@ body
 #main
 {
     flex: 1;
+    border-top: 1px solid var(--container-border-color);
+    border-right: 1px solid var(--container-border-color);
+    border-top-right-radius: 10px;
 }
 #footer
 {
@@ -159,7 +176,20 @@ body
 }
 .channel
 {
-    padding: 10px;
+    padding: 5px 10px;
+}
+.channel:first-child
+{
+    padding-top: 10px;
+}
+.channel:last-child
+{
+    padding-bottom: 10px;
+}
+.channel:hover,
+.channel.selected:hover
+{
+    background-color: var(--channel-hover-background-color);
 }
 .channel.selected
 {

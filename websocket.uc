@@ -87,10 +87,11 @@ function decode(state)
                 }
             }
             else if (len === 127) {
-                if (length(state.incoming) >= 10) {
-                    len = (ord(state.incoming, 2) << 24) | (ord(state.incoming, 3) << 16) | (ord(state.incoming, 4) << 8) | ord(state.incoming, 5);
-                    mask = [ ord(state.incoming, 6), ord(state.incoming, 7), ord(state.incoming, 8), ord(state.incoming, 9) ];
-                    off = 10;
+                if (length(state.incoming) >= 14) {
+                    len = (ord(state.incoming, 2) << 56) | (ord(state.incoming, 3) << 48) | (ord(state.incoming, 4) << 40) | (ord(state.incoming, 5) << 32) |
+                          (ord(state.incoming, 6) << 24) | (ord(state.incoming, 7) << 16) | (ord(state.incoming, 8) << 8) | ord(state.incoming, 9);
+                    mask = [ ord(state.incoming, 10), ord(state.incoming, 11), ord(state.incoming, 12), ord(state.incoming, 13) ];
+                    off = 14;
                 }
                 else {
                     len = -1;
@@ -142,7 +143,7 @@ function encode(msg)
         return struct.pack(">BBH", FIN | OP_TEXT, 126, l) + msg;
     }
     else {
-        return struct.pack(">BBI", FIN | OP_TEXT, 127, l) + msg;
+        return struct.pack(">BBQ", FIN | OP_TEXT, 127, l) + msg;
     }
 }
 

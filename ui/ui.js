@@ -5,6 +5,7 @@ let channels = null;
 const nodes = {};
 const me = {};
 let textObs;
+const xdiv = document.createElement("div");
 
 function Q(a, b)
 {
@@ -23,16 +24,14 @@ function I(id)
 
 function N(html)
 {
-    const e = document.createElement("div");
-    e.innerHTML = html;
-    return e.firstElementChild;
+    xdiv.innerHTML = html;
+    return xdiv.firstElementChild;
 }
 
 function T(text)
 {
-    const e = document.createElement("div");
-    e.innerText = text;
-    return e.innerHTML;
+    xdiv.innerText = text;
+    return xdiv.innerHTML;
 }
 
 const roles = {
@@ -147,14 +146,14 @@ function updateNodes(msg)
 function updateNode(msg)
 {
     const n = I(msg.node.id);
-    if (n) {
-        n.remove(n);
-    }
     const node = nodeExpand(msg.node);
     nodes[node.num] = node;
     const nd = N(htmlNode(node));
     requestAnimationFrame(_ => {
         const q = Q("#nodes");
+        if (n) {
+            n.remove(n);
+        }
         q.prepend(nd);
         if (q.scrollTop < 50) {
             nd.nextSibling.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
@@ -233,9 +232,14 @@ function updateText(msg)
 
 function selectChannel(namekey)
 {
-    rightSelection = namekey;
-    send({ cmd: "texts", namekey: namekey });
-    updateChannels();
+    if (rightSelection === namekey) {
+        Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+    }
+    else {
+        rightSelection = namekey;
+        send({ cmd: "texts", namekey: namekey });
+        updateChannels();
+    }
 }
 
 function sendMessage(event)
@@ -244,7 +248,7 @@ function sendMessage(event)
     if (event.type === "keyup") {
         Q("#post .count").innerText = `${Math.max(0, text.length)}/200`;
     }
-    else if (event.keyCode === 13 && !event.shiftKey) {
+    else if (event.key === "Enter" && !event.shiftKey) {
         event.target.value = "";
         if (text) {
             send({ cmd: "post", namekey: rightSelection, text: text.trim() });
@@ -254,6 +258,26 @@ function sendMessage(event)
     return true;
 }
 
+function openDialog(html)
+{
+    if (!Q("#main dialog")) {
+        const dialog = document.createElement("dialog");
+        dialog.innerHTML = html;
+        Q("#main").prepend(dialog);
+        dialog.addEventListener("keypress", e => {
+            if (e.key === "Escape") {
+                dialog.remove();
+            }
+        });
+        dialog.showModal();
+    }
+}
+
+function openChannelConfig()
+{
+    openDialog("Channel Config");
+}
+
 function startup()
 {
     const sock = new WebSocket(`ws://aredn-build:4404`);
@@ -261,45 +285,49 @@ function startup()
         send = (msg) => sock.send(JSON.stringify(msg));
     });
     sock.addEventListener("message", e => {
-        const msg = JSON.parse(e.data);
-        //console.log(msg);
-        switch (msg.event) {
-            case "me":
-                updateMe(msg);
-                break;
-            case "nodes":
-                updateNodes(msg);
-                break;
-            case "channels":
-                if (!rightSelection) {
-                    rightSelection = msg.channels[0].namekey;
-                }
-                updateChannels(msg);
-                break;
-            case "texts":
-                if (rightSelection == msg.namekey) {
-                    updateTexts(msg);
-                }
-                else {
+        try {
+            const msg = JSON.parse(e.data);
+            //console.log(msg);
+            switch (msg.event) {
+                case "me":
+                    updateMe(msg);
+                    break;
+                case "nodes":
+                    updateNodes(msg);
+                    break;
+                case "channels":
+                    if (!rightSelection) {
+                        rightSelection = msg.channels[0].namekey;
+                    }
+                    updateChannels(msg);
+                    break;
+                case "texts":
+                    if (rightSelection == msg.namekey) {
+                        updateTexts(msg);
+                    }
+                    else {
+                        updateUnread(msg);
+                    }
+                    break;
+                case "node":
+                    updateNode(msg);
+                    break;
+                case "text":
+                    if (rightSelection == msg.namekey) {
+                        updateText(msg);
+                    }
+                    else {
+                        updateUnread(msg);
+                    }
+                    break;
+                case "catchup":
                     updateUnread(msg);
-                }
-                break;
-            case "node":
-                updateNode(msg);
-                break;
-            case "text":
-                if (rightSelection == msg.namekey) {
-                    updateText(msg);
-                }
-                else {
-                    updateUnread(msg);
-                }
-                break;
-            case "catchup":
-                updateUnread(msg);
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (_) {
         }
     });
 }
