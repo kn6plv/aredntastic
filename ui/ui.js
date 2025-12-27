@@ -6,9 +6,14 @@ const nodes = {};
 const me = {};
 let textObs;
 
-function Q(selector)
+function Q(a, b)
 {
-    return document.querySelector(selector);
+    if (b) {
+        return a.querySelector(b);
+    }
+    else {
+        return document.querySelector(a);
+    }
 }
 
 function I(id)
@@ -56,18 +61,23 @@ function getChannel(namekey)
     return null;
 }
 
+function nodeColors(n)
+{
+    const c = { r: (n >> 16) & 255, g: (n >> 16) & 255, b: n & 255 }; 
+    const bcolor = `rgb(${c.r},${c.g},${c.b})`;
+    if ((c.r * 299 + c.g * 587 + c.b * 114) / 1000 > 127.5) {
+        return { bcolor: bcolor, fcolor: "black" };
+    }
+    else {
+        return { bcolor: bcolor, fcolor: "white" };
+    }
+}
+
 function nodeExpand(node)
 {
     const n = parseInt(node.id.substr(1), 16);
     node.num = n;
-    const c = { r: (n >> 16) & 255, g: (n >> 16) & 255, b: n & 255 }; 
-    node.bcolor = `rgb(${c.r},${c.g},${c.b})`;
-    if ((c.r * 299 + c.g * 587 + c.b * 114) / 1000 > 127.5) {
-        node.fcolor = "black";
-    }
-    else {
-        node.fcolor = "white";
-    }
+    node.colors = nodeColors(n);
     node.rolename = roles[node.role] ?? "?";
     node.logo = node.hw_model == 255 ? "aredn" : "meshtastic";
     return node;
@@ -76,19 +86,19 @@ function nodeExpand(node)
 function htmlChannel(channel)
 {
     const nk = channel.namekey.split(" ");
-    return `<div id="${nk[0]}" class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
+    return `<div class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
         <div class="n">
             <div class="t">${nk[0]}</div>
             <div class="s">${nk[1]}</div>
         </div>
-        <div class="unread">${channel.unread > 0 ? channel.unread : ''}</div>
+        <div class="unread">${channel.unread.count > 0 ? channel.unread.count : ''}</div>
     </div>`;
 }
 
 function htmlNode(node)
 {
     return `<div id="${node.id}" class="node ${node.logo}">
-        <div class="s" style="color:${node.fcolor};background-color:${node.bcolor}">${node.short_name}</div>
+        <div class="s" style="color:${node.colors.fcolor};background-color:${node.colors.bcolor}">${node.short_name}</div>
         <div class="logo"></div>
         <div class="m">
             <div class="l">${node.long_name}</div>
@@ -100,12 +110,21 @@ function htmlNode(node)
 
 function htmlText(text)
 {
-    const n = nodes[text.from];
-    return `<div id="${text.id}" class="text ${n?.num == me.num ? 'right ' : ''}${n?.logo ? n.logo : ''}">
-        <div class="s" style="color:${n?.fcolor};background-color:${n?.bcolor}">${n?.short_name ?? "?"}</div>
+    let n = nodes[text.from];
+    if (!n) {
+        const id = text.from.toString(16);
+        n = {
+            id: `!${id}`,
+            short_name: id.substr(-4),
+            long_name: id.substr(-4),
+            colors: nodeColors(text.from)
+        };
+    }
+    return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
+        <div class="s" style="color:${n.colors.fcolor};background-color:${n.colors.bcolor}">${n.short_name}</div>
         ${n?.logo ? '<div class="logo"></div>' : ''}
         <div class="c">
-            <div class="l">${T(n ? n.long_name + " (" + n.id + ")" : "")}</div>
+            <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? new Date(1000 * text.when).toLocaleString() : ''}</div>
             <div class="t">${T(text.text)}</div>
         </div>
     </div>`;
@@ -123,37 +142,6 @@ function updateNodes(msg)
         nodes[n.num] = n
         return htmlNode(n);
     }).join("");
-}
-
-function updateChannels(msg)
-{
-    if (msg) {
-        channels = msg.channels;
-    }
-    Q("#channels").innerHTML = channels.map(c => htmlChannel(c)).join("");
-}
-
-function updateTexts(msg)
-{
-    const t = Q("#texts");
-    t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
-    t.lastElementChild.scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
-    if (textObs) {
-        textObs.disconnect();
-    }
-    textObs = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                textObs.unobserve(entry.target);
-                const channel = getChannel(msg.namekey);
-                channel.unread--;
-                Q(`#${msg.namekey.split(" ")[0]} .unread`).innerText = (channel.unread > 0 ? channel.unread : "");
-            }
-        })
-    });
-    const channel = getChannel(msg.namekey);
-    channel.unread = 0;
-    Q(`#${msg.namekey.split(" ")[0]} .unread`).innerText = "";
 }
 
 function updateNode(msg)
@@ -178,12 +166,54 @@ function updateNode(msg)
     });
 }
 
+function updateChannels(msg)
+{
+    if (msg) {
+        channels = msg.channels;
+    }
+    const q = Q("#channels");
+    q.innerHTML = channels.map(c => htmlChannel(c)).join("");
+    for (let c = 0; c < channels.length; c++) {
+        channels[c].element = q.children[c];
+    }
+}
+
+function updateTexts(msg)
+{
+    const t = Q("#texts");
+    t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
+    t.lastElementChild.scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
+    if (textObs) {
+        textObs.disconnect();
+    }
+    textObs = new IntersectionObserver(entries => {
+        let newest = null;
+        const channel = getChannel(msg.namekey);
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                textObs.unobserve(entry.target);
+                channel.unread.count--;
+                if (!newest || entry.time > newest.time) {
+                    newest = entry;
+                }
+            }
+        });
+        if (newest) {
+            Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
+            send({ cmd: "catchup", namekey: msg.namekey, id: newest.target.id });
+        }
+    });
+    const channel = getChannel(msg.namekey);
+    channel.unread.count = 0;
+    Q(channel.element, ".unread").innerText = "";
+    send({ cmd: "catchup", namekey: msg.namekey, id: msg.texts[msg.texts.length - 1].id });
+}
+
 function updateUnread(msg)
 {
-    if ("unread" in msg) {
-        Q(`#${msg.namekey.split(" ")[0]} .unread`).innerText = (msg.unread > 0 ? msg.unread : "");
-        getChannel(msg.namekey).unread = msg.unread;
-    }
+    const channel = getChannel(msg.namekey);
+    channel.unread = msg.unread;
+    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
 }
 
 function updateText(msg)
@@ -193,12 +223,11 @@ function updateText(msg)
     const n = t.appendChild(N(htmlText(msg.text)));
     if (atbottom) {
         t.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+        send({ cmd: "catchup", namekey: msg.namekey, id: msg.text.id });
     }
     else {
         textObs.observe(n);
-        const channel = getChannel(msg.namekey);
-        channel.unread++;
-        Q(`#${msg.namekey.split(" ")[0]} .unread`).innerText = channel.unread;
+        updateUnread(msg);
     }
 }
 
@@ -207,6 +236,22 @@ function selectChannel(namekey)
     rightSelection = namekey;
     send({ cmd: "texts", namekey: namekey });
     updateChannels();
+}
+
+function sendMessage(event)
+{
+    const text = event.target.value;
+    if (event.type === "keyup") {
+        Q("#post .count").innerText = `${Math.max(0, text.length)}/200`;
+    }
+    else if (event.keyCode === 13 && !event.shiftKey) {
+        event.target.value = "";
+        if (text) {
+            send({ cmd: "post", namekey: rightSelection, text: text.trim() });
+        }
+        return false;
+    }
+    return true;
 }
 
 function startup()
@@ -249,6 +294,9 @@ function startup()
                 else {
                     updateUnread(msg);
                 }
+                break;
+            case "catchup":
+                updateUnread(msg);
                 break;
             default:
                 break;

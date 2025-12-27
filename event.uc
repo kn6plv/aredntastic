@@ -126,7 +126,7 @@ export function tick()
                 }
                 case "catchup":
                 {
-                    const unread = textmessages.catchUpMessagesTo(msg.namekey, msg.id);
+                    const unread = textmessage.catchUpMessagesTo(msg.namekey, msg.id);
                     send({ event: msg.cmd, namekey: msg.namekey, unread: unread });
                     break;
                 }

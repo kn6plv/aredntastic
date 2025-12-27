@@ -95,17 +95,18 @@ export function createMessage(to, namekey, text)
 
 export function catchUpMessagesTo(namekey, id)
 {
-    const chanmessages = loadMessages(namekey);
-    if (chanmessages.index[id] && id !== chanmessages.cursor) {
-        chanmessages.cursor = id;
-        saveMessages(chanmessages);
+    const cm = loadMessages(namekey);
+    if (cm.index[id] && id !== cm.cursor) {
+        cm.cursor = id;
+        saveMessages(namekey, cm);
     }
-    return chanmessages.count;
+    return { count: cm.count, cursor: cm.cursor, max: cm.max };
 };
 
 export function unread(namekey)
 {
-    return loadMessages(namekey).count;
+    const cm = loadMessages(namekey);
+    return { count: cm.count, cursor: cm.cursor, max: cm.max };
 };
 
 export function setup(config)
