@@ -152,7 +152,7 @@ function updateNode(msg)
     requestAnimationFrame(_ => {
         const q = Q("#nodes");
         if (n) {
-            n.remove(n);
+            q.removeChild(n);
         }
         q.prepend(nd);
         if (q.scrollTop < 50) {
