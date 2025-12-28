@@ -149,36 +149,43 @@ function updateNode(msg)
     const node = nodeExpand(msg.node);
     nodes[node.num] = node;
     const nd = N(htmlNode(node));
-    function update()
-    {
-        const q = Q("#nodes");
-        if (q.firstElementChild === n) {
-            q.replaceChild(nd, n);
+    const nl = Q("#nodes");
+    if (document.visibilityState == "hidden") {
+        nl.insertBefore(nd, nl.firstElementChild);
+        if (n) {
+            nl.removeChild(n);
+        }
+        if (nl.scrollTop < 70) {
+            nl.scrollTop = 0;
         }
         else {
-            q.insertBefore(nd, q.firstElementChild);
-            if (n) {
-                q.removeChild(n);
-            }
-            if (q.scrollTop < 70) {
-                if (document.visibilityState == "hidden") {
-                    q.scrollTop = 0;
-                }
-                else {
-                    nd.nextSibling.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
-                    nd.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-                }
-            }
-            else {
-                q.scrollTop += nd.offsetHeight;
-            }
+            nl.scrollTop += nd.offsetHeight;
         }
     }
-    if (document.visibilityState == "hidden") {
-        update();
-    }
     else {
-        requestAnimationFrame(update);
+        requestAnimationFrame(_ => {
+            if (nl.firstElementChild === n) {
+                nl.replaceChild(nd, n);
+            }
+            else {
+                nl.insertBefore(nd, nl.firstElementChild);
+                if (n) {
+                    nl.removeChild(n);
+                }
+                if (nl.scrollTop < 70) {
+                    if (document.visibilityState == "hidden") {
+                        nl.scrollTop = 0;
+                    }
+                    else {
+                        nd.nextSibling.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
+                        nd.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+                    }
+                }
+                else {
+                    nl.scrollTop += nd.offsetHeight;
+                }
+            }
+        });
     }
 }
 
