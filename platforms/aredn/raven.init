@@ -6,7 +6,7 @@ START=98
 start_service()
 {
     procd_open_instance raven
-    procd_set_param command /root/raven/main.uc
+    procd_set_param command /usr/local/raven/main.uc
     procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
     procd_set_param stdout 1
     procd_set_param stderr 1

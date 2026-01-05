@@ -123,7 +123,7 @@ function htmlText(text)
         <div class="s" style="color:${n.colors.fcolor};background-color:${n.colors.bcolor}">${n.short_name}</div>
         ${n?.logo ? '<div class="logo"></div>' : ''}
         <div class="c">
-            <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? new Date(1000 * text.when).toLocaleString() : ''}</div>
+            <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
             <div class="t">${T(text.text)}</div>
         </div>
     </div>`;

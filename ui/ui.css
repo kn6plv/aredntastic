@@ -9,6 +9,7 @@
     --container-border-color: grey;
     --text-background-color: white;
     --text-border-color: black;
+    --text-date-color: #606060;
     --logo-background-color: white;
     --logo-border-color: white;
     --post-border-color: grey;
@@ -38,6 +39,11 @@ body
     overflow: hidden;
     color: var(--default-fg-color);
     background-color: var(--body-bg-color);
+    font-family: var(--font-family);
+}
+textarea,
+input
+{
     font-family: var(--font-family);
 }
 dialog
@@ -295,7 +301,7 @@ dialog::backdrop
 }
 .text .l
 {
-    font-size: 10px;
+    font-size: 11px;
     padding-left: 6px;
 }
 .text.right .l
@@ -304,12 +310,18 @@ dialog::backdrop
     padding-left: 0;
     padding-right: 6px;
 }
+.text .l div
+{
+    margin: auto 0 0 0;
+    color: var(--text-date-color);
+    font-size: 10px;
+}
 .text .t
 {
     border: 1px solid var(--text-border-color);
     margin: 2px auto 2px 6px;
     padding: 8px 10px;
-    border-radius: 14px;
+    border-radius: 17px;
     background-color: var(--text-background-color);
 }
 .text.right .t
@@ -352,8 +364,8 @@ dialog::backdrop
 {
     height: 50px;
     width: 100px;
-    background: url(raven.png) no-repeat center;
-    background-size: 100px 50px;
+    background: url(raven.svg) no-repeat center;
+    background-size: 80px 80px;
 }
 .cog
 {
