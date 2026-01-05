@@ -46,6 +46,7 @@ chmod 755 $ROOT/control/postinst $ROOT/control/prerm
 cp $SRC/*.uc $ROOT/data/usr/local/raven/
 cp $SRC/crypto/*.uc $ROOT/data/usr/local/raven/crypto/
 cp $SRC/platform/aredn/*.uc $ROOT/data/usr/local/raven/platform/aredn/
+cp $SRC/
 
 cp $SRC/ui/index.html $SRC/ui/ui.js $SRC/ui/ui.css $SRC/ui/raven.svg $ROOT/data/www/apps/raven/
 cp $SRC/platform/aredn/admin.sh $ROOT/data/www/cgi-bin/raven/admin
