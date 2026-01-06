@@ -156,7 +156,7 @@ export function setup(config)
     }
     switch (config.role) {
         case "client":
-            if (config.unicast && config.multicast) {
+            if (config.ipmesh && config.meshtastic) {
                 me.role = ROLE_CLIENT;
             }
             else {

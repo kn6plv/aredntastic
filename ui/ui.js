@@ -119,12 +119,13 @@ function htmlText(text)
             colors: nodeColors(text.from)
         };
     }
+    const ttext = T(text.text).replace(/https?:\/\/[^ \t]+/g, v => `<a target="_blank" href="${v}">${v}</a>`);
     return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
         <div class="s" style="color:${n.colors.fcolor};background-color:${n.colors.bcolor}">${n.short_name}</div>
         ${n?.logo ? '<div class="logo"></div>' : ''}
         <div class="c">
             <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
-            <div class="t">${T(text.text)}</div>
+            <div class="t">${ttext}</div>
         </div>
     </div>`;
 }

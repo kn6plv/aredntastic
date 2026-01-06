@@ -2,10 +2,10 @@
     "preset": "MediumFast",
     "role": "client",
     "debug": true,
-    "multicast": {
+    "meshtastic": {
         "address": "192.168.51.113"
     },
-    "unicast": {},
+    "ipmesh": {},
     "location": {
         "latitude": 37.888,
         "longitude": -122.268,

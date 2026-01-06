@@ -18,7 +18,7 @@ let bynamekey = {};
 let byid = {};
 let forwarders = [];
 let myid;
-let unicastEnabled = false;
+let arednmeshEnabled = false;
 const badges = {};
 
 /* export */ function setup(config)
@@ -47,8 +47,9 @@ const badges = {};
     const cu = uci.cursor("/etc/local/uci");
     ucdata.macaddress = map(split(cu.get("hsmmmesh", "settings", "wifimac"), ":"), v => hex(v));
 
-    if (config.unicast) {
-        unicastEnabled = true;
+    if (config.arednmesh) {
+        config.ipmesh = config.arednmesh;
+        arednmeshEnabled = true;
     }
 
     timers.setInterval("aredn", 1 * 60);
@@ -78,8 +79,8 @@ const badges = {};
         location.source = LOCATION_SOURCE_INTERNAL;
     }
 
-    if (config.multicast && config.multicast?.address === null) {
-        config.multicast.address = ucdata.lan_ip;
+    if (config.meshtastic && config.meshtastic?.address === null) {
+        config.meshtastic.address = ucdata.lan_ip;
     }
 
     if (config.channels?.AREDN === null) {
@@ -169,7 +170,7 @@ function path(name)
 
 /* export */ function publish(me, channels)
 {
-    if (!unicastEnabled) {
+    if (!arednmeshEnabled) {
         return;
     }
     myid = me.id;

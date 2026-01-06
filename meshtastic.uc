@@ -7,10 +7,10 @@ let s = null;
 
 export function setup(config)
 {
-    if (!config.multicast) {
+    if (!config.meshtastic) {
         return;
     }
-    const address = config.multicast.address;
+    const address = config.meshtastic.address;
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
     s.bind({
         port: PORT

@@ -1,5 +1,5 @@
-import * as multicast from "multicast";
-import * as unicast from "unicast";
+import * as meshtastic from "meshtastic";
+import * as ipmesh from "ipmesh";
 import * as parse from "parse";
 import * as node from "node";
 import * as message from "message";
@@ -43,14 +43,14 @@ export function process()
             const transport = msg.transport_mechanism;
             if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                unicast.send(msg.to, msg.namekey, sprintf("%J", msg));
+                ipmesh.send(msg.to, msg.namekey, sprintf("%J", msg));
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
                 if (node.isBroadcast(msg) || !platform.getTargetById(node.to)) {
                     msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
                     const pkt = parse.encodePacket(msg);
                     if (pkt) {
-                        multicast.send(pkt);
+                        meshtastic.send(pkt);
                     }
                 }
             }
@@ -78,13 +78,13 @@ export function tick()
     }
     process();
     const sockets = [];
-    const us = unicast.handle();
+    const us = ipmesh.handle();
     if (us) {
-        push(sockets, [ us, socket.POLLIN, "unicast" ]);
+        push(sockets, [ us, socket.POLLIN, "ipmesh" ]);
     }
-    const ms = multicast.handle();
+    const ms = meshtastic.handle();
     if (ms) {
-        push(sockets, [ ms, socket.POLLIN, "multicast" ])
+        push(sockets, [ ms, socket.POLLIN, "meshtastic" ])
     }
     const ws = websocket.handles();
     if (ws) {
@@ -96,18 +96,18 @@ export function tick()
     for (let i = 0; i < length(v); i++) {
         if (v[i] && v[i][1]) {
             switch (v[i][2]) {
-                case "unicast":
+                case "ipmesh":
                     try {
-                        const msg = json(unicast.recv());
+                        const msg = json(ipmesh.recv());
                         msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
                         queue(msg);
                     }
                     catch (_) {
                     }
                     break;
-                case "multicast":
+                case "meshtastic":
                     try {
-                        const msg = parse.decodePacket(multicast.recv());
+                        const msg = parse.decodePacket(meshtastic.recv());
                         if (msg) {
                             msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
                             queue(msg);

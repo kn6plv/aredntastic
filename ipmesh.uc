@@ -6,7 +6,7 @@ let s = null;
 
 export function setup(config)
 {
-    if (!config.unicast) {
+    if (!config.ipmesh) {
         return;
     }
     s = socket.create(socket.AF_INET, socket.SOCK_DGRAM, 0);
@@ -35,7 +35,7 @@ export function send(to, namekey, data)
             port: PORT
         });
         if (r === null) {
-            printf("unicast:send error: %s\n", socket.error());
+            printf("ipmesh:send error: %s\n", socket.error());
         }
     }
 };

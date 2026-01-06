@@ -2,8 +2,8 @@ import * as fs from "fs";
 import * as router from "router";
 import * as channel from "channel";
 import * as node from "node";
-import * as unicast from "unicast";
-import * as multicast from "multicast";
+import * as ipmesh from "ipmesh";
+import * as meshtastic from "meshtastic";
 import * as websocket from "websocket";
 import * as event from "event";
 
@@ -34,6 +34,9 @@ export function setup()
                 }
                 else switch (type(o[k])) {
                     case "object":
+                        if (!c[k]) {
+                            c[k] = {};
+                        }
                         f(c[k], o[k]);
                         break;
                     default:
@@ -69,8 +72,8 @@ export function setup()
 
     global.platform.mergePlatformConfig(config);
 
-    unicast.setup(config);
-    multicast.setup(config);
+    ipmesh.setup(config);
+    meshtastic.setup(config);
     
     event.setup(config);
     global.event = event;
