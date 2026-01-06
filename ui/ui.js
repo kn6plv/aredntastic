@@ -62,7 +62,7 @@ function getChannel(namekey)
 
 function nodeColors(n)
 {
-    const c = { r: (n >> 16) & 255, g: (n >> 16) & 255, b: n & 255 }; 
+    const c = { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
     const bcolor = `rgb(${c.r},${c.g},${c.b})`;
     if ((c.r * 299 + c.g * 587 + c.b * 114) / 1000 > 127.5) {
         return { bcolor: bcolor, fcolor: "black" };
@@ -205,7 +205,6 @@ function updateTexts(msg)
 {
     const t = Q("#texts");
     t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
-    t.lastElementChild.scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
     if (textObs) {
         textObs.disconnect();
     }
@@ -227,9 +226,16 @@ function updateTexts(msg)
         }
     });
     const channel = getChannel(msg.namekey);
-    channel.unread.count = 0;
-    Q(channel.element, ".unread").innerText = "";
-    send({ cmd: "catchup", namekey: msg.namekey, id: msg.texts[msg.texts.length - 1].id });
+    channel.unread = msg.unread;
+    I(msg.unread.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
+    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
+    for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
+        if (txt.id == channel.unread.cursor) {
+            for (txt = txt.nextSibling; txt; txt = txt.nextSibling) {
+                textObs.observe(txt);
+            }
+        }
+    }
 }
 
 function updateUnread(msg)
@@ -244,7 +250,7 @@ function updateText(msg)
     const t = Q("#texts");
     const atbottom = (t.scrollTop > t.scrollHeight - t.clientHeight - 50);
     const n = t.appendChild(N(htmlText(msg.text)));
-    if (atbottom) {
+    if (atbottom && document.visibilityState == "visible") {
         t.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
         send({ cmd: "catchup", namekey: msg.namekey, id: msg.text.id });
     }
@@ -308,6 +314,7 @@ function startup()
     sock.addEventListener("open", e => {
         send = (msg) => sock.send(JSON.stringify(msg));
     });
+    sock.addEventListener("close", _ => setTimeout(startup, 10000));
     sock.addEventListener("message", e => {
         try {
             const msg = JSON.parse(e.data);

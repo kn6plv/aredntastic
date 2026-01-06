@@ -30,10 +30,10 @@ export function setup(config)
     timers.setInterval("nodeinfo", config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
 };
 
-function createNodeinfoMessage(to, extra)
+function createNodeinfoMessage(to, namekey, extra)
 {
     const me = node.getInfo();
-    return message.createMessage(to, null, null, "nodeinfo", {
+    return message.createMessage(to, null, namekey, "nodeinfo", {
         id: sprintf("!%08x", me.id),
         long_name: me.long_name,
         short_name: me.short_name,
@@ -48,7 +48,7 @@ function createNodeinfoMessage(to, extra)
 export function tick()
 {
     if (timers.tick("nodeinfo")) {
-        router.queue(createNodeinfoMessage(null));
+        router.queue(createNodeinfoMessage(null, null, null));
     }
 };
 
@@ -57,7 +57,7 @@ export function process(msg)
     if (msg.data?.nodeinfo) {
         nodedb.updateNodeinfo(msg.from, msg.data.nodeinfo);
         if (node.toMe(msg) && msg.data.want_response) {
-            router.queue(createNodeinfoMessage(msg.from, {
+            router.queue(createNodeinfoMessage(msg.from, msg.namekey, {
                 data: {
                     request_id: msg.id
                 }
@@ -66,7 +66,7 @@ export function process(msg)
     }
     else if (!nodedb.getNode(msg.from, false) && !node.fromMe(msg)) {
         nodedb.createNode(msg.from);
-        router.queue(createNodeinfoMessage(msg.from, {
+        router.queue(createNodeinfoMessage(msg.from, msg.namekey, {
             data: {
                 want_response: true
             }

@@ -1,7 +1,7 @@
 
 const timers = {};
 
-export function setInterval(name, timeout)
+export function setInterval(name, timeout, sdelay)
 {
     if (type(timeout) === "string") {
         switch (substr(timeout, -1)) {
@@ -17,7 +17,7 @@ export function setInterval(name, timeout)
                 break;
         }
     }
-    timers[name] = { next: clock()[0], timeout: timeout };
+    timers[name] = { next: clock()[0] + (sdelay || 60), timeout: timeout };
 };
 
 export function tick(name)

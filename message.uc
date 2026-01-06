@@ -37,7 +37,7 @@ export function createMessage(to, from, namekey, type, payload, extra)
     const msg = {
         from: fid,
         to: to ?? node.BROADCAST,
-        namekey: namekey,
+        namekey: chan?.namekey,
         channel: chan?.hash ?? 0,
         id: math.rand(),
         rx_time: time(),
