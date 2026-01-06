@@ -78,7 +78,7 @@ function nodeExpand(node)
     node.num = n;
     node.colors = nodeColors(n);
     node.rolename = roles[node.role] ?? "?";
-    node.logo = node.hw_model == 255 ? "aredn" : "meshtastic";
+    node.logo = node.hw_model == 254 ? "aredn" : "meshtastic";
     return node;
 }
 
@@ -145,41 +145,32 @@ function updateNodes(msg)
 
 function updateNode(msg)
 {
-    const n = I(msg.node.id);
     const node = nodeExpand(msg.node);
     nodes[node.num] = node;
     const nd = N(htmlNode(node));
     const nl = Q("#nodes");
     if (document.visibilityState == "hidden") {
-        nl.insertBefore(nd, nl.firstElementChild);
+        const n = I(msg.node.id);
         if (n) {
             nl.removeChild(n);
         }
-        if (nl.scrollTop < 70) {
-            nl.scrollTop = 0;
-        }
-        else {
-            nl.scrollTop += nd.offsetHeight;
-        }
+        nl.insertBefore(nd, nl.firstElementChild);
+        nd.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
     }
     else {
         requestAnimationFrame(_ => {
+            const n = I(msg.node.id);
             if (nl.firstElementChild === n) {
                 nl.replaceChild(nd, n);
             }
             else {
-                nl.insertBefore(nd, nl.firstElementChild);
                 if (n) {
                     nl.removeChild(n);
                 }
+                nl.insertBefore(nd, nl.firstElementChild);
                 if (nl.scrollTop < 70) {
-                    if (document.visibilityState == "hidden") {
-                        nl.scrollTop = 0;
-                    }
-                    else {
-                        nd.nextSibling.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
-                        nd.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-                    }
+                    nd.nextSibling.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
+                    nd.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
                 }
                 else {
                     nl.scrollTop += nd.offsetHeight;
@@ -288,24 +279,8 @@ function sendMessage(event)
     return true;
 }
 
-function openDialog(html)
-{
-    if (!Q("#main dialog")) {
-        const dialog = document.createElement("dialog");
-        dialog.innerHTML = html;
-        Q("#main").prepend(dialog);
-        dialog.addEventListener("keypress", e => {
-            if (e.key === "Escape") {
-                dialog.remove();
-            }
-        });
-        dialog.showModal();
-    }
-}
-
 function openChannelConfig()
 {
-    openDialog("Channel Config");
 }
 
 function startup()

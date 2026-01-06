@@ -4,6 +4,7 @@ import * as uci from "uci";
 import * as services from "aredn.services";
 import * as node from "../../node.uc";
 import * as channel from "../../channel.uc";
+import * as crypto from "../../crypto/crypto.uc";
 
 const CURL = "/usr/bin/curl";
 
@@ -71,7 +72,7 @@ const badges = {};
         location.altitude = ucdata.height;
     }
     if (location.precision === null) {
-        location.precision = 0;
+        location.precision = 32;
     }
     if (location.source === null && fs.readfile("/tmp/timesync") === "gps") {
         location.source = LOCATION_SOURCE_INTERNAL;
@@ -172,7 +173,7 @@ function path(name)
         return;
     }
     myid = me.id;
-    services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: me.private_key, channels: map(channels, c => c.namekey) });
+    services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: crypto.pKeyToString(me.private_key), channels: map(channels, c => c.namekey) });
 }
 
 /* export */ function badge(key, count)

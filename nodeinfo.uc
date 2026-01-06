@@ -8,7 +8,9 @@ import * as textmessage from "textmessage";
 import * as crypto from "crypto.crypto";
 
 const PRIVATE_HW = 255;
+const RAVEN_HW = 254;
 const DEFAULT_INTERVAL = 3 * 60 * 60;
+let platform = "raven";
  
 parse.registerProto(
     "nodeinfo", 4,
@@ -27,6 +29,7 @@ parse.registerProto(
 
 export function setup(config)
 {
+    platform = config.platform?.type ?? "raven";
     timers.setInterval("nodeinfo", config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
 };
 
@@ -38,10 +41,11 @@ function createNodeinfoMessage(to, namekey, extra)
         long_name: me.long_name,
         short_name: me.short_name,
         macaddr: me.macaddr,
-        hw_model: PRIVATE_HW,
+        hw_model: RAVEN_HW,
         role: me.role,
         public_key: crypto.pKeyToString(me.public_key),
-        is_unmessagable: !textmessage.isMessagable()
+        is_unmessagable: !textmessage.isMessagable(),
+        platform: platform
     }, extra);
 }
 

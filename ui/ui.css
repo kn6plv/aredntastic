@@ -46,19 +46,6 @@ input
 {
     font-family: var(--font-family);
 }
-dialog
-{
-    display: none;
-    outline: none;
-}
-dialog[open]
-{
-    display: flex;
-}
-dialog::backdrop
-{
-    background-color: rgba(0, 0, 0, 0.5);
-}
 #all
 {
     height: 100%;

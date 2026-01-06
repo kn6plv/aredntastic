@@ -159,7 +159,7 @@ export function generateKeyPair()
 {
     const kprivate = [];
     for (let i = 0; i < 16; i++) {
-        kprivate[i] = (math.rand(255) << 8) | math.rand(255);
+        kprivate[i] = ((math.rand() & 255) << 8) | (math.rand() & 255);
     }
     return {
         private: kprivate,
