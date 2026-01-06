@@ -3,7 +3,7 @@
 VERSION=0.0.1
 
 ROOT=/tmp/raven-build-$$
-SRC=../..
+SRC=$(dirname $0)/../..
 
 rm -rf $ROOT/
 
