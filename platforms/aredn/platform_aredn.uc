@@ -1,9 +1,9 @@
 import * as fs from "fs";
-import * as timers from "timers";
+import * as timers from "../../timers.uc";
 import * as uci from "uci";
 import * as services from "aredn.services";
-import * as node from "node";
-import * as channel from "channel";
+import * as node from "../../node.uc";
+import * as channel from "../../channel.uc";
 
 const CURL = "/usr/bin/curl";
 
@@ -30,12 +30,12 @@ const badges = {};
         }
         fs.mkdir(p);
     }
-    mkdirp("/usr/local/raven");
+    mkdirp("/usr/local/raven/data");
     mkdirp("/tmp/apps/raven");
 
     const c = uci.cursor();
-    ucdata.latitide = c.get("aredn", "@location[0]", "lat");
-    ucdata.longitude = c.get("aredn", "@location[0]", "lat");
+    ucdata.latitude = c.get("aredn", "@location[0]", "lat");
+    ucdata.longitude = c.get("aredn", "@location[0]", "lon");
     ucdata.height = c.get("aredn", "@location[0]", "height");
     ucdata.hostname = c.get("system", "@system[0]", "hostname");
 
@@ -62,7 +62,7 @@ const badges = {};
 {
     const location = config.location ?? (config.location = {});
     if (location.latitude === null) {
-        location.latitide = ucdata.latitide;
+        location.latitude = ucdata.latitude;
     }
     if (location.longitude === null) {
         location.longitude = ucdata.longitude;
@@ -102,7 +102,7 @@ const badges = {};
 
 function path(name)
 {
-    return `/etc/raven/${name}.json`;
+    return `/usr/local/raven/data/${name}.json`;
 }
 
 /* export */ function load(name)
@@ -237,7 +237,7 @@ function path(name)
                         bynamekey[namekey] = [];
                         channel.addMessageNameKey(namekey);
                     }
-                    pushd(bynamekey[namekey], service);
+                    push(bynamekey[namekey], service);
                     nchannels[namekey] = true;
                 }
                 service.channels = nchannels;

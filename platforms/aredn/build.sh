@@ -11,8 +11,10 @@ mkdir -p $ROOT/control \
     $ROOT/data/www/cgi-bin/apps/raven \
     $ROOT/data/www/apps/raven \
     $ROOT/tmp/apps/raven \
-    $ROOT/data/usr/local/raven/platform/aredn $ROOT/data/usr/local/raven/crypto \
-    $ROOT/data/etc/init.d
+    $ROOT/data/usr/local/raven/platforms/aredn $ROOT/data/usr/local/raven/crypto \
+    $ROOT/data/etc/init.d \
+    $ROOT/data/etc/local/mesh-firewall \
+    $ROOT/data/etc/arednsysupgrade.d
 
 cat > $ROOT/debian-binary <<__EOF__
 2.0
@@ -20,7 +22,7 @@ __EOF__
 cat > $ROOT/control/control <<__EOF__
 Package: raven
 Version: ${VERSION}
-Depends: ucode
+Depends: ucode, curl
 Provides:
 Source: package/raven
 Section: net
@@ -33,6 +35,7 @@ cat > $ROOT/control/postinst <<__EOF__
 #!/bin/sh
 /etc/init.d/raven enable
 /etc/init.d/raven start
+/usr/local/bin/restart-firewall
 exit 0
 __EOF__
 cat > $ROOT/control/prerm <<__EOF__
@@ -41,21 +44,36 @@ cat > $ROOT/control/prerm <<__EOF__
 /etc/init.d/raven disable
 exit 0
 __EOF__
-chmod 755 $ROOT/control/postinst $ROOT/control/prerm
+cat > $ROOT/data/etc/local/mesh-firewall/21-raven <<__EOF__
+nft insert rule inet fw4 input_lan tcp dport 4404 accept
+nft insert rule inet fw4 input_wifi tcp dport 4404 accept
+nft insert rule inet fw4 input_dtdlink tcp dport 4404 accept
+nft insert rule inet fw4 input_vpn tcp dport 4404 accept
+nft insert rule inet fw4 input_lan udp dport 4404 accept
+nft insert rule inet fw4 input_wifi udp dport 4404 accept
+nft insert rule inet fw4 input_dtdlink udp dport 4404 accept
+nft insert rule inet fw4 input_vpn udp dport 4404 accept
+__EOF__
+chmod 755 $ROOT/control/postinst $ROOT/control/prerm $ROOT/data/etc/local/mesh-firewall/21-raven
 
 cp $SRC/*.uc $ROOT/data/usr/local/raven/
 cp $SRC/crypto/*.uc $ROOT/data/usr/local/raven/crypto/
-cp $SRC/platform/aredn/*.uc $ROOT/data/usr/local/raven/platform/aredn/
-cp $SRC/
+cp $SRC/platforms/aredn/*.uc $ROOT/data/usr/local/raven/platforms/aredn/
+cp $SRC/platforms/aredn/raven.conf $ROOT/data/usr/local/raven/
 
 cp $SRC/ui/index.html $SRC/ui/ui.js $SRC/ui/ui.css $SRC/ui/raven.svg $ROOT/data/www/apps/raven/
-cp $SRC/platform/aredn/admin.sh $ROOT/data/www/cgi-bin/raven/admin
+cp $SRC/ui/raven.svg $ROOT/data/www/apps/raven/icon.svg
+cp $SRC/platforms/aredn/admin.sh $ROOT/data/www/cgi-bin/apps/raven/admin
 
-cp $SRC/platform/aredn/raven.init $ROOT/data/etc/init.d/
+cp $SRC/platforms/aredn/raven.init $ROOT/data/etc/init.d/raven
 
-(cd $ROOT/control ; tar cfz ../control.tar.gz)
-(cd $ROOT/data ; tar cfz ../data.tar.gz)
-(cd $ROOT ; tar cfz raven_${VESION}_all.ipk control.tar.gz data.tar.gz debian-binary)
+cp $SRC/platforms/aredn/upgrade.conf $ROOT/data/etc/arednsysupgrade.d/KN6PLV.raven.conf
 
-mv $ROOT/raven_${VESION}_all.ipk .
+chmod 755 $ROOT/data/www/apps/raven/* $ROOT/data/www/cgi-bin/apps/raven/admin
+
+(cd $ROOT/control ; tar cfz ../control.tar.gz .)
+(cd $ROOT/data ; tar cfz ../data.tar.gz .)
+(cd $ROOT ; tar cfz raven_${VERSION}_all.ipk control.tar.gz data.tar.gz debian-binary)
+
+mv $ROOT/raven_${VERSION}_all.ipk .
 rm -rf $ROOT/

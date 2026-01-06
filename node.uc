@@ -148,15 +148,15 @@ export function setup(config)
             source: location.source ?? LOCATION_SOURCE_MANUAL
         };
     }
-    if (config?.long_name) {
+    if (config.long_name) {
         me.long_name = substr(config.long_name, 0, MAX_LONG_NAME_LENGTH);
     }
-    if (config?.short_name) {
+    if (config.short_name) {
         me.short_name = substr(config.short_name, 0, MAX_SHORT_NAME_LENGTH);
     }
-    switch (config?.role) {
+    switch (config.role) {
         case "client":
-            if (config.unicast && config.mulicast) {
+            if (config.unicast && config.multicast) {
                 me.role = ROLE_CLIENT;
             }
             else {

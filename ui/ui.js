@@ -304,7 +304,7 @@ function openChannelConfig()
 
 function startup()
 {
-    const sock = new WebSocket(`ws://aredn-build:4404`);
+    const sock = new WebSocket(`ws://${location.hostname}:4404`);
     sock.addEventListener("open", e => {
         send = (msg) => sock.send(JSON.stringify(msg));
     });
