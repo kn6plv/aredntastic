@@ -77,7 +77,7 @@ function nodeExpand(node)
     node.num = n;
     node.colors = nodeColors(n);
     node.rolename = roles[node.role] ?? "?";
-    node.logo = node.hw_model == 254 ? "aredn" : "meshtastic";
+    node.logo = node.hw;
     return node;
 }
 
@@ -126,6 +126,27 @@ function htmlText(text)
             <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
             <div class="t">${ttext}</div>
         </div>
+    </div>`;
+}
+
+function htmlChannelConfig()
+{
+    const body = channels.map(c => {
+        const nk = c.namekey.split(" ");
+        return `<div class="c">
+            <input value="${nk[0]}" minlength="1" maxlength="11" size="11" placeholder="Name">
+            <input value="${nk[1]}" minlength="4" maxlength="43" size="43" placeholder="Key">
+            <select>
+                <option>new key</option>
+                <option>1 byte</option>
+                <option>128 bit</option>
+                <option>256 bit</option>
+            </select>
+            <button onclick="rmChannel(event)">-</button><button onclick="addChannel(event)">+</button></div>`;
+    }).join("");
+    return `<div class="config">
+        <div class="t">Configure Channels</div>
+        <div class="b">${body}</div>
     </div>`;
 }
 
@@ -192,16 +213,13 @@ function updateChannels(msg)
     }
 }
 
-function updateTexts(msg)
+function restartTextsObserver(channel)
 {
-    const t = Q("#texts");
-    t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
     if (textObs) {
         textObs.disconnect();
     }
     textObs = new IntersectionObserver(entries => {
         let newest = null;
-        const channel = getChannel(msg.namekey);
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 textObs.unobserve(entry.target);
@@ -214,10 +232,17 @@ function updateTexts(msg)
         });
         if (newest) {
             Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
-            send({ cmd: "catchup", namekey: msg.namekey, id: channel.unread.cursor });
+            send({ cmd: "catchup", namekey: channel.namekey, id: channel.unread.cursor });
         }
-    }, { root: t });
+    }, { root: Q("#texts") });
+}
+
+function updateTexts(msg)
+{
+    const t = Q("#texts");
+    t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
     const channel = getChannel(msg.namekey);
+    restartTextsObserver(channel);
     channel.unread = msg.unread;
     if (channel.unread.cursor) {
         I(channel.unread.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
@@ -253,13 +278,6 @@ function updateTexts(msg)
     Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
 }
 
-function updateUnread(msg)
-{
-    const channel = getChannel(msg.namekey);
-    channel.unread = msg.unread;
-    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
-}
-
 function updateText(msg)
 {
     const t = Q("#texts");
@@ -271,14 +289,28 @@ function updateText(msg)
     }
     else {
         textObs.observe(n);
-        updateUnread(msg);
+        const channel = getChannel(msg.namekey);
+        channel.unread.count++;
+        Q(channel.element, ".unread").innerText = channel.unread.count;
     }
+}
+
+function updateUnread(msg)
+{
+    const channel = getChannel(msg.namekey);
+    channel.unread = msg.unread;
+    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
 }
 
 function selectChannel(namekey)
 {
     if (rightSelection === namekey) {
-        Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+        const last = Q("#texts").lastElementChild;
+        last.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+        const channel = getChannel(namekey);
+        restartTextsObserver(channel);
+        Q(channel.element, ".unread").innerText = "";
+        send({ cmd: "catchup", namekey: namekey, id: last.id });
     }
     else {
         rightSelection = namekey;
@@ -305,19 +337,30 @@ function sendMessage(event)
 
 function openChannelConfig()
 {
+    if (rightSelection !== "channel-config") {
+        rightSelection = "channel-config";
+        Q("#texts").innerHTML = htmlChannelConfig();
+    }
+}
+
+function addChannel(e)
+{
+}
+
+function rmChannel(e)
+{
 }
 
 function startup()
 {
     const sock = new WebSocket(`ws://${location.hostname}:4404`);
-    sock.addEventListener("open", e => {
+    sock.addEventListener("open", _ => {
         send = (msg) => sock.send(JSON.stringify(msg));
     });
     sock.addEventListener("close", _ => setTimeout(startup, 10000));
     sock.addEventListener("message", e => {
         try {
             const msg = JSON.parse(e.data);
-            //console.log(msg);
             switch (msg.event) {
                 case "me":
                     updateMe(msg);

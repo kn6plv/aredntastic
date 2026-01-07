@@ -49,7 +49,7 @@ function basicNode(node)
             role: nodeinfo.role ?? 0,
             lastseen: node.lastseen,
             hops: node.hops,
-            hw_model: nodeinfo.hw_model ?? 0
+            hw: nodeinfo.hw_model === 254 ? "aredn" : "meshtastic"
         };
     }
     return null;
