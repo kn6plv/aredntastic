@@ -1,4 +1,3 @@
-
 let send = () => {};
 let rightSelection = null;
 let channels = null;
@@ -207,27 +206,51 @@ function updateTexts(msg)
             if (entry.isIntersecting) {
                 textObs.unobserve(entry.target);
                 channel.unread.count--;
-                if (!newest || entry.time > newest.time) {
+                if (!newest || entry.time >= newest.time) {
                     newest = entry;
+                    channel.unread.cursor = entry.target.id;
                 }
             }
         });
         if (newest) {
             Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
-            send({ cmd: "catchup", namekey: msg.namekey, id: newest.target.id });
+            send({ cmd: "catchup", namekey: msg.namekey, id: channel.unread.cursor });
         }
-    });
+    }, { root: t });
     const channel = getChannel(msg.namekey);
     channel.unread = msg.unread;
-    I(msg.unread.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
-    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
-    for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
-        if (txt.id == channel.unread.cursor) {
-            for (txt = txt.nextSibling; txt; txt = txt.nextSibling) {
-                textObs.observe(txt);
+    if (channel.unread.cursor) {
+        I(channel.unread.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
+        for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
+            if (txt.id === channel.unread.cursor) {
+                for (txt = txt.nextSibling; txt; txt = txt.nextSibling) {
+                    textObs.observe(txt);
+                }
             }
         }
     }
+    else if (t.firstElementChild) {
+        const container = t.getBoundingClientRect();
+        function onScreen(e)
+        {
+            const r = e.getBoundingClientRect();
+            return r.bottom >= container.top && r.top < container.bottom;
+        }
+        t.firstElementChild.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
+        for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
+            if (onScreen(txt)) {
+                channel.unread.count--;
+                channel.unread.cursor = txt.id
+            }
+            else {
+                textObs.observe(txt);
+            }
+        }
+        if (channel.unread.cursor) {
+            send({ cmd: "catchup", namekey: channel.namekey, id: channel.unread.cursor });
+        }
+    }
+    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
 }
 
 function updateUnread(msg)

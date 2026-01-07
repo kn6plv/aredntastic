@@ -16,8 +16,8 @@ function loadMessages(namekey)
     if (!channelmessages[namekey]) {
         channelmessages[namekey] = platform.load(`messages.${namekey}`) ?? {
             max: MAX_MESSAGES,
-            count: 0,
             index: {},
+            count: 0,
             cursor: null,
             messages: []
         };
@@ -27,23 +27,21 @@ function loadMessages(namekey)
 
 function saveMessages(namekey, chanmessages)
 {
+    const messages = chanmessages.messages;
+    const cursor = chanmessages.cursor;
     let count = 0;
-    if (!chanmessages.cursor) {
-        count = length(chanmessages.messages);
-    }
-    else {
-        const messages = chanmessages.messages;
-        const cursor = chanmessages.cursor;
-        for (let i = length(messages) - 1; i >= 0; i--) {
-            if (messages[i].id === cursor) {
-                break;
-            }
-            count++;
+    for (let i = length(messages) - 1; i >= 0; i--) {
+        if (messages[i].id === cursor) {
+            break;
         }
+        count++;
     }
     chanmessages.count = count;
+    if (count === length(messages)) {
+        chanmessages.cursor = null;
+    }
     channelmessagesdirty[namekey] = true;
-    platform.badge(`messages.${namekey}`, count);
+    platform.badge(`messages.${namekey}`, chanmessages.count);
 }
 
 function addMessage(msg)
@@ -60,7 +58,7 @@ function addMessage(msg)
         });
         while (length(chanmessages.messages) > chanmessages.max) {
             const m = shift(chanmessages.messages);
-            delete chanmessages[m.id];
+            delete chanmessages.index[m.id];
         }
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
