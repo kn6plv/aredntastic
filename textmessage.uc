@@ -29,6 +29,12 @@ function saveMessages(namekey, chanmessages)
 {
     const messages = chanmessages.messages;
     const cursor = chanmessages.cursor;
+    const max = chanmessages.max;
+    const index = chanmessages.index;
+    while (length(messages) > max) {
+        const m = shift(messages);
+        delete index[m.id];
+    }
     let count = 0;
     for (let i = length(messages) - 1; i >= 0; i--) {
         if (messages[i].id === cursor) {
@@ -56,10 +62,6 @@ function addMessage(msg)
             when: msg.rx_time,
             text: msg.data.text_message
         });
-        while (length(chanmessages.messages) > chanmessages.max) {
-            const m = shift(chanmessages.messages);
-            delete chanmessages.index[m.id];
-        }
         sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
         event.notify({ cmd: "text", namekey: msg.namekey, id: idx }, `text ${msg.namekey} ${idx}`);
@@ -99,6 +101,15 @@ export function catchUpMessagesTo(namekey, id)
         saveMessages(namekey, cm);
     }
     return { count: cm.count, cursor: cm.cursor, max: cm.max };
+};
+
+export function updateMax(channel)
+{
+    const cm = loadMessages(channel.namekey);
+    if (cm.max != channel.max) {
+        cm.max = channel.max;
+        saveMessages(channel.namekey, cm);
+    }
 };
 
 export function unread(namekey)

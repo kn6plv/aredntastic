@@ -406,11 +406,15 @@ select
 }
 .config .b .c input:nth-child(1)
 {
-    width: 100px;
+    width: 140px;
 }
 .config .b .c input:nth-child(2)
 {
     width: 300px;
+}
+.config .b .c input:nth-child(3)
+{
+    width: 60px;
 }
 .config .p
 {

@@ -7,7 +7,7 @@ const primaryChannelPresets = [
     "MediumFast",
     "LongSlow",
     "LongFast",
-    "LongModerate",
+    "LongMod",
     "LongTurbo"
 ];
 
@@ -108,11 +108,11 @@ export function getAllChannels()
     return values(channelByName);
 };
 
-export function updateChannels(keynames)
+export function updateChannels(channels)
 {
     channelByName = {};
-    for (let i = 0; i < length(keynames); i++) {
-        const kn = split(keynames[i], " ");
+    for (let i = 0; i < length(channels); i++) {
+        const kn = split(channels[i].namekey, " ");
         setChannel(kn[0], kn[1]);
     }
 };

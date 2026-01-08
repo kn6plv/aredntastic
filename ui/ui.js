@@ -142,6 +142,7 @@ function htmlChannelConfig()
         return `<form class="c">
             <input value="${e.name}" oninput="typeChannelName(${i}, event.target.value)" required minlength="1" maxlength="11" size="11" placeholder="Name" ${e.readonly ? "readonly" : ""}>
             <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""}>
+            <input value="${e.max}" oninput="typeChannelMax(${i}, event.target.value)" required minlength="2" maxlength="4" size="4" placeholder="Count" ${e.readonly ? "readonly" : ""}>
             <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>
                 <option>new key</option>
                 <option>1 byte</option>
@@ -365,7 +366,8 @@ function openChannelConfig()
                 name: nk[0],
                 key: nk[1],
                 primary: c.primary,
-                readonly: i < 2
+                readonly: i < 2,
+                max: c.unread.max
             });
         });
         Q("#texts").innerHTML = htmlChannelConfig();
@@ -374,7 +376,7 @@ function openChannelConfig()
 
 function addChannel(idx)
 {
-    echannels.splice(idx + 1, 0, { name: "", key: "" });
+    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100 });
     Q("#texts").innerHTML = htmlChannelConfig();
 }
 
@@ -392,6 +394,11 @@ function typeChannelName(idx, value)
 function typeChannelKey(idx, value)
 {
     echannels[idx].key = value;
+}
+
+function typeChannelMax(idx, value)
+{
+    echannels[idx].max = value;
 }
 
 function primaryChannelChange(value)
@@ -435,17 +442,18 @@ function doneChannels()
     const channelnames = [];
     echannels.forEach(e => {
         try {
-            if (e.name.length >= 1 && e.name.length <= 11 && e.key.length >= 4 && e.key.length <= 43 && e.name.search(/[ \t]/) === -1 && atob(e.key)) {
+            if (e.name.length >= 1 && e.key.length >= 4 && e.name.search(/[ \t]/) === -1 && atob(e.key) && e.max >= 10 && e.max <= 1000) {
                 const namekey = `${e.name} ${e.key}`;
-                const channel = getChannel(namekey) || { primary: false, unread: 0 };
-                channelnames.push(namekey);
+                const channel = getChannel(namekey) || { primary: false, unread: { count: 0, cursor: null, max: 100 } };
+                channelnames.push({ namekey: namekey, max: e.max });
+                channel.unread.max = e.max;
                 nchannels.push({ namekey: namekey, primary: channel.primary, unread: channel.unread });
             }
         }
         catch (_) {
         }
     });
-    rightSelection = channelnames[0];
+    rightSelection = channelnames[0].namekey;
     send({ cmd: "texts", namekey: rightSelection });
     send({ cmd: "newchannels", channels: channelnames });
     updateChannels({ channels: nchannels });
@@ -458,6 +466,7 @@ function startup()
         send = (msg) => sock.send(JSON.stringify(msg));
     });
     sock.addEventListener("close", _ => setTimeout(startup, 10000));
+    sock.addEventListener("error", _ => setTimeout(startup, 10000));
     sock.addEventListener("message", e => {
         try {
             const msg = JSON.parse(e.data);

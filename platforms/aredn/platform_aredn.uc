@@ -110,7 +110,12 @@ function path(name)
 /* export */ function load(name)
 {
     const data = fs.readfile(path(name));
-    return data ? json(data) : null;
+    try {
+        return data ? json(data) : null;
+    }
+    catch (_) {
+        return null;
+    }
 }
 
 /* export */ function store(name, data)
