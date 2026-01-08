@@ -5,12 +5,15 @@ import * as nodedb from "nodedb";
 import * as channel from "channel";
 import * as textmessage from "textmessage";
 import * as router from "router";
+import * as config from "config";
 
 const q = [];
 let merge = {};
+let update = null;
 
 export function setup(config)
 {
+    update = config.update;
     timers.setInterval("event", 10 * 60);
 };
 
@@ -120,9 +123,17 @@ export function tick()
                 case "channels":
                 {
                     const channels = map(channel.getAllChannels(), c => {
-                        return { namekey: c.namekey, unread: textmessage.unread(c.namekey) };
+                        return { namekey: c.namekey, primary: c.primary, unread: textmessage.unread(c.namekey) };
                     });
                     send({ event: msg.cmd, channels: channels });
+                    break;
+                }
+                case "newchannels":
+                {
+                    channel.updateChannels(msg.channels);
+                    notify({ cmd: "channels" });
+                    platform.publish(node.getInfo(), channel.getAllChannels());
+                    update("channels");
                     break;
                 }
                 case "catchup":

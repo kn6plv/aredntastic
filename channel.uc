@@ -7,12 +7,13 @@ const primaryChannelPresets = [
     "MediumFast",
     "LongSlow",
     "LongFast",
-    "LongMod"
+    "LongModerate",
+    "LongTurbo"
 ];
 
 const MAX_NAME_LENGTH = 13;
 
-const channelByName = {};
+let channelByName = {};
 const channelByNameKey = {};
 const channelsByHash = {};
 let primaryChannel;
@@ -47,7 +48,7 @@ function getHash(name, crypto)
 export function addMessageNameKey(namekey)
 {
     if (channelByNameKey[namekey]) {
-        return null;
+        return channelByNameKey[namekey];
     }
     const nk = split(namekey, " ");
     const crypto = getCryptoKey(nk[1]);
@@ -63,15 +64,14 @@ function setChannel(name, key)
 {
     name = substr(replace(name, /[ \t\r\n]/g, ""), 0, MAX_NAME_LENGTH);
     const chan = addMessageNameKey(`${name} ${key}`);
-    if (chan) {
-        if (chan.crypto[-1] === 1) {
-            if (index(primaryChannelPresets, name) == -1) {
-                print("Bad primary channel name\n");
-            }
-            primaryChannel = chan;
+    if (chan.crypto[-1] === 1) {
+        if (index(primaryChannelPresets, name) == -1) {
+            print("Bad primary channel name\n");
         }
-        channelByName[name] = chan;
+        primaryChannel = chan;
+        chan.primary = true;
     }
+    channelByName[name] = chan;
 };
 
 export function getChannelsByHash(hash)
@@ -106,6 +106,15 @@ export function getChannelByNameKey(namekey)
 export function getAllChannels()
 {
     return values(channelByName);
+};
+
+export function updateChannels(keynames)
+{
+    channelByName = {};
+    for (let i = 0; i < length(keynames); i++) {
+        const kn = split(keynames[i], " ");
+        setChannel(kn[0], kn[1]);
+    }
 };
 
 export function setup(config)

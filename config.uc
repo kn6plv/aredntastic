@@ -19,12 +19,88 @@ import * as device from "telemetry_device";
 import * as environmental_weewx from "telemetry_environmental_weewx";
 import * as power from "telemetry_power";
 
+let bconfig;
+let config;
+let override;
+
+function jsonEq(a, b)
+{
+    return sprintf("%J", a) === sprintf("%J", b);
+}
+
+function clone(a)
+{
+    return json(sprintf("%J", a));
+}
+
+function update(option)
+{
+    let write = false;
+
+    switch (option) {
+        case "channels":
+        {
+            const channels = channel.getAllChannels();
+            const nchannels = {};
+            let primary = null;
+            for (let i = 0; i < length(channels); i++) {
+                const nk = split(channels[i].namekey, " ");
+                if (channels[i].primary) {
+                    primary = nk[0];
+                }
+                else {
+                    nchannels[nk[0]] = nk[1];
+                }
+            }
+            if (primary != config.preset) {
+                config.preset = primary;
+                if (primary == bconfig.preset) {
+                    delete override.preset;
+                }
+                else {
+                    override.preset = primary;
+                }
+                write = true;
+            }
+            if (!jsonEq(nchannels, config.channels)) {
+                if (jsonEq(nchannels, bconfig.channels)) {
+                    delete override.channels;
+                }
+                else {
+                    override.channels = nchannels;
+                }
+                write = true;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (write) {
+        const data = sprintf("%.2J", override);
+        if (fs.access("/etc/raven.conf.override")) {
+            fs.writefile("/etc/raven.conf.override", data);
+        }
+        else if (fs.access(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`)) {
+            fs.writefile(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`, data);
+        }
+        else if (fs.access("/etc/raven.conf")) {
+            fs.writefile("/etc/raven.conf.override", data);
+        }
+        else if (fs.access(`${fs.dirname(SCRIPT_NAME)}/raven.conf`)) {
+            fs.writefile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`, data);
+        }
+    }
+}
+
 export function setup()
 {
     push(REQUIRE_SEARCH_PATH, `${fs.dirname(SCRIPT_NAME)}/*.uc`);
 
-    const config = json(fs.readfile("/etc/raven.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`));
-    const override = json(fs.readfile("/etc/raven.conf.override") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`) ?? "[]");
+    bconfig = json(fs.readfile("/etc/raven.conf") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`));
+    config = clone(bconfig);
+    override = json(fs.readfile("/etc/raven.conf.override") ?? fs.readfile(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`) ?? "[]");
     if (type(override) === "object") {
         function f(c, o)
         {
@@ -47,6 +123,11 @@ export function setup()
         }
         f(config, override);
     }
+    else {
+        override = {};
+    }
+
+    config.update = update;
 
     if (config.debug) {
         global.DEBUG = function(...a)

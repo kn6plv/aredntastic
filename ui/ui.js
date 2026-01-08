@@ -1,10 +1,27 @@
 let send = () => {};
 let rightSelection = null;
 let channels = null;
+let echannels = null;
 const nodes = {};
 const me = {};
 let textObs;
 const xdiv = document.createElement("div");
+
+const roles = {
+    0: "Client",
+    1: "Client Mute",
+    2: "Router",
+    3: "Route Client",
+    4: "Repeater",
+    5: "Tracker",
+    6: "Sensor",
+    7: "Tak",
+    8: "Client Hidden",
+    9: "Lost and Found",
+    10: "Tak Tracker",
+    11: "Router Late",
+    12: "Client Base"
+};
 
 function Q(a, b)
 {
@@ -32,22 +49,6 @@ function T(text)
     xdiv.innerText = text;
     return xdiv.innerHTML;
 }
-
-const roles = {
-    0: "Client",
-    1: "Client Mute",
-    2: "Router",
-    3: "Route Client",
-    4: "Repeater",
-    5: "Tracker",
-    6: "Sensor",
-    7: "Tak",
-    8: "Client Hidden",
-    9: "Lost and Found",
-    10: "Tak Tracker",
-    11: "Router Late",
-    12: "Client Base"
-};
 
 function getChannel(namekey)
 {
@@ -86,7 +87,7 @@ function htmlChannel(channel)
     const nk = channel.namekey.split(" ");
     return `<div class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
         <div class="n">
-            <div class="t">${nk[0]}</div>
+            <div class="t">${channel.primary ? "Primary" : nk[0]}</div>
             <div class="s">${nk[1]}</div>
         </div>
         <div class="unread">${channel.unread.count > 0 ? channel.unread.count : ''}</div>
@@ -131,22 +132,42 @@ function htmlText(text)
 
 function htmlChannelConfig()
 {
-    const body = channels.map(c => {
-        const nk = c.namekey.split(" ");
-        return `<div class="c">
-            <input value="${nk[0]}" minlength="1" maxlength="11" size="11" placeholder="Name">
-            <input value="${nk[1]}" minlength="4" maxlength="43" size="43" placeholder="Key">
-            <select>
+    let primary = null;
+    const body = echannels.map((e, i) => {
+        const ne = echannels[i + 1] || {};
+        if (e.primary) {
+            primary = e.name;
+            return "";
+        }
+        return `<form class="c">
+            <input value="${e.name}" oninput="typeChannelName(${i}, event.target.value)" required minlength="1" maxlength="11" size="11" placeholder="Name" ${e.readonly ? "readonly" : ""}>
+            <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""}>
+            <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>
                 <option>new key</option>
                 <option>1 byte</option>
                 <option>128 bit</option>
                 <option>256 bit</option>
             </select>
-            <button onclick="rmChannel(event)">-</button><button onclick="addChannel(event)">+</button></div>`;
+            <button onclick="rmChannel(${i})" ${e.readonly ? "disabled" : ""}>-</button>
+            <button onclick="addChannel(${i})" ${e.readonly && ne.readonly ? "disabled" : ""}>+</button>
+        </form>`;
     }).join("");
+    const pchannel = primary ? `<div class="p"><div class="s">Primary</div><div class="cs">Channel <select onchange="primaryChannelChange(event.target.value)">
+        <option ${primary === "ShortTurbo" ? "selected" : ""}>ShortTurbo</option>
+        <option ${primary === "ShortSlow" ? "selected" : ""}>ShortSlow</option>
+        <option ${primary === "ShortFast" ? "selected" : ""}>ShortFast</option>
+        <option ${primary === "MediumSlow" ? "selected" : ""}>MediumSlow</option>
+        <option ${primary === "MediumFast" ? "selected" : ""}>MediumFast</option>
+        <option ${primary === "LongSlow" ? "selected" : ""}>LongSlow</option>
+        <option ${primary === "LongFast" ? "selected" : ""}>LongFast</option>
+        <option ${primary === "LongMod" ? "selected" : ""}>LongMod</option>
+        <option ${primary === "LongTurbo" ? "selected" : ""}>LongTurbo</option>
+    </select></div></div>` : "";
     return `<div class="config">
         <div class="t">Configure Channels</div>
-        <div class="b">${body}</div>
+        ${pchannel}
+        <div class="b"><div class="s">Secondary</div>${body}</div>
+        <div class="d"><button onclick="doneChannels()">Done</button></div>
     </div>`;
 }
 
@@ -233,6 +254,9 @@ function restartTextsObserver(channel)
         if (newest) {
             Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
             send({ cmd: "catchup", namekey: channel.namekey, id: channel.unread.cursor });
+            if (textObs.root.lastElementChild.id === channel.unread.cursor) {
+                restartTextsObserver(channel);
+            }
         }
     }, { root: Q("#texts") });
 }
@@ -305,12 +329,7 @@ function updateUnread(msg)
 function selectChannel(namekey)
 {
     if (rightSelection === namekey) {
-        const last = Q("#texts").lastElementChild;
-        last.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
-        const channel = getChannel(namekey);
-        restartTextsObserver(channel);
-        Q(channel.element, ".unread").innerText = "";
-        send({ cmd: "catchup", namekey: namekey, id: last.id });
+        Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
     }
     else {
         rightSelection = namekey;
@@ -339,16 +358,97 @@ function openChannelConfig()
 {
     if (rightSelection !== "channel-config") {
         rightSelection = "channel-config";
+        echannels = [];
+        channels.forEach((c, i) => {
+            const nk = c.namekey.split(" ");
+            echannels.push({
+                name: nk[0],
+                key: nk[1],
+                primary: c.primary,
+                readonly: i < 2
+            });
+        });
         Q("#texts").innerHTML = htmlChannelConfig();
     }
 }
 
-function addChannel(e)
+function addChannel(idx)
 {
+    echannels.splice(idx + 1, 0, { name: "", key: "" });
+    Q("#texts").innerHTML = htmlChannelConfig();
 }
 
-function rmChannel(e)
+function rmChannel(idx)
 {
+    echannels.splice(idx, 1);
+    Q("#texts").innerHTML = htmlChannelConfig();
+}
+
+function typeChannelName(idx, value)
+{
+    echannels[idx].name = value;
+}
+
+function typeChannelKey(idx, value)
+{
+    echannels[idx].key = value;
+}
+
+function primaryChannelChange(value)
+{
+    echannels[0].name = value;
+}
+
+function genChannelKey(idx, value)
+{
+    function bytesToBase64(bytes)
+    {
+        return btoa(Array.from(bytes, byte => String.fromCodePoint(byte)).join(""));
+    }
+    function rand() {
+        return Math.floor(Math.random() * 255);
+    }
+    let key = null;
+    switch (value) {
+        case "1 byte":
+            key = [ rand() ];
+            break;
+        case "128 bit":
+            key = [ rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand() ];
+            break;
+        case "256 bit":
+            key = [ rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand(),
+                    rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand() ];
+            break;
+        default:
+            break;
+    }
+    if (key) {
+        echannels[idx].key = bytesToBase64(key);
+        Q("#texts").innerHTML = htmlChannelConfig();
+    }
+}
+
+function doneChannels()
+{
+    const nchannels = [];
+    const channelnames = [];
+    echannels.forEach(e => {
+        try {
+            if (e.name.length >= 1 && e.name.length <= 11 && e.key.length >= 4 && e.key.length <= 43 && e.name.search(/[ \t]/) === -1 && atob(e.key)) {
+                const namekey = `${e.name} ${e.key}`;
+                const channel = getChannel(namekey) || { primary: false, unread: 0 };
+                channelnames.push(namekey);
+                nchannels.push({ namekey: namekey, primary: channel.primary, unread: channel.unread });
+            }
+        }
+        catch (_) {
+        }
+    });
+    rightSelection = channelnames[0];
+    send({ cmd: "texts", namekey: rightSelection });
+    send({ cmd: "newchannels", channels: channelnames });
+    updateChannels({ channels: nchannels });
 }
 
 function startup()

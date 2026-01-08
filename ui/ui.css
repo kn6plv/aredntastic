@@ -35,16 +35,18 @@ body
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 30px;
+    padding: 15px 20px;
     overflow: hidden;
     color: var(--default-fg-color);
     background-color: var(--body-bg-color);
     font-family: var(--font-family);
 }
 textarea,
-input
+input,
+select
 {
     font-family: var(--font-family);
+    color: inherit;
 }
 #all
 {
@@ -77,7 +79,7 @@ input
 }
 #footer
 {
-    height: 20px;
+    height: 0;
 }
 #left
 {
@@ -146,7 +148,7 @@ input
 #post
 {
     position: relative;
-    padding: 10px;
+    padding: 0 20px 10px 10px;
 }
 #post textarea
 {
@@ -162,7 +164,7 @@ input
 #post .count
 {
     position: absolute;
-    right: 16px;
+    right: 26px;
     bottom: 16px;
     font-size: 14px;
     color: grey;
@@ -310,6 +312,7 @@ input
     padding: 8px 10px;
     border-radius: 17px;
     background-color: var(--text-background-color);
+    white-space: pre;
 }
 .text.right .t
 {
@@ -328,7 +331,7 @@ input
 .config
 {
     height: 100%;
-    width: 100%;
+    margin-right: 10px;
     border: 1px solid var(--container-border-color);
     border-radius: var(--post-font-size);
     background-color: var(--container-background-color);
@@ -341,14 +344,104 @@ input
 }
 .config .b
 {
-    padding: 20px;
+    position: relative;
+    margin: 0 10px;
+    padding: 40px 20px 20px 20px;
+    border: 1px solid var(--container-border-color);
+    border-radius: var(--post-font-size);
+    background-color: #f8f8f8;
     flex-direction: column;
+    overflow: scroll;
+}
+.config .s
+{
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-weight: bold;
+}
+.config .b .c
+{
+    padding-left: 10px;
+}
+.config .b .c:nth-child(even)
+{
+    background-color: #f0f0f0;
+}
+.config .b .c:not(:last-child)
+{
+    border-bottom: 1px solid #d0d0d0;
+}
+.config .b .c input:invalid
+{
+    color: #800000;
 }
 .config .b .c input,
-.config .b .c select,
-.config .b .c button
+.config .b .c select
 {
     font-size: 16px;
+    padding: 5px;
+    border: 0;
+    border-right: 1px solid #d0d0d0 !important;
+    background-color: transparent;
+}
+.config .b .c select
+{
+    margin-right: 10px;
+}
+.config .b .c button
+{
+    width: 24px;
+    background-color: transparent;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    margin: 2px;
+    font-size: 14px;
+    justify-content: center;
+    font-weight: bold;
+}
+.config .b .c button:disabled
+{
+    visibility: hidden;
+}
+.config .b .c input:nth-child(1)
+{
+    width: 100px;
+}
+.config .b .c input:nth-child(2)
+{
+    width: 300px;
+}
+.config .p
+{
+    position: relative;
+    margin: 10px;
+    padding: 20px;
+    border: 1px solid var(--container-border-color);
+    border-radius: var(--post-font-size);
+    background-color: #f8f8f8;
+}
+.config .p .cs
+{
+    padding: 20px 0 0 12px;
+    line-height: 23px;
+}
+.config .p select
+{
+    margin-left: 10px;
+    font-size: 14px;
+}
+.config .d
+{
+    padding: 20px;
+    justify-content: right;
+    flex: 1;
+}
+.config .d button
+{
+    font-size: 16px;
+    padding: 4px 10px;
+    align-self: end;
 }
 
 .logo
