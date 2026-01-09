@@ -20,10 +20,10 @@
     --channel-selected-background-color: #f0f0f0;
     --channel-hover-background-color: #e8e8e8;
     --link-color: #0040c0;
-    --config-body-background-color: #f8f8f8;
-    --config-table-even-background-color: #f0f0f0;
+    --config-table-even-background-color: #f8f8f8;
     --config-table-separator-color: #d0d0d0;
     --invalid-text-color: #800000;
+    --disabled-text-color: #808080;
 }
 *
 {
@@ -356,10 +356,8 @@ a
 {
     position: relative;
     margin: 0 10px;
-    padding: 40px 20px 20px 20px;
-    border: 1px solid var(--container-border-color);
+    padding: 20px;
     border-radius: var(--post-font-size);
-    background-color: var(--config-body-background-color);
     flex-direction: column;
     overflow: scroll;
 }
@@ -410,6 +408,11 @@ a
     justify-content: center;
     font-weight: bold;
 }
+.config .b .c input:read-only,
+.config .b .c select:disabled
+{
+    color: var(--disabled-text-color);
+}
 .config .b .c button:disabled
 {
     visibility: hidden;
@@ -418,32 +421,15 @@ a
 {
     width: 140px;
 }
-.config .b .c input:nth-child(2)
+.config .b .c *:nth-child(2)
 {
     width: 300px;
+    margin-right: 0;
 }
 .config .b .c input:nth-child(3)
 {
     width: 60px;
-}
-.config .p
-{
-    position: relative;
-    margin: 10px;
-    padding: 20px;
-    border: 1px solid var(--container-border-color);
-    border-radius: var(--post-font-size);
-    background-color: var(--config-body-background-color);
-}
-.config .p .cs
-{
-    padding: 20px 0 0 12px;
-    line-height: 23px;
-}
-.config .p select
-{
-    margin-left: 10px;
-    font-size: 14px;
+    text-align: right;
 }
 .config .d
 {

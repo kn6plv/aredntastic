@@ -87,7 +87,7 @@ function htmlChannel(channel)
     const nk = channel.namekey.split(" ");
     return `<div class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
         <div class="n">
-            <div class="t">${channel.primary ? "Primary" : nk[0]}</div>
+            <div class="t">${channel.primary ? "Meshtastic" : nk[0]}</div>
             <div class="s">${nk[1]}</div>
         </div>
         <div class="unread">${channel.unread.count > 0 ? channel.unread.count : ''}</div>
@@ -153,21 +153,24 @@ function htmlChannelConfig()
             <button onclick="addChannel(${i})" ${e.readonly && ne.readonly ? "disabled" : ""}>+</button>
         </form>`;
     }).join("");
-    const pchannel = primary ? `<div class="p"><div class="s">Primary</div><div class="cs">Channel <select onchange="primaryChannelChange(event.target.value)">
-        <option ${primary === "ShortTurbo" ? "selected" : ""}>ShortTurbo</option>
-        <option ${primary === "ShortSlow" ? "selected" : ""}>ShortSlow</option>
-        <option ${primary === "ShortFast" ? "selected" : ""}>ShortFast</option>
-        <option ${primary === "MediumSlow" ? "selected" : ""}>MediumSlow</option>
-        <option ${primary === "MediumFast" ? "selected" : ""}>MediumFast</option>
-        <option ${primary === "LongSlow" ? "selected" : ""}>LongSlow</option>
-        <option ${primary === "LongFast" ? "selected" : ""}>LongFast</option>
-        <option ${primary === "LongMod" ? "selected" : ""}>LongMod</option>
-        <option ${primary === "LongTurbo" ? "selected" : ""}>LongTurbo</option>
-    </select></div></div>` : "";
     return `<div class="config">
         <div class="t">Configure Channels</div>
-        ${pchannel}
-        <div class="b"><div class="s">Secondary</div>${body}</div>
+        <div class="b">
+            <form class="c">
+                <input value="Meshtastic" readonly><select onchange="primaryChannelChange(event.target.value)">
+                    <option ${primary === "ShortTurbo" ? "selected" : ""}>ShortTurbo</option>
+                    <option ${primary === "ShortSlow" ? "selected" : ""}>ShortSlow</option>
+                    <option ${primary === "ShortFast" ? "selected" : ""}>ShortFast</option>
+                    <option ${primary === "MediumSlow" ? "selected" : ""}>MediumSlow</option>
+                    <option ${primary === "MediumFast" ? "selected" : ""}>MediumFast</option>
+                    <option ${primary === "LongSlow" ? "selected" : ""}>LongSlow</option>
+                    <option ${primary === "LongFast" ? "selected" : ""}>LongFast</option>
+                    <option ${primary === "LongMod" ? "selected" : ""}>LongMod</option>
+                    <option ${primary === "LongTurbo" ? "selected" : ""}>LongTurbo</option>
+                </select><input value="100" readonly><select disabled><option>new key</option></select>
+            </form>
+            ${body}
+        </div>
         <div class="d"><button onclick="doneChannels()">Done</button></div>
     </div>`;
 }
