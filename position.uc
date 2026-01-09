@@ -39,7 +39,7 @@ parse.registerProto(
 export function setup(config)
 {
     if (node.getLocation()) {
-        timers.setInterval("position", config.position?.interval ?? DEFAULT_INTERVAL);
+        timers.setInterval("position", 60, config.position?.interval ?? DEFAULT_INTERVAL);
     }
 };
 

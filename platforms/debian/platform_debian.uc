@@ -56,6 +56,11 @@ let rootdir = "/tmp/raven";
     return null;
 }
 
+/* export */ function getStoresByNamekey()
+{
+    return [];
+}
+
 /* export */ function publish()
 {
 }
@@ -86,6 +91,7 @@ return {
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,
+    getStoresByNamekey,
     publish,
     badge,
     auth,

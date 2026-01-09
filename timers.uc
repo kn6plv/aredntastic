@@ -1,7 +1,7 @@
 
 global.timers = {};
 
-export function setInterval(name, timeout, sdelay)
+function setTimer(name, delay, timeout)
 {
     if (type(timeout) === "string") {
         switch (substr(timeout, -1)) {
@@ -17,7 +17,31 @@ export function setInterval(name, timeout, sdelay)
                 break;
         }
     }
-    timers[name] = { next: clock()[0] + (sdelay || 60), timeout: timeout };
+    if (type(delay) === "string") {
+        switch (substr(delay, -1)) {
+            case "m":
+                delay = int(v) * 60;
+                break;
+            case "h":
+                delay = int(v) * 60 * 60;
+                break;
+            case "s":
+            default:
+                delay = int(v);
+                break;
+        }
+    }
+    timers[name] = { next: clock()[0] + delay, timeout: timeout };
+}
+
+export function setInterval(name, delay, timeout)
+{
+    setTimer(name, delay, timeout);
+};
+
+export function setTimeout(name, timeout)
+{
+    setTimer(name, timeout, -1);
 };
 
 export function tick(name)
@@ -25,7 +49,12 @@ export function tick(name)
     const now = clock()[0];
     const timer = timers[name];
     if (timer && now >= timer.next) {
-        timer.next = timer.next + timer.timeout;
+        if (timer.timeout === -1) {
+            delete timers[name];
+        }
+        else {
+            timer.next = timer.next + timer.timeout;
+        }
         return true;
     }
     return false;

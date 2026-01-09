@@ -26,9 +26,9 @@ export function recv()
     return s.recvmsg(65535).data;
 };
 
-export function send(to, namekey, data)
+export function send(to, namekey, data, canforward)
 {
-    const targets = platform.getTargetsByIdAndNamekey(to, namekey);
+    const targets = platform.getTargetsByIdAndNamekey(to, namekey, canforward);
     for (let i = 0; i < length(targets); i++) {
         const r = s.send(data, 0, {
             address: targets[i].ip,

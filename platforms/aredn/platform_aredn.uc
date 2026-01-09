@@ -11,14 +11,18 @@ const CURL = "/usr/bin/curl";
 const pubID = "KN6PLV.raven.v1.1";
 const pubTopic = "KN6PLV.raven.v1";
 
+const RESCAN_INTERVAL = 1 * 60;
+
 const LOCATION_SOURCE_INTERNAL = 2;
 
 const ucdata = {};
 let bynamekey = {};
 let byid = {};
 let forwarders = [];
+let stores = {};
 let myid;
 let arednmeshEnabled = false;
+let storeEnabled = false;
 const badges = {};
 
 /* export */ function setup(config)
@@ -50,9 +54,10 @@ const badges = {};
     if (config.arednmesh) {
         config.ipmesh = config.arednmesh;
         arednmeshEnabled = true;
+        storeEnabled = !!config.messagestore;
     }
 
-    timers.setInterval("aredn", 1 * 60);
+    timers.setInterval("aredn", 0, RESCAN_INTERVAL);
 }
 
 /* export */ function shutdown()
@@ -134,7 +139,7 @@ function path(name)
     return all;
 }
 
-/* export */ function getTargetsByIdAndNamekey(id, namekey)
+/* export */ function getTargetsByIdAndNamekey(id, namekey, canforward)
 {
     if (id === node.BROADCAST) {
         const services = bynamekey[namekey];
@@ -148,9 +153,6 @@ function path(name)
             }
             return targets;
         }
-        else {
-            return forwarders;
-        }
     }
     else {
         const target = byid[id];
@@ -162,15 +164,18 @@ function path(name)
                 return [];
             }
         }
-        else {
-            return forwarders;
-        }
     }
+    return canforward ? forwarders : [];
 }
 
 /* export */ function getTargetById(id)
 {
     return byid[id];
+}
+
+/* export */ function getStoresByNamekey(namekey)
+{
+    return stores[namekey] ?? stores["*"] ?? [];
 }
 
 /* export */ function publish(me, channels)
@@ -179,7 +184,7 @@ function path(name)
         return;
     }
     myid = me.id;
-    services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: crypto.pKeyToString(me.private_key), channels: map(channels, c => c.namekey) });
+    services.publish(pubID, pubTopic, { id: myid, ip: ucdata.main_ip, role: me.role, key: crypto.pKeyToString(me.private_key), channels: map(channels, c => c.namekey), store: (storeEnabled ? [ "*" ] : null) });
 }
 
 /* export */ function badge(key, count)
@@ -233,6 +238,7 @@ function path(name)
         byid = {};
         bynamekey = {};
         forwarders = [];
+        stores = {};
         for (let i = 0; i < length(published); i++) {
             const service = published[i];
             if (service.id !== myid) {
@@ -250,6 +256,15 @@ function path(name)
                 service.channels = nchannels;
                 if (node.canRoleForward(service.role)) {
                     push(forwarders, service);
+                }
+                if (service.store) {
+                    for (let j = 0; j < length(service.store); j++) {
+                        const key = service.store[j];
+                        if (!stores[key]) {
+                            stores[key] = [];
+                        }
+                        push(stores[key], service);
+                    }
                 }
             }
         }
@@ -269,6 +284,7 @@ return {
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,
+    getStoresByNamekey,
     publish,
     badge,
     auth,

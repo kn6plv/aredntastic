@@ -15,6 +15,7 @@ import * as favorite from "favorite";
 import * as storeandforward from "storeandforward";
 import * as neighborinfo from "neighborinfo";
 import * as traceroute from "traceroute";
+import * as messagestore from "messagestore";
 import * as device from "telemetry_device";
 import * as environmental_weewx from "telemetry_environmental_weewx";
 import * as power from "telemetry_power";
@@ -181,6 +182,8 @@ export function setup()
     router.registerApp(storeandforward);
     channel.setup(config);
     router.registerApp(channel);
+    messagestore.setup(config);
+    router.registerApp(messagestore);
 
     if (config.telemetry?.environmental) {
         switch (config.telemetry.environmental.type) {
@@ -206,6 +209,7 @@ export function setup()
     {
         nodedb.shutdown();
         textmessage.shutdown();
+        messagestore.shutdown();
         platform.shutdown();
         exit(0);
     }

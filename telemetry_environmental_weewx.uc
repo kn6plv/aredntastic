@@ -12,7 +12,7 @@ export function setup(config)
 {
     weewxurl = config.telemetry?.environmental?.url;
     if (weewxurl) {
-        timers.setInterval("environmental_metrics", config.telemetry?.environmental?.interval ?? telemetry.DEFAULT_INTERVAL);
+        timers.setInterval("environmental_metrics", 60, config.telemetry?.environmental?.interval ?? telemetry.DEFAULT_INTERVAL);
     }
 };
 

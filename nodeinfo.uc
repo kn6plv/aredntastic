@@ -30,7 +30,7 @@ parse.registerProto(
 export function setup(config)
 {
     platform = config.platform?.type ?? "raven";
-    timers.setInterval("nodeinfo", config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
+    timers.setInterval("nodeinfo", 60, config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
 };
 
 function createNodeinfoMessage(to, namekey, extra)
