@@ -14,10 +14,16 @@
     --logo-border-color: white;
     --post-border-color: grey;
     --post-font-size: 16px;
+    --post-count-color: grey;
     --unread-background-color: seagreen;
     --unread-color: white;
     --channel-selected-background-color: #f0f0f0;
     --channel-hover-background-color: #e8e8e8;
+    --link-color: #0040c0;
+    --config-body-background-color: #f8f8f8;
+    --config-table-even-background-color: #f0f0f0;
+    --config-table-separator-color: #d0d0d0;
+    --invalid-text-color: #800000;
 }
 *
 {
@@ -47,6 +53,10 @@ select
 {
     font-family: var(--font-family);
     color: inherit;
+}
+a
+{
+    color: var(--link-color);
 }
 #all
 {
@@ -167,7 +177,7 @@ select
     right: 26px;
     bottom: 16px;
     font-size: 14px;
-    color: grey;
+    color: var(--post-count-color);
 }
 .channel
 {
@@ -276,7 +286,6 @@ select
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: lightgray;
 }
 .text .c
 {
@@ -307,6 +316,7 @@ select
 }
 .text .t
 {
+    display: block;
     border: 1px solid var(--text-border-color);
     margin: 2px auto 2px 6px;
     padding: 8px 10px;
@@ -349,7 +359,7 @@ select
     padding: 40px 20px 20px 20px;
     border: 1px solid var(--container-border-color);
     border-radius: var(--post-font-size);
-    background-color: #f8f8f8;
+    background-color: var(--config-body-background-color);
     flex-direction: column;
     overflow: scroll;
 }
@@ -366,15 +376,15 @@ select
 }
 .config .b .c:nth-child(even)
 {
-    background-color: #f0f0f0;
+    background-color: var(--config-table-even-background-color);
 }
 .config .b .c:not(:last-child)
 {
-    border-bottom: 1px solid #d0d0d0;
+    border-bottom: 1px solid var(--config-table-separator-color);
 }
 .config .b .c input:invalid
 {
-    color: #800000;
+    color: var(--invalid-text-color);
 }
 .config .b .c input,
 .config .b .c select
@@ -382,7 +392,7 @@ select
     font-size: 16px;
     padding: 5px;
     border: 0;
-    border-right: 1px solid #d0d0d0 !important;
+    border-right: 1px solid var(--config-table-separator-color) !important;
     background-color: transparent;
 }
 .config .b .c select
@@ -393,7 +403,7 @@ select
 {
     width: 24px;
     background-color: transparent;
-    border: 1px solid #d0d0d0;
+    border: 1px solid var(--config-table-separator-color);
     border-radius: 10px;
     margin: 2px;
     font-size: 14px;
@@ -423,7 +433,7 @@ select
     padding: 20px;
     border: 1px solid var(--container-border-color);
     border-radius: var(--post-font-size);
-    background-color: #f8f8f8;
+    background-color: var(--config-body-background-color);
 }
 .config .p .cs
 {

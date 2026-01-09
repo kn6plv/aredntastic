@@ -46,7 +46,7 @@ function N(html)
 
 function T(text)
 {
-    xdiv.innerText = text;
+    xdiv.innerText = text.trim();
     return xdiv.innerHTML;
 }
 
