@@ -312,7 +312,7 @@ select
     padding: 8px 10px;
     border-radius: 17px;
     background-color: var(--text-background-color);
-    white-space: pre;
+    white-space: pre-wrap;
 }
 .text.right .t
 {

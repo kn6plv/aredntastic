@@ -89,7 +89,7 @@ function update(option)
             fs.writefile("/etc/raven.conf.override", data);
         }
         else if (fs.access(`${fs.dirname(SCRIPT_NAME)}/raven.conf`)) {
-            fs.writefile(`${fs.dirname(SCRIPT_NAME)}/raven.conf`, data);
+            fs.writefile(`${fs.dirname(SCRIPT_NAME)}/raven.conf.override`, data);
         }
     }
 }

@@ -13,10 +13,10 @@ const primaryChannelPresets = [
 
 const MAX_NAME_LENGTH = 13;
 
-let channelByName = {};
-const channelByNameKey = {};
-const channelsByHash = {};
+global.channelByNameKey = {};
+global.channelsByHash = {};
 let primaryChannel;
+let channelByName = {};
 
 function getCryptoKey(key)
 {

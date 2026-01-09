@@ -1,5 +1,5 @@
 
-const timers = {};
+global.timers = {};
 
 export function setInterval(name, timeout, sdelay)
 {
