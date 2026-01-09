@@ -405,7 +405,9 @@ a
     border-radius: 10px;
     margin: 2px;
     font-size: 14px;
+    line-height: 22px;
     justify-content: center;
+    align-items: center;
     font-weight: bold;
 }
 .config .b .c input:read-only,
