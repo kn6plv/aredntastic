@@ -9,7 +9,6 @@ let enabled = false;
 const SAVE_INTERVAL = 5 * 60;
 const SYNC_DELAY = 30;
 const MAX_RESEND = 50;
-const MAX_MESSAGES = 500;
 const stores = {};
 const dirty = {};
 let maxStoreSize;
@@ -61,7 +60,7 @@ function resendMessages(msg)
     const mlength = length(messages);
 
     let start = 0;
-    let limit = min(resend.limit, MAX_RESEND);
+    let limit = min(resend.limit, maxStoreSize);
     const cursor = resend.cursor;
 
     if (cursor && store.index[cursor]) {
@@ -106,7 +105,7 @@ export function setup(config)
 {
     if (config.messagestore) {
         enabled = true;
-        maxStoreSize = config.messagestore.size ?? MAX_MESSAGES;
+        maxStoreSize = config.messagestore.size ?? MAX_RESEND;
         timers.setInterval("messagestore", SAVE_INTERVAL);
     }
     timers.setTimeout("messagesync", SYNC_DELAY);
