@@ -465,27 +465,28 @@ function doneChannels()
 
 function restartup()
 {
-    try {
-        if (sock && sock.readyState < 2) {
-            sock.close();
+    if (sock) {
+        try {
+            if (sock.readyState < 2) {
+                sock.close();
+            }
         }
+        catch (_) {
+        }
+        sock = null;
+        send = () => {};
+        setTimeout(startup, 10000);
     }
-    catch (_) {
-    }
-    sock = null;
-    send = () => {};
-    setTimeout(startup, 10000);
 }
 
 function startup()
 {
-    
     sock = new WebSocket(`ws://${location.hostname}:4404`);
     sock.addEventListener("open", _ => {
         send = (msg) => sock.send(JSON.stringify(msg));
     });
-    sock.addEventListener("close", _ => restartup);
-    sock.addEventListener("error", _ => restartup);
+    sock.addEventListener("close", restartup);
+    sock.addEventListener("error", restartup);
     sock.addEventListener("message", e => {
         try {
             const msg = JSON.parse(e.data);
