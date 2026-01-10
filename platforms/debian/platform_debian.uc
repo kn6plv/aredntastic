@@ -82,6 +82,10 @@ let rootdir = "/tmp/raven";
 {
 }
 
+/* export */ function refresh()
+{
+}
+
 return {
     setup,
     shutdown,
@@ -96,5 +100,6 @@ return {
     badge,
     auth,
     tick,
-    process
+    process,
+    refresh
 };

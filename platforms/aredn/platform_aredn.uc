@@ -231,48 +231,58 @@ function path(name)
     return false;
 };
 
-/* export */ function tick()
+function refreshTargets()
 {
-    if (timers.tick("aredn")) {
-        const published = services.published(pubTopic);
-        byid = {};
-        bynamekey = {};
-        forwarders = [];
-        stores = {};
-        for (let i = 0; i < length(published); i++) {
-            const service = published[i];
-            if (service.id !== myid) {
-                byid[service.id] = service;
-                const nchannels = {};
-                for (let j = 0; j < length(service.channels); j++) {
-                    const namekey = service.channels[j];
-                    if (!bynamekey[namekey]) {
-                        bynamekey[namekey] = [];
-                        channel.addMessageNameKey(namekey);
-                    }
-                    push(bynamekey[namekey], service);
-                    nchannels[namekey] = true;
+    const published = services.published(pubTopic);
+    byid = {};
+    bynamekey = {};
+    forwarders = [];
+    stores = {};
+    for (let i = 0; i < length(published); i++) {
+        const service = published[i];
+        if (service.id !== myid) {
+            byid[service.id] = service;
+            const nchannels = {};
+            for (let j = 0; j < length(service.channels); j++) {
+                const namekey = service.channels[j];
+                if (!bynamekey[namekey]) {
+                    bynamekey[namekey] = [];
+                    channel.addMessageNameKey(namekey);
                 }
-                service.channels = nchannels;
-                if (node.canRoleForward(service.role)) {
-                    push(forwarders, service);
-                }
-                if (service.store) {
-                    for (let j = 0; j < length(service.store); j++) {
-                        const key = service.store[j];
-                        if (!stores[key]) {
-                            stores[key] = [];
-                        }
-                        push(stores[key], service);
+                push(bynamekey[namekey], service);
+                nchannels[namekey] = true;
+            }
+            service.channels = nchannels;
+            if (node.canRoleForward(service.role)) {
+                push(forwarders, service);
+            }
+            if (service.store) {
+                for (let j = 0; j < length(service.store); j++) {
+                    const key = service.store[j];
+                    if (!stores[key]) {
+                        stores[key] = [];
                     }
+                    push(stores[key], service);
                 }
             }
         }
     }
 }
 
+/* export */ function tick()
+{
+    if (timers.tick("aredn")) {
+        refreshTargets();
+    }
+}
+
 /* export */ function process(msg)
 {
+}
+
+/* export */ function refresh()
+{
+    refreshTargets();
 }
 
 return {
@@ -289,5 +299,6 @@ return {
     badge,
     auth,
     tick,
-    process
+    process,
+    refresh
 };

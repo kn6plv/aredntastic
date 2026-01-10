@@ -7,8 +7,8 @@ import * as timers from "timers";
 let enabled = false;
 
 const SAVE_INTERVAL = 5 * 60;
-const SYNC_DELAY = 1 * 60;
-const MAX_RESEND = 5;
+const SYNC_DELAY = 30;
+const MAX_RESEND = 50;
 const MAX_MESSAGES = 500;
 const stores = {};
 const dirty = {};

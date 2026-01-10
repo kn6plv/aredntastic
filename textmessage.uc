@@ -11,9 +11,9 @@ const SAVE_INTERVAL = 5 * 60;
 const channelmessages = {};
 const channelmessagesdirty = {};
 
-function loadMessages(namekey, create)
+function loadMessages(namekey)
 {
-    if (!channelmessages[namekey] && create !== false) {
+    if (!channelmessages[namekey]) {
         channelmessages[namekey] = platform.load(`messages.${namekey}`) ?? {
             max: MAX_MESSAGES,
             index: {},
@@ -125,12 +125,12 @@ export function setup(config)
         enabled = true;
         timers.setInterval("textmessages", SAVE_INTERVAL);
         if (config.preset) {
-            loadMessages(`${config.preset} AQ==`, false);
+            loadMessages(`${config.preset} AQ==`);
         }
         const channels = config.channels;
         if (channels) {
             for (let name in channels) {
-                loadMessages(`${name} ${channels[name]}`, false);
+                loadMessages(`${name} ${channels[name]}`);
             }
         }
     }

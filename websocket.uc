@@ -133,17 +133,17 @@ function decode(state)
     return messages;
 }
 
-function encode(msg)
+function encodeHeader(msg)
 {
     const l = length(msg);
     if (l < 126) {
-        return struct.pack(">BB", FIN | OP_TEXT, l) + msg;
+        return struct.pack(">BB", FIN | OP_TEXT, l);
     }
     else if (l < 65536) {
-        return struct.pack(">BBH", FIN | OP_TEXT, 126, l) + msg;
+        return struct.pack(">BBH", FIN | OP_TEXT, 126, l);
     }
     else {
-        return struct.pack(">BBQ", FIN | OP_TEXT, 127, l) + msg;
+        return struct.pack(">BBQ", FIN | OP_TEXT, 127, l);
     }
 }
 
@@ -211,9 +211,9 @@ export function recv(handle)
 
 export function send(msg)
 {
-    const data = encode(msg);
+    const hdr = encodeHeader(msg);
     for (let i = 1; i < length(allhandles); i++) {
-        const r = allhandles[i].send(data);
+        const r = allhandles[i].sendmsg([ hdr, msg ]);
         if (r === null) {
             printf("websocket:send error: %s\n", socket.error());
         }

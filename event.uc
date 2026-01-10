@@ -141,16 +141,12 @@ export function tick()
                 }
                 case "catchup":
                 {
-                    const unread = textmessage.catchUpMessagesTo(msg.namekey, msg.id);
-                    send({ event: msg.cmd, namekey: msg.namekey, unread: unread });
+                    send({ event: msg.cmd, namekey: msg.namekey, unread: textmessage.catchUpMessagesTo(msg.namekey, msg.id) });
                     break;
                 }
                 case "texts":
                 {
-                    const texts = textmessage.getMessages(msg.namekey);
-                    if (texts) {
-                        send({ event: msg.cmd, namekey: msg.namekey, texts: texts, unread: textmessage.unread(msg.namekey) });
-                    }
+                    send({ event: msg.cmd, namekey: msg.namekey, texts: textmessage.getMessages(msg.namekey), unread: textmessage.unread(msg.namekey) });
                     break;
                 }
                 case "text":

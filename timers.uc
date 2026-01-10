@@ -64,7 +64,7 @@ export function trigger(name, delay)
 {
     const timer = timers[name];
     if (timer) {
-        timer.next = min(timer.next, clock()[0] + (delay || 0));
+        timer.next = min(timer.next, clock()[0] + (delay ?? 0));
     }
 };
 
