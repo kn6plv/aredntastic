@@ -43,7 +43,7 @@ export function process()
             const transport = msg.transport_mechanism;
             if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                ipmesh.send(msg, true);
+                ipmesh.send(msg.to, msg, true);
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
                 if (node.isBroadcast(msg) || !platform.getTargetById(node.to)) {

@@ -142,17 +142,34 @@ function path(name)
 /* export */ function getTargetsByIdAndNamekey(id, namekey, canforward)
 {
     if (id === node.BROADCAST) {
+        let targets = [];
         const services = bynamekey[namekey];
         if (services) {
-            const targets = slice(services);
-            for (let i = 0; i < length(forwarders); i++) {
-                const forwarder = forwarders[i];
-                if (!forwarder.channels[namekey]) {
-                    push(targets, forwarder);
+            targets = slice(services);
+        }
+        for (let i = 0; i < length(forwarders); i++) {
+            const forwarder = forwarders[i];
+            if (index(targets, forwarder) === -1) {
+                push(targets, forwarder);
+            }
+        }
+        let store = stores[namekey];
+        if (store) {
+            for (let i = 0; i < length(store); i++) {
+                if (index(targets, store[i]) === -1) {
+                    push(targets, store[i]);
                 }
             }
-            return targets;
         }
+        store = stores["*"];
+        if (store) {
+            for (let i = 0; i < length(store); i++) {
+                if (index(targets, store[i]) === -1) {
+                    push(targets, store[i]);
+                }
+            }
+        }
+        return targets;
     }
     else {
         const target = byid[id];
@@ -164,8 +181,8 @@ function path(name)
                 return [];
             }
         }
+        return canforward ? forwarders : [];
     }
-    return canforward ? forwarders : [];
 }
 
 /* export */ function getTargetById(id)

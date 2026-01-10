@@ -37,9 +37,9 @@ export function recv()
     }
 };
 
-export function send(msg, canforward)
+export function send(to, msg, canforward)
 {
-    const targets = platform.getTargetsByIdAndNamekey(msg.to, msg.namekey, canforward);
+    const targets = platform.getTargetsByIdAndNamekey(to, msg.namekey, canforward);
     const data = sprintf("%J", msg);
     for (let i = 0; i < length(targets); i++) {
         const r = s.send(data, 0, {

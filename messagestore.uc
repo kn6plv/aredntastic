@@ -80,7 +80,7 @@ function resendMessages(msg)
         limit = mlength - start;
     }
     for (let i = 0; i < limit; i++) {
-        ipmesh.send(messages[start + i], false);
+        ipmesh.send(msg.from, messages[start + i], false);
     }
 }
 
