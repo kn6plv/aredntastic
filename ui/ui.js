@@ -1,3 +1,4 @@
+let sock = null;
 let send = () => {};
 let rightSelection = null;
 let channels = null;
@@ -462,14 +463,29 @@ function doneChannels()
     updateChannels({ channels: nchannels });
 }
 
+function restartup()
+{
+    try {
+        if (sock && sock.readyState < 2) {
+            sock.close();
+        }
+    }
+    catch (_) {
+    }
+    sock = null;
+    send = () => {};
+    setTimeout(startup, 10000);
+}
+
 function startup()
 {
-    const sock = new WebSocket(`ws://${location.hostname}:4404`);
+    
+    sock = new WebSocket(`ws://${location.hostname}:4404`);
     sock.addEventListener("open", _ => {
         send = (msg) => sock.send(JSON.stringify(msg));
     });
-    sock.addEventListener("close", _ => setTimeout(startup, 10000));
-    sock.addEventListener("error", _ => setTimeout(startup, 10000));
+    sock.addEventListener("close", _ => restartup);
+    sock.addEventListener("error", _ => restartup);
     sock.addEventListener("message", e => {
         try {
             const msg = JSON.parse(e.data);

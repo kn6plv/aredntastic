@@ -92,7 +92,7 @@ function save()
 
 function createNode(config)
 {
-    const id = config.macaddress ?? [ math.rand(255), math.rand(255), math.rand(255), math.rand(255), math.rand(255), math.rand(255) ];
+    const id = config.macaddress ?? [ math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255, math.rand() & 255 ];
     const keypair = crypto.generateKeyPair();
     me = {
         id: (id[2] << 24) + (id[3] << 16) + (id[4] << 8) + id[5],
