@@ -23,12 +23,24 @@ export function handle()
 
 export function recv()
 {
-    return s.recvmsg(65535).data;
+    try {
+        const msg = json(s.recvmsg(65535).data);
+        // If we receive a message from an unknown target, refresh the platform targets in an
+        // attempt to learn about it.
+        if (!platform.getTargetById(msg.from)) {
+            platform.refresh();
+        }
+        return msg;
+    }
+    catch (_) {
+        return null;
+    }
 };
 
-export function send(to, namekey, data, canforward)
+export function send(msg, canforward)
 {
-    const targets = platform.getTargetsByIdAndNamekey(to, namekey, canforward);
+    const targets = platform.getTargetsByIdAndNamekey(msg.to, msg.namekey, canforward);
+    const data = sprintf("%J", msg);
     for (let i = 0; i < length(targets); i++) {
         const r = s.send(data, 0, {
             address: targets[i].ip,

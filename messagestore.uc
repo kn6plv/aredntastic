@@ -1,5 +1,6 @@
 import * as ipmesh from "ipmesh";
 import * as channel from "channel";
+import * as router from "router";
 import * as message from "message";
 import * as textmessage from "textmessage";
 import * as timers from "timers";
@@ -79,7 +80,7 @@ function resendMessages(msg)
         limit = mlength - start;
     }
     for (let i = 0; i < limit; i++) {
-        ipmesh.send(msg.from, resend.namekey, sprintf("%J", messages[start + i]), false);
+        ipmesh.send(messages[start + i], false);
     }
 }
 
@@ -92,11 +93,11 @@ function syncMessages()
         if (stores[0]) {
             const to = stores[0].id;
             const texts = textmessage.unread(namekey);
-            ipmesh.send(to, namekey, sprintf("%J", message.createMessage(to, null, namekey, "resend_messages", {
+            router.queue(message.createMessage(to, null, namekey, "resend_messages", {
                 namekey: namekey,
                 cursor: texts.cursor,
                 limit: texts.max
-            })));
+            }));
         }
     }
 }

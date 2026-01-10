@@ -6,28 +6,28 @@ function setTimer(name, delay, timeout)
     if (type(timeout) === "string") {
         switch (substr(timeout, -1)) {
             case "m":
-                timeout = int(v) * 60;
+                timeout = int(timeout) * 60;
                 break;
             case "h":
-                timeout = int(v) * 60 * 60;
+                timeout = int(timeout) * 60 * 60;
                 break;
             case "s":
             default:
-                timeout = int(v);
+                timeout = int(timeout);
                 break;
         }
     }
     if (type(delay) === "string") {
         switch (substr(delay, -1)) {
             case "m":
-                delay = int(v) * 60;
+                delay = int(delay) * 60;
                 break;
             case "h":
-                delay = int(v) * 60 * 60;
+                delay = int(delay) * 60 * 60;
                 break;
             case "s":
             default:
-                delay = int(v);
+                delay = int(delay);
                 break;
         }
     }
@@ -36,7 +36,7 @@ function setTimer(name, delay, timeout)
 
 export function setInterval(name, delay, timeout)
 {
-    setTimer(name, delay, timeout);
+    setTimer(name, delay, timeout ?? delay);
 };
 
 export function setTimeout(name, timeout)
@@ -53,7 +53,7 @@ export function tick(name)
             delete timers[name];
         }
         else {
-            timer.next = timer.next + timer.timeout;
+            timer.next += timer.timeout;
         }
         return true;
     }

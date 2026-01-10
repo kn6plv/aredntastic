@@ -14,7 +14,7 @@ let update = null;
 export function setup(config)
 {
     update = config.update;
-    timers.setInterval("event", 10 * 60);
+    timers.setInterval("event", 0, 10 * 60);
 };
 
 function send(msg)

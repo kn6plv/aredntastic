@@ -43,7 +43,7 @@ export function process()
             const transport = msg.transport_mechanism;
             if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                ipmesh.send(msg.to, msg.namekey, sprintf("%J", msg), true);
+                ipmesh.send(msg, true);
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
                 if (node.isBroadcast(msg) || !platform.getTargetById(node.to)) {
@@ -89,7 +89,7 @@ export function tick()
     const ws = websocket.handles();
     if (ws) {
         for (let i = 0; i < length(ws); i++) {
-            push(sockets, [ ws[i], socket.POLLIN, "websocket" ]);
+            push(sockets, [ ws[i], socket.POLLIN|socket.POLLRDHUP, "websocket" ]);
         }
     }
     const v = socket.poll(timers.minTimeout(60) * 1000, ...sockets);
@@ -98,9 +98,11 @@ export function tick()
             switch (v[i][2]) {
                 case "ipmesh":
                     try {
-                        const msg = json(ipmesh.recv());
-                        msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                        queue(msg);
+                        const msg = ipmesh.recv();
+                        if (msg) {
+                            msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
+                            queue(msg);
+                        }
                     }
                     catch (_) {
                     }
@@ -121,11 +123,7 @@ export function tick()
                     {
                         const msgs = websocket.recv(v[i][0]);
                         for (let i = 0; i < length(msgs); i++) {
-                            const msg = json(msgs[i]);
-                            if (!platform.getTargetById(msg.from)) {
-                                platform.refresh();
-                            }
-                            event.queue(msg);
+                            event.queue(json(msgs[i]));
                         }
                     }
                     break;
