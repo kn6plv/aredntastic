@@ -130,14 +130,20 @@ export function setup()
 
     config.update = update;
 
-    if (config.debug) {
-        global.DEBUG = function(...a)
-        {
-            printf(...a);
-        };
-    }
-    else {
-        global.DEBUG = function(){};
+    global.DEBUG0 = function(){};
+    global.DEBUG1 = function(){};
+    global.DEBUG2 = function(){};
+    switch (config.debug)
+    {
+        case 2:
+            global.DEBUG2 = printf;
+        case 1:
+            global.DEBUG1 = printf;
+        case 0:
+            global.DEBUG0 = printf;
+            break;
+        default:
+            break;
     }
 
     switch (config.platform?.type) {

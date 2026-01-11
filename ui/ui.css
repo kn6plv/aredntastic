@@ -22,6 +22,7 @@
     --link-color: #0040c0;
     --config-table-even-background-color: #f8f8f8;
     --config-table-separator-color: #d0d0d0;
+    --config-subtitle-color: #808080;
     --invalid-text-color: #800000;
     --disabled-text-color: #808080;
 }
@@ -368,6 +369,24 @@ a
     left: 10px;
     font-weight: bold;
 }
+.config .b .ct
+{
+    padding: 5px 16px;
+    font-size: 10px;
+    color: var(--config-subtitle-color);
+}
+.config .b .ct div:nth-child(1)
+{
+    width: 140px;
+}
+.config .b .ct div:nth-child(2)
+{
+    width: 300px;
+}
+.config .b .ct div:nth-child(3)
+{
+    width: 77px;
+}
 .config .b .c
 {
     padding-left: 10px;
@@ -419,19 +438,28 @@ a
 {
     visibility: hidden;
 }
-.config .b .c input:nth-child(1)
+.config .b .c > input:nth-child(1)
 {
     width: 140px;
 }
-.config .b .c *:nth-child(2)
+.config .b .c > *:nth-child(2)
 {
     width: 300px;
     margin-right: 0;
 }
-.config .b .c input:nth-child(3)
+.config .b .c > input:nth-child(3)
 {
-    width: 60px;
+    width: 80px;
     text-align: right;
+}
+.config .b .c > div
+{
+    border-right: 1px solid var(--config-table-separator-color) !important;
+}
+.config .b .c > div input
+{
+    width: 10px;
+    margin: auto 10px;
 }
 .config .d
 {

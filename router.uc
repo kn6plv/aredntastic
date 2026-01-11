@@ -22,7 +22,12 @@ export function process()
     while (length(q) > 0) {
         const msg = shift(q);
 
-        DEBUG("%.2J\n", msg);
+        if (node.fromMe(msg)) {
+            DEBUG0("%.2J\n", msg);
+        }
+        else {
+            DEBUG1("%.2J\n", msg);
+        }
 
         // Give each app a chance at the message
         for (let i = 0; i < length(apps); i++) {

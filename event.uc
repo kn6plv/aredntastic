@@ -72,7 +72,7 @@ export function tick()
         while (length(q) > 0) {
             const msg = shift(q);
 
-            DEBUG("%J\n", msg);
+            DEBUG1("%J\n", msg);
 
             switch (msg.cmd) {
                 case "connected":
@@ -132,7 +132,7 @@ export function tick()
                 {
                     channel.updateChannels(msg.channels);
                     for (let i = 0; i < length(msg.channels); i++) {
-                        textmessage.updateMax(msg.channels[i]);
+                        textmessage.updateSettings(msg.channels[i]);
                     }
                     notify({ cmd: "channels" });
                     platform.publish(node.getInfo(), channel.getAllChannels());
