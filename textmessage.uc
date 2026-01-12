@@ -62,7 +62,8 @@ function addMessage(msg)
             id: idx,
             from: msg.from,
             when: msg.rx_time,
-            text: msg.data.text_message
+            text: msg.data.text_message,
+            replyid: msg.data.reply_id
         });
         saveMessages(msg.namekey, chanmessages);
         event.notify({ cmd: "text", namekey: msg.namekey, id: idx }, `text ${msg.namekey} ${idx}`);

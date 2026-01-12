@@ -4,6 +4,7 @@ let rightSelection = null;
 let channels = null;
 let echannels = null;
 const nodes = {};
+let tests = null;
 const me = {};
 let textObs;
 const xdiv = document.createElement("div");
@@ -120,13 +121,24 @@ function htmlText(text)
             colors: nodeColors(text.from)
         };
     }
+    let reply = "";
+    if (text.replyid) {
+        const key = `:${text.replyid}`;
+        const r = texts.findLast(t => t.id.indexOf(key) !== -1);
+        if (r) {
+            reply = `<div class="r"><div>${T(r.text.replace(/\n/g," "))}</div></div>`;
+        }
+    }
     const ttext = T(text.text).replace(/https?:\/\/[^ \t]+/g, v => `<a target="_blank" href="${v}">${v}</a>`);
     return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
-        <div class="s" style="color:${n.colors.fcolor};background-color:${n.colors.bcolor}">${n.short_name}</div>
-        ${n?.logo ? '<div class="logo"></div>' : ''}
-        <div class="c">
-            <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
-            <div class="t">${ttext}</div>
+        ${reply}
+        <div>
+            <div class="s" style="color:${n.colors.fcolor};background-color:${n.colors.bcolor}">${n.short_name}</div>
+            ${n?.logo ? '<div class="logo"></div>' : ''}
+            <div class="c">
+                <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
+                <div class="t">${ttext}</div>
+            </div>
         </div>
     </div>`;
 }
@@ -279,6 +291,7 @@ function restartTextsObserver(channel)
 function updateTexts(msg)
 {
     const t = Q("#texts");
+    texts = msg.texts;
     t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
     const channel = getChannel(msg.namekey);
     restartTextsObserver(channel);
@@ -321,6 +334,7 @@ function updateText(msg)
 {
     const t = Q("#texts");
     const atbottom = (t.scrollTop > t.scrollHeight - t.clientHeight - 50);
+    texts.push(msg.text);
     const n = t.appendChild(N(htmlText(msg.text)));
     if (atbottom && document.visibilityState == "visible") {
         t.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });

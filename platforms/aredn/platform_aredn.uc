@@ -114,18 +114,30 @@ function path(name)
 
 /* export */ function load(name)
 {
-    const data = fs.readfile(path(name));
+    const p = path(name);
     try {
-        return data ? json(data) : null;
+        return json(fs.readfile(p));
     }
     catch (_) {
-        return null;
+        fs.unlink(p);
     }
+    try {
+        return json(fs.readfile(`${p}~`));
+    }
+    catch (_) {
+        fs.unlink(`${p}~`);
+    }
+    return null;
 }
 
 /* export */ function store(name, data)
 {
-    fs.writefile(path(name), sprintf("%.02J", data));
+    const p = path(name);
+    if (fs.access(p)) {
+        fs.unlink(`${p}~`);
+        fs.rename(p, `${p}~`);
+    }
+    fs.writefile(p, sprintf("%.02J", data));
 }
 
 /* export */ function fetch(url)
