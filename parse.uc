@@ -173,6 +173,9 @@ export function encodePacket(msg)
             }
         }
     }
+    if (!data.payload) {
+        return null;
+    }
     msg.decoded = protobuf.encode("data", msg.data);
     delete msg.data;
     const chan = channel.getChannelByNameKey(msg.namekey);

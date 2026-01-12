@@ -48,6 +48,7 @@ export function process()
             const transport = msg.transport_mechanism;
             if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
                 msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
+                DEBUG1("Send IPMesh: %.2J\n", msg);
                 ipmesh.send(msg.to, msg, true);
             }
             if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
@@ -55,6 +56,7 @@ export function process()
                     msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
                     const pkt = parse.encodePacket(msg);
                     if (pkt) {
+                        DEBUG1("Send Meshtastic: %.2J\n", msg);
                         meshtastic.send(pkt);
                     }
                 }
