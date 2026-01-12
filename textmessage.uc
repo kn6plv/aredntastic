@@ -64,7 +64,6 @@ function addMessage(msg)
             when: msg.rx_time,
             text: msg.data.text_message
         });
-        sort(chanmessages.messages, (a, b) => a.when - b.when);
         saveMessages(msg.namekey, chanmessages);
         event.notify({ cmd: "text", namekey: msg.namekey, id: idx }, `text ${msg.namekey} ${idx}`);
     }
