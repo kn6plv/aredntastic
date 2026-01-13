@@ -14,6 +14,9 @@
     --text-reply-border-color: darkblue;
     --logo-background-color: white;
     --logo-border-color: white;
+    --light-filter: none;
+    --post-text-color: black;
+    --post-bg-color: #f8f8f8;
     --post-border-color: grey;
     --post-font-size: 16px;
     --post-count-color: grey;
@@ -27,6 +30,39 @@
     --config-subtitle-color: #808080;
     --invalid-text-color: #800000;
     --disabled-text-color: #808080;
+}
+@media (prefers-color-scheme: dark)
+{
+:root
+{
+    --default-fg-color: #d0d0d0;
+    --body-bg-color: #202020;
+    --container-background-color: #202020;
+    --container-title-background-color: #202020;
+    --container-border-color: grey;
+    --text-background-color: #202020;
+    --text-border-color: #d0d0d0;
+    --text-date-color: #a0a0a0;
+    --text-reply-color: lightblue;
+    --text-reply-border-color: lightblue;
+    --logo-background-color: #202020;
+    --logo-border-color: #202020;
+    --light-filter: invert(86%) sepia(86%) saturate(38%) hue-rotate(322deg) brightness(116%) contrast(69%);
+    --post-text-color: white;
+    --post-bg-color: black;
+    --post-border-color: grey;
+    --post-count-color: grey;
+    --unread-background-color: seagreen;
+    --unread-color: #303030;
+    --channel-selected-background-color: #383838;
+    --channel-hover-background-color: #404040;
+    --link-color: #70a0ff;
+    --config-table-even-background-color: #282828;
+    --config-table-separator-color: #606060;
+    --config-subtitle-color: #808080;
+    --invalid-text-color: #800000;
+    --disabled-text-color: #808080;
+}
 }
 *
 {
@@ -167,6 +203,8 @@ a
 {
     width: 100%;
     height: 76px;
+    color: var(--post-text-color);
+    background-color: var(--post-bg-color);
     font-size: var(--post-font-size);
     padding: 10px 60px 10px 10px;
     border: 1px solid var(--post-border-color);
@@ -283,6 +321,7 @@ a
     font-size: 12px;
     margin: 7px auto 2px 20px;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.49 12 3.75-3.751m0 0-3.75-3.75m3.75 3.75H3.74V19.5" /></svg>') no-repeat 0 4px !important;
+    filter: var(--light-filter);
 }
 .text .r > div
 {
@@ -439,6 +478,7 @@ a
 .config .b .c button
 {
     width: 24px;
+    color: inherit;
     background-color: transparent;
     border: 1px solid var(--config-table-separator-color);
     border-radius: 10px;
@@ -521,6 +561,7 @@ a
     width: 100px;
     background: url(raven.svg) no-repeat center;
     background-size: 80px 80px;
+    filter: var(--light-filter);
 }
 .cog
 {
@@ -529,6 +570,7 @@ a
     margin-right: -8px;
     float: right;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>') !important;
+    filter: var(--light-filter);
 }
 .cog:hover
 {
