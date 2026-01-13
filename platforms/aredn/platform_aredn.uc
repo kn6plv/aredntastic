@@ -138,6 +138,7 @@ function path(name)
         fs.rename(p, `${p}~`);
     }
     fs.writefile(p, sprintf("%.02J", data));
+    fs.unlink(`${p}~`);
 }
 
 /* export */ function fetch(url)

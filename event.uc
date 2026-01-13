@@ -93,14 +93,14 @@ export function tick()
                 case "nodes":
                 {
                     const raw = nodedb.getNodes();
+                    sort(raw, (a, b) => b.lastseen - a.lastseen);
                     const nodes = [];
-                    for (let i = 0; i < length(raw) && i < 579; i++) {
+                    for (let i = 0; i < length(raw) && length(nodes) < 200; i++) {
                         const node = basicNode(raw[i]);
                         if (node) {
                             push(nodes, node);
                         }
                     }
-                    sort(nodes, (a, b) => b.lastseen - a.lastseen);
                     send({ event: msg.cmd, nodes: nodes });
                     break;
                 }
