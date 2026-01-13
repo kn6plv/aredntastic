@@ -129,7 +129,7 @@ function htmlText(text)
             reply = `<div class="r"><div>${T(r.text.replace(/\n/g," "))}</div></div>`;
         }
     }
-    const ttext = T(text.text).replace(/https?:\/\/[^ \t]+/g, v => `<a target="_blank" href="${v}">${v}</a>`);
+    const ttext = T(text.text).replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`);
     return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
         ${reply}
         <div>
