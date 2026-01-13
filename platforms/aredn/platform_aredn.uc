@@ -109,7 +109,7 @@ const badges = {};
 
 function path(name)
 {
-    return `/usr/local/raven/data/${name}.json`;
+    return `/usr/local/raven/data/${replace(name, /\//g, "_")}.json`;
 }
 
 /* export */ function load(name)
