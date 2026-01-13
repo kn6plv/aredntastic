@@ -105,12 +105,15 @@ export function catchUpMessagesTo(namekey, id)
     return { count: cm.count, cursor: cm.cursor, max: cm.max, badge: cm.badge };
 };
 
-export function updateSettings(channel)
+export function updateSettings(channels)
 {
-    const cm = loadMessages(channel.namekey);
-    cm.badge = channel.badge;
-    cm.max = channel.max;
-    saveMessages(channel.namekey, cm);
+    for (let i = 0; i < length(channels); i++) {
+        const channel = channels[i];
+        const cm = loadMessages(channel.namekey);
+        cm.badge = channel.badge;
+        cm.max = channel.max;
+        saveMessages(channel.namekey, cm);
+    }
 };
 
 export function unread(namekey)

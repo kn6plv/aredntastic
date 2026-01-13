@@ -11,8 +11,6 @@ const primaryChannelPresets = [
     "LongTurbo"
 ];
 
-const MAX_NAME_LENGTH = 13;
-
 global.channelByNameKey = {};
 global.channelsByHash = {};
 let primaryChannel;
@@ -60,10 +58,10 @@ export function addMessageNameKey(namekey)
     return chan;
 };
 
-function setChannel(name, key)
+function setChannel(config)
 {
-    name = substr(replace(name, /[ \t\r\n]/g, ""), 0, MAX_NAME_LENGTH);
-    const chan = addMessageNameKey(`${name} ${key}`);
+    const name = split(config.namekey, " ")[0];
+    const chan = addMessageNameKey(config.namekey);
     if (chan.crypto[-1] === 1) {
         if (index(primaryChannelPresets, name) == -1) {
             print("Bad primary channel name\n");
@@ -112,8 +110,7 @@ export function updateChannels(channels)
 {
     channelByName = {};
     for (let i = 0; i < length(channels); i++) {
-        const kn = split(channels[i].namekey, " ");
-        setChannel(kn[0], kn[1]);
+        setChannel(channels[i]);
     }
 };
 
@@ -123,12 +120,12 @@ export function setup(config)
         print("No preset\n");
     }
     else {
-        setChannel(config.preset, "AQ==");
+        setChannel({ namekey: `${config.preset} AQ==` });
     }
     const channels = config.channels;
     if (channels) {
-        for (let name in channels) {
-            setChannel(name, channels[name]);
+        for (let i = 0; i < length(channels); i++) {
+            setChannel(channels[i]);
         }
     }
 };

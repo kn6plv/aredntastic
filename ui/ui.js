@@ -8,6 +8,7 @@ let tests = null;
 const me = {};
 let textObs;
 const xdiv = document.createElement("div");
+let updateTextTimeout;
 
 const roles = {
     0: "Client",
@@ -290,6 +291,7 @@ function restartTextsObserver(channel)
 
 function updateTexts(msg)
 {
+    clearTimeout(updateTextTimeout);
     const t = Q("#texts");
     texts = msg.texts;
     t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
@@ -364,6 +366,8 @@ function selectChannel(namekey)
         rightSelection = namekey;
         send({ cmd: "texts", namekey: namekey });
         updateChannels();
+        clearTimeout(updateTextTimeout);
+        updateTextTimeout = setTimeout(_ => Q("#texts").innerHTML = "", 500);
     }
 }
 
@@ -405,7 +409,7 @@ function openChannelConfig()
 
 function addChannel(idx)
 {
-    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100 });
+    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100, badge: true });
     Q("#texts").innerHTML = htmlChannelConfig();
 }
 

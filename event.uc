@@ -131,9 +131,7 @@ export function tick()
                 case "newchannels":
                 {
                     channel.updateChannels(msg.channels);
-                    for (let i = 0; i < length(msg.channels); i++) {
-                        textmessage.updateSettings(msg.channels[i]);
-                    }
+                    textmessage.updateSettings(msg.channels);
                     notify({ cmd: "channels" });
                     platform.publish(node.getInfo(), channel.getAllChannels());
                     update("channels");

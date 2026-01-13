@@ -42,7 +42,7 @@ function update(option)
         case "channels":
         {
             const channels = channel.getAllChannels();
-            const nchannels = {};
+            const nchannels = [];
             let primary = null;
             for (let i = 0; i < length(channels); i++) {
                 const nk = split(channels[i].namekey, " ");
@@ -50,7 +50,7 @@ function update(option)
                     primary = nk[0];
                 }
                 else {
-                    nchannels[nk[0]] = nk[1];
+                    push(nchannels, { namekey: channels[i].namekey });
                 }
             }
             if (primary != config.preset) {
@@ -64,6 +64,7 @@ function update(option)
                 write = true;
             }
             if (!jsonEq(nchannels, config.channels)) {
+                config.channels = nchannels;
                 if (jsonEq(nchannels, bconfig.channels)) {
                     delete override.channels;
                 }
