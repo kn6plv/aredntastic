@@ -154,8 +154,8 @@ function htmlChannelConfig()
             return "";
         }
         return `<form class="c">
-            <input value="${e.name}" oninput="typeChannelName(${i}, event.target.value)" required minlength="1" maxlength="11" size="11" placeholder="Name" ${e.readonly ? "readonly" : ""}>
-            <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""}>
+            <input value="${e.name}" oninput="typeChannelName(${i}, event.target.value)" required minlength="1" maxlength="11" size="11" placeholder="Name" ${e.readonly ? "readonly" : ""} pattern="[^ ]+">
+            <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""} pattern="[\\-A-Za-z0-9+\\/]*={0,3}">
             <input value="${e.max}" oninput="typeChannelMax(${i}, event.target.value)" required minlength="2" maxlength="4" size="4" placeholder="Count" ${e.readonly ? "readonly" : ""}>
             <div><input ${e.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(${i}, event.target.checked)"></div>
             <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>

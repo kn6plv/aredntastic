@@ -5,7 +5,6 @@ import * as nodedb from "nodedb";
 import * as channel from "channel";
 import * as textmessage from "textmessage";
 import * as router from "router";
-import * as config from "config";
 
 const q = [];
 let merge = {};
@@ -130,6 +129,11 @@ export function tick()
                 }
                 case "newchannels":
                 {
+                    for (let i = 0; i < length(msg.channels); i++) {
+                        const c = msg.channels[i];
+                        const n = split(c.namekey, " ");
+                        c.namekey = `${substr(join("", slice(n, 0, -1)), 0, 13)} ${n[-1]}`;
+                    }
                     channel.updateChannels(msg.channels);
                     textmessage.updateSettings(msg.channels);
                     notify({ cmd: "channels" });
