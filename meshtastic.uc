@@ -242,14 +242,14 @@ export function handle()
     return s;
 };
 
-export function recv()
+function makeNativeMsg(data)
 {
-    const msg = decodePacket(s.recvmsg(512).data);
+    const msg = decodePacket(data);
     if (msg) {
         msg.transport = "meshtastic";
     }
     return msg;
-};
+}
 
 function makeMeshtasticMsg(msg)
 {
@@ -261,6 +261,11 @@ function makeMeshtasticMsg(msg)
     msg.data.bitfield = BITFIELD_MQTT_OKAY;
     return encodePacket(msg);
 }
+
+export function recv()
+{
+    return makeNativeMsg(s.recvmsg(512).data);
+};
 
 export function send(msg)
 {
