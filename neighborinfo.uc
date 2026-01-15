@@ -1,7 +1,7 @@
 
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
-parse.registerProto(
+meshtastic.registerProto(
     "neighbor", null,
     {
         "1": "uint32 node_id",
@@ -10,7 +10,7 @@ parse.registerProto(
         "4": "uint32 node_broadcast_interval_secs"
     }
 );
-parse.registerProto(
+meshtastic.registerProto(
     "neighborinfo", 71,
     {
         "1": "uint32 node_id",

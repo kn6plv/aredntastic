@@ -1,6 +1,7 @@
 import * as socket from "socket";
 
 const PORT = 4404;
+const TRANSPORT_MECHANISM_UNICAST_UDP = 251;
 
 let s = null;
 
@@ -30,6 +31,7 @@ export function recv()
         if (!platform.getTargetById(msg.from)) {
             platform.refresh();
         }
+        msg.transport = "ipmesh";
         return msg;
     }
     catch (_) {
@@ -39,6 +41,7 @@ export function recv()
 
 export function send(to, msg, canforward)
 {
+    msg.transport_mechanism = TRANSPORT_MECHANISM_UNICAST_UDP;
     const targets = platform.getTargetsByIdAndNamekey(to, msg.namekey, canforward);
     const data = sprintf("%J", msg);
     for (let i = 0; i < length(targets); i++) {

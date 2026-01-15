@@ -1,6 +1,6 @@
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
-parse.registerProto(
+meshtastic.registerProto(
     "statistics", null,
     {
         "1": "uint32 messages_total",
@@ -14,7 +14,7 @@ parse.registerProto(
         "9": "uint32 return_window"
     }
 );
-parse.registerProto(
+meshtastic.registerProto(
     "history", null,
     {
         "1": "uint32 history_messages",
@@ -22,14 +22,14 @@ parse.registerProto(
         "3": "uint32 last_request"
     }
 );
-parse.registerProto(
+meshtastic.registerProto(
     "heartbeat", null,
     {
         "1": "uint32 period",
         "2": "uint32 secondary"
     }
 );
-parse.registerProto(
+meshtastic.registerProto(
     "storeandforward", 65,
     {
         "1": "enum rr",

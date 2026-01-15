@@ -1,6 +1,6 @@
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
-parse.registerProto(
+meshtastic.registerProto(
     "power_metrics", null,
     {
         "1": "float ch1_voltage",

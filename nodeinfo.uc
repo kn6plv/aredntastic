@@ -3,7 +3,7 @@ import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as timers from "timers";
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 import * as textmessage from "textmessage";
 import * as crypto from "crypto.crypto";
 
@@ -12,7 +12,7 @@ const RAVEN_HW = 254;
 const DEFAULT_INTERVAL = 3 * 60 * 60;
 let platform = "raven";
  
-parse.registerProto(
+meshtastic.registerProto(
     "nodeinfo", 4,
     {
         "1": "string id",

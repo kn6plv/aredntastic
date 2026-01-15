@@ -1,9 +1,9 @@
 import * as message from "message";
 import * as router from "router";
 import * as node from "node";
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
-parse.registerProto(
+meshtastic.registerProto(
     "traceroute", 70,
     {
         "1": "repeated fixed32 route",

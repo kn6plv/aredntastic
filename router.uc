@@ -1,8 +1,6 @@
 import * as meshtastic from "meshtastic";
 import * as ipmesh from "ipmesh";
-import * as parse from "parse";
 import * as node from "node";
-import * as message from "message";
 import * as socket from "socket";
 import * as timers from "timers";
 import * as websocket from "websocket";
@@ -45,20 +43,14 @@ export function process()
                     return;
                 }
             }
-            const transport = msg.transport_mechanism;
-            if (transport === message.TRANSPORT_MECHANISM_MULTICAST_UDP || node.fromMe(msg)) {
-                msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
+            if (msg.transport !== "ipmesh" || node.fromMe(msg)) {
                 DEBUG1("Send IPMesh: %.2J\n", msg);
                 ipmesh.send(msg.to, msg, true);
             }
-            if (transport === message.TRANSPORT_MECHANISM_UNICAST_UDP || node.fromMe(msg)) {
+            if (msg.transport !== "meshtastic" || node.fromMe(msg)) {
                 if (node.isBroadcast(msg) || !platform.getTargetById(node.to)) {
-                    msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
-                    const pkt = parse.encodePacket(msg);
-                    if (pkt) {
-                        DEBUG1("Send Meshtastic: %.2J\n", msg);
-                        meshtastic.send(pkt);
-                    }
+                    DEBUG1("Send Meshtastic: %.2J\n", msg);
+                    meshtastic.send(msg);
                 }
             }
         }
@@ -67,14 +59,16 @@ export function process()
 
 export function queue(msg)
 {
-    // Remember messages we queued for a little while and don't queue them again.
-    const key = `${msg.from}:${msg.id}`;
-    if (index(recent, key) === -1) {
-        push(recent, key);
-        if (length(recent) > MAX_RECENT) {
-            shift(recent);
+    if (msg) {
+        // Remember messages we queued for a little while and don't queue them again.
+        const key = `${msg.from}:${msg.id}`;
+        if (index(recent, key) === -1) {
+            push(recent, key);
+            if (length(recent) > MAX_RECENT) {
+                shift(recent);
+            }
+            push(q, msg);
         }
-        push(q, msg);
     }
 };
 
@@ -105,22 +99,14 @@ export function tick()
             switch (v[i][2]) {
                 case "ipmesh":
                     try {
-                        const msg = ipmesh.recv();
-                        if (msg) {
-                            msg.transport_mechanism = message.TRANSPORT_MECHANISM_UNICAST_UDP;
-                            queue(msg);
-                        }
+                        queue(ipmesh.recv());
                     }
                     catch (_) {
                     }
                     break;
                 case "meshtastic":
                     try {
-                        const msg = parse.decodePacket(meshtastic.recv());
-                        if (msg) {
-                            msg.transport_mechanism = message.TRANSPORT_MECHANISM_MULTICAST_UDP;
-                            queue(msg);
-                        }
+                        queue(meshtastic.recv());
                     }
                     catch (_)
                     {

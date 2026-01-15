@@ -1,6 +1,6 @@
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
-parse.registerProto(
+meshtastic.registerProto(
     "telemetry", 67,
     {
         "1": "fixed32 time",

@@ -1,17 +1,13 @@
 import * as math from "math";
 import * as node from "node";
 import * as channel from "channel";
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
 const MAX_TEXT_MESSAGE_LENGTH = 200;
 const DEFAULT_PRIORITY = 64;
 const ACK_PRIORITY = 120;
-const BITFIELD_MQTT_OKAY = 1;
 
-export const TRANSPORT_MECHANISM_UNICAST_UDP = 251;
-export const TRANSPORT_MECHANISM_MULTICAST_UDP = 6;
-
-parse.registerProto(
+meshtastic.registerProto(
     "routediscovery", null,
     {
         "1": "repeated fixed32 route",
@@ -20,7 +16,7 @@ parse.registerProto(
         "4": "repeated int32 snr_back"
     }
 );
-parse.registerProto(
+meshtastic.registerProto(
     "routing", 5,
     {
         "1": "proto routediscovery route_request",
@@ -31,25 +27,17 @@ parse.registerProto(
 
 export function createMessage(to, from, namekey, type, payload, extra)
 {
-    const chan = channel.getChannelByNameKey(namekey);
-    const fid = from ?? node.id(); // From me by default;
     const hops = node.hopLimit();
     const msg = {
-        from: fid,
+        from: from ?? node.id(), // From me by default
         to: to ?? node.BROADCAST,
-        namekey: chan?.namekey,
-        channel: chan?.hash ?? 0,
+        namekey: channel.getChannelByNameKey(namekey)?.namekey,
         id: math.rand(),
         rx_time: time(),
-        rx_snr: 0,
         hop_limit: hops,
         priority: DEFAULT_PRIORITY,
-        rx_rssi: 0,
         hop_start: hops,
-        relay_node: fid & 255,
-        transport_mechanism: TRANSPORT_MECHANISM_MULTICAST_UDP,
         data: {
-            bitfield: BITFIELD_MQTT_OKAY,
             [type]: payload
         }
     };

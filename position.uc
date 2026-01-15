@@ -3,11 +3,11 @@ import * as message from "message";
 import * as router from "router";
 import * as nodedb from "nodedb";
 import * as node from "node";
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 
 const DEFAULT_INTERVAL = 60 * 60;
 
-parse.registerProto(
+meshtastic.registerProto(
     "position", 3,
     {
         "1": "sfixed32 latitude_i",

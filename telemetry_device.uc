@@ -3,13 +3,13 @@ import * as message from "message";
 import * as node from "node";
 import * as timers from "timers";
 import * as nodedb from "nodedb";
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 import * as telemetry from "telemetry";
 
 const GRID_POWER = 101;
 let startTime = 0;
  
-parse.registerProto(
+meshtastic.registerProto(
     "device_metrics", null,
     {
         "1": "uint32 battery_level",

@@ -1,11 +1,12 @@
 import * as struct from "struct";
 import * as math from "math";
 
-const encodeProtos = {};
-const decodeProtos = {};
-
-export function registerProto(name, proto)
+export function registerProto(protos, name, proto)
 {
+    if (!protos.encode) {
+        protos.encode = {};
+        protos.decode = {};
+    }
     const decode = {};
     const encode = {};
 
@@ -51,13 +52,13 @@ export function registerProto(name, proto)
         }
     }
 
-    decodeProtos[name] = decode;
-    encodeProtos[name] = encode;
+    protos.decode[name] = decode;
+    protos.encode[name] = encode;
 };
 
-export function decode(name, buf)
+export function decode(protos, name, buf)
 {
-    const proto = decodeProtos[name] ?? {};
+    const proto = protos.decode[name] ?? {};
     const r = {};
     const len = length(buf);
     let i = 0;
@@ -115,7 +116,7 @@ export function decode(name, buf)
         if (k) {
             if (proto[vi].proto) {
                 if (type(d) === "string") {
-                    d = decode(proto[vi].proto, d);
+                    d = decode(protos, proto[vi].proto, d);
                 }
             }
             else if (proto[vi].repeatedunpacked) {
@@ -127,7 +128,7 @@ export function decode(name, buf)
                         case "string":
                             break;
                         default:
-                            v = decode(proto[vi].repeatedunpacked, v);
+                            v = decode(protos, proto[vi].repeatedunpacked, v);
                             break;
                     }
                 }
@@ -265,9 +266,9 @@ export function decode(name, buf)
     return r;
 };
 
-export function encode(name, data)
+export function encode(protos, name, data)
 {
-    const proto = encodeProtos[name];
+    const proto = protos.encode[name];
     if (!proto) {
         print(`Missing proto ${name}\n`);
         return null;
@@ -304,7 +305,7 @@ export function encode(name, data)
             //print(`Missing proto ${name}:${k}\n`);
         }
         else if (p.proto) {
-            const buf = encode(p.proto, v);
+            const buf = encode(protos, p.proto, v);
             d = tag(p.id, 2) + varint(length(buf)) + buf;
         }
         else if (p.repeatedunpacked) {
@@ -319,7 +320,7 @@ export function encode(name, data)
                             buf = vi;
                             break;
                         default:
-                            buf = encode(p.repeatedunpacked, vi);
+                            buf = encode(protos, p.repeatedunpacked, vi);
                             break;
                     }
                     if (buf !== null) {

@@ -1,7 +1,7 @@
-import * as parse from "parse";
+import * as meshtastic from "meshtastic";
 import * as telemetry from "telemetry";
 
-parse.registerProto(
+meshtastic.registerProto(
     "environment_metrics", null,
     {
         "1": "float temperature",
