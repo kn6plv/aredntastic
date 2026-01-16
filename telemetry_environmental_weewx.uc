@@ -4,7 +4,6 @@ import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as telemetry from "telemetry";
-import * as environmental from "telemetry_environmental";
 
 let weewxurl;
 
@@ -26,14 +25,14 @@ export function tick()
             router.queue(message.createMessage(null, null, null, "telemetry", {
                 time: time(),
                 environment_metrics: {
-                    temperature: environmental.convert("C", c.temperature),
+                    temperature: telemetry.convert("C", c.temperature),
                     relative_humidity: c.humidity?.value,
-                    barometric_pressure: environmental.convert("hPA", c.barometer),
+                    barometric_pressure: telemetry.convert("hPA", c.barometer),
                     wind_direction: c["wind direction"]?.value,
-                    wind_speed: environmental.convert("m/s", c["wind speed"]),
-                    wind_gust: environmental.convert("m/s", c["wind gust"]),
-                    rainfall_1h: environmental.convert("mm/h", c["rain rate"]),
-                    rainfall_24h: environmental.convert("mm", d["rain total"])
+                    wind_speed: telemetry.convert("m/s", c["wind speed"]),
+                    wind_gust: telemetry.convert("m/s", c["wind gust"]),
+                    rainfall_1h: telemetry.convert("mm/h", c["rain rate"]),
+                    rainfall_24h: telemetry.convert("mm", d["rain total"])
                 }
             }));
         }

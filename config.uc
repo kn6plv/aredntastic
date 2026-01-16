@@ -18,6 +18,7 @@ import * as traceroute from "traceroute";
 import * as messagestore from "messagestore";
 import * as device from "telemetry_device";
 import * as environmental_weewx from "telemetry_environmental_weewx";
+import * as airquality_purpleair from "telemetry_airquality_purpleair";
 import * as power from "telemetry_power";
 
 let bconfig;
@@ -199,8 +200,19 @@ export function setup()
                 router.registerApp(environmental_weewx);
                 break;
             default:
-                print(`Unknown environmental: ${config.environmental?.type}\n`);
-                exit(-1);
+                print(`Unknown environmental: ${config.telemetry.environmental.type}\n`);
+                break;
+        }
+    }
+    if (config.telemetry?.airquality) {
+        switch (config.telemetry.airquality.type) {
+            case "purpleair":
+                airquality_purpleair.setup(config);
+                router.registerApp(airquality_purpleair);
+                break;
+            default:
+                print(`Unknown airquality: ${config.telemetry.airquality.type}\n`);
+                break;
         }
     }
 

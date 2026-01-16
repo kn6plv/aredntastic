@@ -64,6 +64,14 @@ export function updateEnvironmentMetrics(id, metrics)
     saveNode(node);
 };
 
+export function updateAirQualityMetrics(id, metrics)
+{
+    const node = getNode(id);
+    const telemetry = node.telemetry ?? (node.telemetry = {});
+    telemetry.airquality_metrics = metrics;  
+    saveNode(node);
+};
+
 export function getNodes()
 {
     return values(nodedb);
