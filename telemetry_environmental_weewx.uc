@@ -19,7 +19,7 @@ export function tick()
 {
     if (timers.tick("environmental_metrics")) {
         try {
-            const j = json(platform.fetch(weewxurl));
+            const j = json(platform.fetch(weewxurl, 2));
             const c = j.current;
             const d = j.day;
             router.queue(message.createMessage(null, null, null, "telemetry", {

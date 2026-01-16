@@ -20,10 +20,13 @@ export function tick()
 {
     if (timers.tick("airquality_metrics")) {
         try {
-            const j = json(platform.fetch(purpleairurl));
+            const j = json(platform.fetch(purpleairurl, 5));
             router.queue(message.createMessage(null, null, null, "telemetry", {
                 time: time(),
                 airquality_metrics: {
+                    particles_03um: j.p_0_3_um,
+                    particles_05um: j.p_0_5_um,
+                    particles_10um: j.p_1_0_um,
                     particles_25um: j.p_2_5_um,
                     particles_50um: j.p_5_0_um,
                     particles_100um: j.p_10_0_um,

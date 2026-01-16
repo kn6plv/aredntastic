@@ -35,9 +35,9 @@ let rootdir = "/tmp/raven";
     fs.writefile(`${rootdir}/${name}.json`, sprintf("%.02J", data));
 }
 
-/* export */ function fetch(url)
+/* export */ function fetch(url, timeout)
 {
-    const p = fs.popen(`curl --max-time 2 --silent --output - ${url}`);
+    const p = fs.popen(`curl --max-time ${timeout} --silent --output - ${url}`);
     if (!p) {
         return null;
     }

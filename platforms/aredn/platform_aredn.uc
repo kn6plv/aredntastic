@@ -141,9 +141,9 @@ function path(name)
     fs.unlink(`${p}~`);
 }
 
-/* export */ function fetch(url)
+/* export */ function fetch(url, timeout)
 {
-    const p = fs.popen(`${CURL} --max-time 2 --silent --output - ${url}`);
+    const p = fs.popen(`${CURL} --max-time ${timeout} --silent --output - ${url}`);
     if (!p) {
         return null;
     }
