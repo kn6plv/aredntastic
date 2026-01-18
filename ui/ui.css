@@ -222,15 +222,15 @@ a
 }
 .channel
 {
-    padding: 5px 10px;
+    padding: 0px 5px 0 10px;
 }
 .channel:first-child
 {
-    padding-top: 10px;
+    padding-top: 5px;
 }
 .channel:last-child
 {
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 .channel:hover,
 .channel.selected:hover
@@ -243,8 +243,9 @@ a
 }
 .channel .n
 {
-    display: block;
+    height: 30px;
     flex: 1;
+    align-items: center;
 }
 .channel .t
 {
@@ -260,9 +261,10 @@ a
 .channel .unread
 {
     justify-content: center;
-    width: 30px;
-    padding: 6px;
-    border-radius: 15px;
+    min-width: 24px;
+    margin: 3px;
+    padding: 3px;
+    border-radius: 12px;
     color: var(--unread-color);
     background-color: var(--unread-background-color);
     font-weight: bold;
@@ -297,6 +299,7 @@ a
 {
     font-weight: bold;
     font-size: 16px;
+    word-break: break-word;
 }
 .node .m .r
 {

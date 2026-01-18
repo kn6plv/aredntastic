@@ -78,8 +78,9 @@ function decode(state)
             let len = ord(state.incoming, 1) & 127;
             if (len === 126) {
                 if (length(state.incoming) >= 8) {
-                    len = (ord(state.incoming, 2) << 8) | ord(state.incoming, 3);
-                    mask = [ ord(state.incoming, 4), ord(state.incoming, 5), ord(state.incoming, 6), ord(state.incoming, 7) ];
+                    len = struct.unpack(">H", state.incoming, 2)[0];
+                    mask = struct.unpack("<I", state.incoming, 4)[0];
+                    mask = (mask << 32) | mask;
                     off = 8;
                 }
                 else {
@@ -88,9 +89,9 @@ function decode(state)
             }
             else if (len === 127) {
                 if (length(state.incoming) >= 14) {
-                    len = (ord(state.incoming, 2) << 56) | (ord(state.incoming, 3) << 48) | (ord(state.incoming, 4) << 40) | (ord(state.incoming, 5) << 32) |
-                          (ord(state.incoming, 6) << 24) | (ord(state.incoming, 7) << 16) | (ord(state.incoming, 8) << 8) | ord(state.incoming, 9);
-                    mask = [ ord(state.incoming, 10), ord(state.incoming, 11), ord(state.incoming, 12), ord(state.incoming, 13) ];
+                    len = struct.unpack(">Q", state.incoming, 2)[0];
+                    mask = struct.unpack("<I", state.incoming, 10)[0];
+                    mask = (mask << 32) | mask;
                     off = 14;
                 }
                 else {
@@ -98,13 +99,24 @@ function decode(state)
                 }
             }
             else {
-                mask = [ ord(state.incoming, 2), ord(state.incoming, 3), ord(state.incoming, 4), ord(state.incoming, 5) ];
+                mask = struct.unpack("<I", state.incoming, 2)[0];
+                mask = (mask << 32) | mask;
                 off = 6;
             }
             if (len >= 0 && off + len <= length(state.incoming)) {
-                for (let i = 0; i < len; i++) {
-                    state.msg += chr(ord(state.incoming, off + i) ^ mask[i & 3]);
+                const buf = struct.buffer(substr(state.incoming, off, len));
+                const rlen = int(len / 8);
+                for (let i = 0; i < rlen; i++) {
+                    const v = buf.get("<Q") ^ mask;
+                    buf.pos(buf.pos() - 8);
+                    buf.put("<Q", v);
                 }
+                for (let i = rlen * 8; i < len; i++) {
+                    const v = buf.get("B") ^ ((mask >> (8 * (i & 3))) & 255);
+                    buf.pos(buf.pos() - 1);
+                    buf.put("B", v);
+                }
+                state.msg += buf.pull();
                 state.incoming = substr(state.incoming, off + len);
                 if (opcode & 15) {
                     state.opcode = opcode & 15;
@@ -112,12 +124,14 @@ function decode(state)
                 if (opcode & 128) {
                     switch (state.opcode) {
                         case OP_TEXT:
-                            push(messages, state.msg);
+                            push(messages, { text: state.msg });
+                            break;
+                        case OP_BINARY:
+                            push(messages, { binary: state.msg });
                             break;
                         case OP_PING:
                             state.s.send(struct.pack("2B", FIN | OP_PONG, l) + state.msg);
                             break;
-                        case OP_BINARY:
                         default:
                             break;
                     }
@@ -183,7 +197,7 @@ function read(ns)
                     ns.send(`HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${digest}\r\n\r\n`);
                     state.state = S_MSGRECV;
                     state.incoming = substr(state.incoming, i + 4);
-                    return [ '{"cmd":"connected"}', ...decode(state) ];
+                    return [ { text: '{"cmd":"connected"}' }, ...decode(state) ];
                 }
             }
             break;

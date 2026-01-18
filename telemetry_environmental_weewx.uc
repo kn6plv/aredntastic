@@ -4,6 +4,7 @@ import * as message from "message";
 import * as node from "node";
 import * as nodedb from "nodedb";
 import * as telemetry from "telemetry";
+import * as telemetry_environmental from "telemetry_environmental";
 
 let weewxurl;
 

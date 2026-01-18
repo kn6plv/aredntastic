@@ -91,7 +91,6 @@ function htmlChannel(channel)
     return `<div class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
         <div class="n">
             <div class="t">${channel.primary ? "Meshtastic" : nk[0]}</div>
-            <div class="s">${nk[1]}</div>
         </div>
         <div class="unread">${channel.unread.count > 0 ? channel.unread.count : ''}</div>
     </div>`;
@@ -387,6 +386,61 @@ function sendMessage(event)
     return true;
 }
 
+function sendDrop(event)
+{
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    switch (file?.type ?? "-") {
+        case "image/jpeg":
+        case "image/png":
+        {
+            const reader = new FileReader();
+            reader.onload = function()
+            {
+                const maxWidth = 1024;
+                const maxHeight = 768;
+                const img = new Image();
+                img.onload = function()
+                {
+                    const canvas = document.createElement('canvas');
+                    if (img.width > img.height) {
+                        if (img.width > maxWidth) {
+                            canvas.width = maxWidth;
+                            canvas.height = img.height * maxWidth / img.width;
+                        }
+                        else {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                        }
+                    }
+                    else {
+                        if (img.height > maxHeight) {
+                            canvas.width = img.width * maxHeight / img.height;
+                            canvas.height = maxHeight;
+                        }
+                        else {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                        }
+                    }
+                    const context = canvas.getContext('2d');
+                    context.imageSmoothingEnabled = true;
+                    context.drawImage(img, 0, 0, canvas.width,  canvas.height);
+                    canvas.toBlob(blob => {
+                        console.log(blob);
+                        send(blob);
+                    }, "image/jpeg", 0.9);
+                }
+                img.src = reader.result;
+            }
+            reader.readAsDataURL(file);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 function openChannelConfig()
 {
     if (rightSelection !== "channel-config") {
@@ -513,7 +567,7 @@ function startup()
 {
     sock = new WebSocket(`ws://${location.hostname}:4404`);
     sock.addEventListener("open", _ => {
-        send = (msg) => sock.send(JSON.stringify(msg));
+        send = (msg) => sock.send(msg instanceof Blob ? msg : JSON.stringify(msg));
     });
     sock.addEventListener("close", restartup);
     sock.addEventListener("error", restartup);

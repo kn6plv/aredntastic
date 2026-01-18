@@ -30,7 +30,7 @@ export function tick()
                     particles_25um: j.p_2_5_um,
                     particles_50um: j.p_5_0_um,
                     particles_100um: j.p_10_0_um,
-                    pm_temperature: telemetry.convert("C", `${j.current_temp_f}F`),
+                    pm_temperature: telemetry.convert("C", { value: j.current_temp_f, units: "F" }),
                     pm_humidity: j.current_humidity
                 }
             }));

@@ -116,7 +116,13 @@ export function tick()
                     {
                         const msgs = websocket.recv(v[i][0]);
                         for (let i = 0; i < length(msgs); i++) {
-                            event.queue(json(msgs[i]));
+                            const msg = msgs[i];
+                            if (msg.text) {
+                                event.queue(json(msg.text));
+                            }
+                            else if (msg.binary) {
+                                event.queue({ cmd: "upload", binary: msg.binary });
+                            }
                         }
                     }
                     break;

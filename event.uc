@@ -169,6 +169,11 @@ export function tick()
                     }
                     break;
                 }
+                case "upload":
+                {
+                    send({ event: "uploaded" });
+                    break;
+                }
             }
         }
         merge = {};
