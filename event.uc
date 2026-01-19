@@ -1,3 +1,4 @@
+import * as math from "math";
 import * as websocket from "websocket";
 import * as timers from "timers";
 import * as node from "node";
@@ -16,10 +17,10 @@ export function setup(config)
     timers.setInterval("event", 0, 10 * 60);
 };
 
-function send(msg)
+function send(msg, to)
 {
-    //print("send ", msg, "\n");
-    websocket.send(sprintf("%J", msg));
+    DEBUG1("send ", msg, "\n");
+    websocket.send(to, sprintf("%J", msg));
 }
 
 export function queue(msg)
@@ -171,7 +172,9 @@ export function tick()
                 }
                 case "upload":
                 {
-                    send({ event: "uploaded" });
+                    const name = `img${math.rand()}${math.rand()}${math.rand()}${math.rand()}.jpeg`;
+                    platform.storebinary(name, msg.binary);
+                    send({ event: "uploaded", name: name }, msg.socket);
                     break;
                 }
             }

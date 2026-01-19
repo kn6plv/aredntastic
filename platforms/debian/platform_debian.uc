@@ -35,6 +35,11 @@ let rootdir = "/tmp/raven";
     fs.writefile(`${rootdir}/${name}.json`, sprintf("%.02J", data));
 }
 
+/* export */ function storebinary(name, data)
+{
+    fs.writefile(`${rootdir}/${name}.json`, data);
+}
+
 /* export */ function fetch(url, timeout)
 {
     const p = fs.popen(`curl --max-time ${timeout} --silent --output - ${url}`);
@@ -92,6 +97,7 @@ return {
     mergePlatformConfig,
     load,
     store,
+    storebinary,
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,

@@ -50,7 +50,7 @@ export function send(to, msg, canforward)
             port: PORT
         });
         if (r === null) {
-            printf("ipmesh:send error: %s\n", socket.error());
+            DEBUG0("ipmesh:send error: %s\n", socket.error());
         }
     }
 };

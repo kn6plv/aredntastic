@@ -9,6 +9,7 @@ const me = {};
 let textObs;
 const xdiv = document.createElement("div");
 let updateTextTimeout;
+let dropSelection;
 
 const roles = {
     0: "Client",
@@ -129,7 +130,15 @@ function htmlText(text)
             reply = `<div class="r"><div>${T(r.text.replace(/\n/g," "))}</div></div>`;
         }
     }
-    const ttext = T(text.text).replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`);
+    const txt = T(text.text);
+    let textmsg = null;
+    const img = txt.match(/^(http:\/\/[^\.]+\.local\.mesh\/cgi-bin\/apps\/raven\/image\?i=.+)$/);
+    if (img) {
+        textmsg = `<div class="i"><a target="_blank" href="${img[1]}"><img loading="lazy" src="${img[1]}"></a></div>`;
+    }
+    else {
+        textmsg = '<div class="t">' + txt.replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`) + "</div>";
+    }
     return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
         ${reply}
         <div>
@@ -137,7 +146,7 @@ function htmlText(text)
             ${n?.logo ? '<div class="logo"></div>' : ''}
             <div class="c">
                 <div class="l">${T(n.long_name + " (" + n.id + ")")} ${n ? "<div>&nbsp;" + (new Date(1000 * text.when).toLocaleString()) + "</div>" : ''}</div>
-                <div class="t">${ttext}</div>
+                ${textmsg}
             </div>
         </div>
     </div>`;
@@ -304,6 +313,7 @@ function updateTexts(msg)
                 for (txt = txt.nextSibling; txt; txt = txt.nextSibling) {
                     textObs.observe(txt);
                 }
+                break;
             }
         }
     }
@@ -386,9 +396,36 @@ function sendMessage(event)
     return true;
 }
 
+function canDrop(namekey)
+{
+    const channel = getChannel(namekey);
+    return channel && !channel.primary;
+}
+
+function drag(event)
+{
+    event.preventDefault();
+    if (canDrop(rightSelection)) {
+        if (event.type === "dragenter") {
+            event.target.classList.add("drop");
+            event.target.placeholder = "Drop image here ...";
+        }
+        else {
+            event.target.classList.remove("drop");
+            event.target.placeholder = "Message ...";
+        }
+    }
+}
+
 function sendDrop(event)
 {
     event.preventDefault();
+    event.target.classList.remove("drop");
+    event.target.placeholder = "Message ...";
+    if (!canDrop(rightSelection)) {
+        return;
+    }
+    dropSelection = rightSelection;
     const file = event.dataTransfer.files[0];
     switch (file?.type ?? "-") {
         case "image/jpeg":
@@ -427,7 +464,6 @@ function sendDrop(event)
                     context.imageSmoothingEnabled = true;
                     context.drawImage(img, 0, 0, canvas.width,  canvas.height);
                     canvas.toBlob(blob => {
-                        console.log(blob);
                         send(blob);
                     }, "image/jpeg", 0.9);
                 }
@@ -609,6 +645,14 @@ function startup()
                 case "catchup":
                     updateUnread(msg);
                     break;
+                case "uploaded":
+                {
+                    if (canDrop(dropSelection)) {
+                        const hostname = location.hostname.indexOf(".local.mesh") == -1 ? `${location.hostname}.local.mesh` : location.hostname;
+                        send({ cmd: "post", namekey: dropSelection, text: `http://${hostname}/cgi-bin/apps/raven/image?i=${msg.name}` });
+                    }
+                    break;
+                }
                 default:
                     break;
             }

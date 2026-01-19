@@ -124,10 +124,10 @@ function decode(state)
                 if (opcode & 128) {
                     switch (state.opcode) {
                         case OP_TEXT:
-                            push(messages, { text: state.msg });
+                            push(messages, { text: state.msg, socket: state.s });
                             break;
                         case OP_BINARY:
-                            push(messages, { binary: state.msg });
+                            push(messages, { binary: state.msg, socket: state.s });
                             break;
                         case OP_PING:
                             state.s.send(struct.pack("2B", FIN | OP_PONG, l) + state.msg);
@@ -223,13 +223,14 @@ export function recv(handle)
     return handle === s ? accept() : read(handle);
 };
 
-export function send(msg)
+export function send(to, msg)
 {
     const hdr = encodeHeader(msg);
-    for (let i = 1; i < length(allhandles); i++) {
-        const r = allhandles[i].sendmsg([ hdr, msg ]);
+    const targets = to ? [ null, to ] : allhandles;
+    for (let i = 1; i < length(targets); i++) {
+        const r = targets[i].sendmsg([ hdr, msg ]);
         if (r === null) {
-            printf("websocket:send error: %s\n", socket.error());
+            DEBUG0("websocket:send error: %s\n", socket.error());
         }
     }
 };

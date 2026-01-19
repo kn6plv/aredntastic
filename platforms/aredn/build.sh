@@ -63,13 +63,15 @@ cp $SRC/platforms/aredn/raven.conf $ROOT/data/usr/local/raven/
 
 cp $SRC/ui/index.html $SRC/ui/ui.js $SRC/ui/ui.css $SRC/ui/raven.svg $ROOT/data/www/apps/raven/
 cp $SRC/ui/raven.svg $ROOT/data/www/apps/raven/icon.svg
+cp $SRC/ui/ix.png $ROOT/data/www/apps/raven/ix.png
 cp $SRC/platforms/aredn/admin.sh $ROOT/data/www/cgi-bin/apps/raven/admin
+cp $SRC/platforms/aredn/image.uc $ROOT/data/www/cgi-bin/apps/raven/image
 
 cp $SRC/platforms/aredn/raven.init $ROOT/data/etc/init.d/raven
 
 cp $SRC/platforms/aredn/upgrade.conf $ROOT/data/etc/arednsysupgrade.d/KN6PLV.raven.conf
 
-chmod 755 $ROOT/data/www/apps/raven/* $ROOT/data/www/cgi-bin/apps/raven/admin
+chmod 755 $ROOT/data/www/apps/raven/* $ROOT/data/www/cgi-bin/apps/raven/admin $ROOT/data/www/cgi-bin/apps/raven/image
 
 (cd $ROOT/control ; tar cfz ../control.tar.gz .)
 (cd $ROOT/data ; tar cfz ../data.tar.gz .)

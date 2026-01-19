@@ -18,6 +18,7 @@
     --post-text-color: black;
     --post-bg-color: #f8f8f8;
     --post-border-color: grey;
+    --post-drop-border-color: green;
     --post-font-size: 16px;
     --post-count-color: grey;
     --unread-background-color: seagreen;
@@ -51,6 +52,7 @@
     --post-text-color: white;
     --post-bg-color: black;
     --post-border-color: grey;
+    --post-drop-border-color: green;
     --post-count-color: grey;
     --unread-background-color: seagreen;
     --unread-color: #303030;
@@ -212,6 +214,14 @@ a
     outline: none;
     resize: none;
 }
+#post textarea.drop
+{
+    border-color: var(--post-drop-border-color);
+}
+#post textarea.drop::placeholder
+{
+    color: var(--post-drop-border-color);
+}
 #post .count
 {
     position: absolute;
@@ -261,9 +271,9 @@ a
 .channel .unread
 {
     justify-content: center;
+    align-items: center;
     min-width: 24px;
     margin: 3px;
-    padding: 3px;
     border-radius: 12px;
     color: var(--unread-color);
     background-color: var(--unread-background-color);
@@ -381,7 +391,8 @@ a
     color: var(--text-date-color);
     font-size: 10px;
 }
-.text .t
+.text .t,
+.text .i
 {
     display: block;
     border: 1px solid var(--text-border-color);
@@ -391,7 +402,13 @@ a
     background-color: var(--text-background-color);
     white-space: pre-wrap;
 }
-.text.right .t
+.text .i img
+{
+    height: 200px;
+    border-radius: 8px;
+}
+.text.right .t,
+.text.right .i
 {
     margin: 2px 6px 2px auto;
 }

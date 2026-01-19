@@ -121,7 +121,7 @@ export function tick()
                                 event.queue(json(msg.text));
                             }
                             else if (msg.binary) {
-                                event.queue({ cmd: "upload", binary: msg.binary });
+                                event.queue({ cmd: "upload", binary: msg.binary, socket: msg.socket });
                             }
                         }
                     }

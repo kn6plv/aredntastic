@@ -31,7 +31,7 @@
                 <div id="right">
                     <div id="texts"></div>
                     <div id="post">
-                        <textarea placeholder="Message" maxlength="200" onkeyup="return sendMessage(event)" onkeypress="return sendMessage(event)" ondrop="sendDrop(event)"></textarea>
+                        <textarea placeholder="Message ..." maxlength="200" onkeyup="return sendMessage(event)" onkeypress="return sendMessage(event)" ondragenter="drag(event)" ondragleave="drag(event)" ondrop="sendDrop(event)"></textarea>
                         <div class="count">0/200</div>
                     </div>
                 </div>

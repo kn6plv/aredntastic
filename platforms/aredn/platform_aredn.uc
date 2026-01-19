@@ -109,6 +109,9 @@ const badges = {};
 
 function path(name)
 {
+    if (index(name, "img") === 0) {
+        return `/tmp/apps/raven/images/${name}`;
+    }
     return `/usr/local/raven/data/${replace(name, /\//g, "_")}.json`;
 }
 
@@ -138,6 +141,17 @@ function path(name)
         fs.rename(p, `${p}~`);
     }
     fs.writefile(p, sprintf("%.02J", data));
+    fs.unlink(`${p}~`);
+}
+
+/* export */ function storebinary(name, data)
+{
+    const p = path(name);
+    if (fs.access(p)) {
+        fs.unlink(`${p}~`);
+        fs.rename(p, `${p}~`);
+    }
+    fs.writefile(p, data);
     fs.unlink(`${p}~`);
 }
 
@@ -321,6 +335,7 @@ return {
     mergePlatformConfig,
     load,
     store,
+    storebinary,
     fetch,
     getTargetsByIdAndNamekey,
     getTargetById,

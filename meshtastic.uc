@@ -277,7 +277,7 @@ export function send(msg)
                 port: PORT
             });
             if (r == null) {
-                print(socket.error(), "\n");
+                DEBUG0("meshtastic:send error: %s\n", socket.error());
             }
         }
     }
