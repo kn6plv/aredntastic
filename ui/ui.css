@@ -12,6 +12,7 @@
     --text-date-color: #606060;
     --text-reply-color: darkblue;
     --text-reply-border-color: darkblue;
+    --text-reply-label-color: grey;
     --logo-background-color: white;
     --logo-border-color: white;
     --light-filter: none;
@@ -46,6 +47,7 @@
     --text-date-color: #a0a0a0;
     --text-reply-color: lightblue;
     --text-reply-border-color: lightblue;
+    --text-reply-label-color: grey;
     --logo-background-color: #202020;
     --logo-border-color: #202020;
     --light-filter: invert(86%) sepia(86%) saturate(38%) hue-rotate(322deg) brightness(116%) contrast(69%);
@@ -195,6 +197,7 @@ a
     overflow: scroll;
     flex-direction: column;
     margin: 10px;
+    padding-right: 10px;
 }
 #post
 {
@@ -204,7 +207,7 @@ a
 #post textarea
 {
     width: 100%;
-    height: 76px;
+    height: 90px;
     color: var(--post-text-color);
     background-color: var(--post-bg-color);
     font-size: var(--post-font-size);
@@ -229,6 +232,25 @@ a
     bottom: 16px;
     font-size: 14px;
     color: var(--post-count-color);
+}
+#post .rt
+{
+    position: absolute;
+    top: 5px;
+    left: 15px;
+    max-width: 90%;
+    max-height: 22px;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-reply-color);
+    border: 1px solid var(--text-reply-border-color);
+    border-radius: 10px;
+}
+#post textarea:nth-child(2)
+{
+    padding-top: 32px;
 }
 .channel
 {
@@ -341,6 +363,14 @@ a
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.49 12 3.75-3.751m0 0-3.75-3.75m3.75 3.75H3.74V19.5" /></svg>') no-repeat 0 4px !important;
     filter: var(--light-filter);
 }
+.text.right .r
+{
+    margin: 7px 20px 2px auto;
+}
+.text.right .r::before
+{
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5" /></svg>') no-repeat 6px 4px !important;
+}
 .text .r > div
 {
     padding: 4px 10px;
@@ -396,7 +426,7 @@ a
 {
     display: block;
     border: 1px solid var(--text-border-color);
-    margin: 2px auto 2px 6px;
+    margin: 2px 6px 2px 6px;
     padding: 8px 10px;
     border-radius: 17px;
     background-color: var(--text-background-color);
@@ -410,7 +440,22 @@ a
 .text.right .t,
 .text.right .i
 {
-    margin: 2px 6px 2px auto;
+    margin: 2px 6px 2px 6px;
+}
+.text.right .b
+{
+    flex-direction: row-reverse;
+}
+.text .re
+{
+    margin-bottom: 2px;
+    font-size: 14px;
+    align-items: end;
+    color: transparent;
+}
+.text:hover .re
+{
+    color: var(--text-reply-label-color);
 }
 .text .logo
 {

@@ -68,7 +68,13 @@ export function process(msg)
     if (msg.data?.position && node.forMe(msg)) {
         nodedb.updatePosition(msg.from, msg.data.position);
         if (node.toMe(msg) && msg.data.want_response) {
-            router.queue(message.createReplyMessage(msg, "position", position(node.isPrivate(msg))));
+            router.queue(
+                message.createMessage(msg.from, msg.to, msg.namekey, "position", position(node.isPrivate(msg)), {
+                    data: {
+                        reply_id: msg.id
+                    }
+                })
+            );
         }
     }
 };

@@ -66,7 +66,13 @@ export function process(msg)
             }
         }
         else {
-            router.queue(message.createReplyMessage(msg, "traceroute", traceroute));
+            router.queue(
+                message.createMessage(msg.from, msg.to, msg.namekey, "traceroute", traceroute, {
+                    data: {
+                        request_id: msg.id
+                    }
+                })
+            );
         }
     }
 };

@@ -63,7 +63,7 @@ export function process(msg)
         if (node.toMe(msg) && msg.data.want_response) {
             router.queue(createNodeinfoMessage(msg.from, msg.namekey, {
                 data: {
-                    request_id: msg.id
+                    reply_id: msg.id
                 }
             }));
         }

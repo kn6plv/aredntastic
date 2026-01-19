@@ -163,7 +163,13 @@ export function tick()
                 case "post":
                 {
                     if (channel.getLocalChannelByNameKey(msg.namekey)) {
-                        const tmsg = textmessage.createMessage(null, msg.namekey, msg.text);
+                        let tmsg;
+                        if (msg.replyto) {
+                            tmsg = textmessage.createReplyMessage(null, msg.namekey, msg.text, msg.replyto);
+                        }
+                        else {
+                            tmsg = textmessage.createMessage(null, msg.namekey, msg.text);
+                        }
                         if (tmsg) {
                             router.queue(tmsg);
                         }

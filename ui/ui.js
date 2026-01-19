@@ -10,6 +10,7 @@ let textObs;
 const xdiv = document.createElement("div");
 let updateTextTimeout;
 let dropSelection;
+let replyid;
 
 const roles = {
     0: "Client",
@@ -137,7 +138,7 @@ function htmlText(namekey, text)
         textmsg = `<div class="i"><a target="_blank" href="${img[1]}"><img loading="lazy" src="${img[1]}"></a></div>`;
     }
     else {
-        textmsg = '<div class="t">' + txt.replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`) + "</div>";
+        textmsg = '<div class="b"><div class="t">' + txt.replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`) + '</div><a href="#" class="re" onclick="setupReply(event)">Reply</a></div>';
     }
     return `<div id="${text.id}" class="text ${n.num == me.num ? 'right ' : ''}${n.logo ? n.logo : ''}">
         ${reply}
@@ -389,14 +390,44 @@ function sendMessage(event)
     if (event.type === "keyup") {
         Q("#post .count").innerText = `${Math.max(0, text.length)}/200`;
     }
+    else if (event.key === "Escape") {
+        resetPost();
+    }
     else if (event.key === "Enter" && !event.shiftKey) {
         event.target.value = "";
         if (text) {
-            send({ cmd: "post", namekey: rightSelection, text: text.trim() });
+            send({ cmd: "post", namekey: rightSelection, text: text.trim(), replyto: replyid });
         }
+        resetPost();
         return false;
     }
     return true;
+}
+
+function setupReply(event)
+{
+    const t = Q(event.target.parentNode, ".t");
+    const tt = t.closest(".text");
+    replyid = tt.id;
+    const p = Q("#post");
+    const n = N(`<div class="rt">${t.innerText}</div>`);
+    if (p.firstElementChild.nodeName == "DIV") {
+        p.firstElementChild.remove();
+    }
+    p.insertBefore(n, p.firstElementChild);
+    const pt = Q(p, "textarea");
+    pt.placeholder = "Reply ...";
+    pt.focus();
+}
+
+function resetPost()
+{
+    replyid = null;
+    const p = Q("#post");
+    if (p.firstElementChild.nodeName == "DIV") {
+        p.firstElementChild.remove();
+    }
+    Q(p, "textarea").placeholder = "Message ...";
 }
 
 function useImage(namekey)

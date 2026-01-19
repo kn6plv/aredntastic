@@ -3,7 +3,6 @@ import * as node from "node";
 import * as channel from "channel";
 import * as meshtastic from "meshtastic";
 
-const MAX_TEXT_MESSAGE_LENGTH = 200;
 const DEFAULT_PRIORITY = 64;
 const ACK_PRIORITY = 120;
 
@@ -54,30 +53,4 @@ export function createMessage(to, from, namekey, type, payload, extra)
         }
     }
     return msg;
-};
-
-export function createReplyMessage(msg, type, payload)
-{
-    return createMessage(msg.from, msg.to, msg.namekey, type, payload, {
-        data: {
-            request_id: msg.id
-        }
-    });
-};
-
-export function createTextMessage(to, from, namekey, text)
-{
-    return createMessage(to, from, namekey, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
-};
-
-export function createAckMessage(msg, reason)
-{
-    return createMessage(msg.from, msg.to, msg.namekey, "routing", {
-        error_reason: reason ?? 0
-    }, {
-        priority: ACK_PRIORITY,
-        data: {
-            request_id: msg.id
-        }
-    });
 };

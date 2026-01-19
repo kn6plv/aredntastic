@@ -7,6 +7,7 @@ let enabled = false;
 
 const MAX_MESSAGES = 100;
 const SAVE_INTERVAL = 5 * 60;
+const MAX_TEXT_MESSAGE_LENGTH = 200;
 
 const channelmessages = {};
 const channelmessagesdirty = {};
@@ -92,7 +93,16 @@ export function getMessage(namekey, id)
 
 export function createMessage(to, namekey, text)
 {
-    return message.createTextMessage(to, null, namekey, text);
+    return message.createMessage(to, null, namekey, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH));
+};
+
+export function createReplyMessage(to, namekey, text, replyto)
+{
+    return message.createMessage(to, null, namekey, "text_message", substr(text, 0, MAX_TEXT_MESSAGE_LENGTH), {
+        data: {
+            reply_id: int(split(replyto, ":")[1])
+        }
+    });
 };
 
 export function catchUpMessagesTo(namekey, id)
