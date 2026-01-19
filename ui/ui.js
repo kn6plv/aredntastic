@@ -433,6 +433,9 @@ function sendDrop(event)
     switch (file?.type ?? "-") {
         case "image/jpeg":
         case "image/png":
+        case "image/gif":
+        case "image/svg+xml":
+        case "image/webp":
         {
             const reader = new FileReader();
             reader.onload = function()
@@ -467,6 +470,7 @@ function sendDrop(event)
                     context.imageSmoothingEnabled = true;
                     context.drawImage(img, 0, 0, canvas.width,  canvas.height);
                     canvas.toBlob(blob => {
+                        event.target.placeholder = "Uploading image ...";
                         send(blob);
                     }, "image/jpeg", 0.9);
                 }
@@ -651,6 +655,7 @@ function startup()
                     break;
                 case "uploaded":
                 {
+                    Q("#post textarea").placeholder = "Message ...";
                     if (useImage(dropSelection)) {
                         const hostname = location.hostname.indexOf(".local.mesh") == -1 ? `${location.hostname}.local.mesh` : location.hostname;
                         send({ cmd: "post", namekey: dropSelection, text: `http://${hostname}/cgi-bin/apps/raven/image?i=${msg.name}` });
