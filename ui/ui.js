@@ -110,7 +110,7 @@ function htmlNode(node)
     </div>`;
 }
 
-function htmlText(text)
+function htmlText(namekey, text)
 {
     let n = nodes[text.from];
     if (!n) {
@@ -133,7 +133,7 @@ function htmlText(text)
     const txt = T(text.text);
     let textmsg = null;
     const img = txt.match(/^(http:\/\/[^\.]+\.local\.mesh\/cgi-bin\/apps\/raven\/image\?i=.+)$/);
-    if (img) {
+    if (img && useImage(namekey)) {
         textmsg = `<div class="i"><a target="_blank" href="${img[1]}"><img loading="lazy" src="${img[1]}"></a></div>`;
     }
     else {
@@ -166,6 +166,7 @@ function htmlChannelConfig()
             <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""} pattern="[\\-A-Za-z0-9+\\/]*={0,3}">
             <input value="${e.max}" oninput="typeChannelMax(${i}, event.target.value)" required minlength="2" maxlength="4" size="4" placeholder="Count" ${e.readonly ? "readonly" : ""}>
             <div><input ${e.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(${i}, event.target.checked)"></div>
+            <div><input ${e.images ? "checked" : ""} type="checkbox" disabled></div>
             <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>
                 <option>new key</option>
                 <option>1 byte</option>
@@ -184,6 +185,7 @@ function htmlChannelConfig()
                 <div>ID or Key</div>
                 <div>Max messages</div>
                 <div>Notify</div>
+                <div>Images</div>
             </div>
             <form class="c">
                 <input value="Meshtastic" readonly><select onchange="typeChannelName(0, event.target.value)">
@@ -199,6 +201,7 @@ function htmlChannelConfig()
                 </select>
                 <input value="100" readonly>
                 <div><input ${primary.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(0, event.target.checked)"></div>
+                <div><input type="checkbox" disabled></div>
                 <select disabled><option>new key</option></select>
             </form>
             ${body}
@@ -302,7 +305,7 @@ function updateTexts(msg)
     clearTimeout(updateTextTimeout);
     const t = Q("#texts");
     texts = msg.texts;
-    t.innerHTML = msg.texts.map(t => htmlText(t)).join("");
+    t.innerHTML = msg.texts.map(t => htmlText(msg.namekey, t)).join("");
     const channel = getChannel(msg.namekey);
     restartTextsObserver(channel);
     channel.unread = msg.unread;
@@ -346,7 +349,7 @@ function updateText(msg)
     const t = Q("#texts");
     const atbottom = (t.scrollTop > t.scrollHeight - t.clientHeight - 50);
     texts.push(msg.text);
-    const n = t.appendChild(N(htmlText(msg.text)));
+    const n = t.appendChild(N(htmlText(msg.namekey, msg.text)));
     if (atbottom && document.visibilityState == "visible") {
         t.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
         send({ cmd: "catchup", namekey: msg.namekey, id: msg.text.id });
@@ -396,7 +399,7 @@ function sendMessage(event)
     return true;
 }
 
-function canDrop(namekey)
+function useImage(namekey)
 {
     const channel = getChannel(namekey);
     return channel && !channel.primary;
@@ -405,7 +408,7 @@ function canDrop(namekey)
 function drag(event)
 {
     event.preventDefault();
-    if (canDrop(rightSelection)) {
+    if (useImage(rightSelection)) {
         if (event.type === "dragenter") {
             event.target.classList.add("drop");
             event.target.placeholder = "Drop image here ...";
@@ -422,7 +425,7 @@ function sendDrop(event)
     event.preventDefault();
     event.target.classList.remove("drop");
     event.target.placeholder = "Message ...";
-    if (!canDrop(rightSelection)) {
+    if (!useImage(rightSelection)) {
         return;
     }
     dropSelection = rightSelection;
@@ -490,7 +493,8 @@ function openChannelConfig()
                 primary: c.primary,
                 readonly: i < 2,
                 max: c.unread.max,
-                badge: c.unread.badge
+                badge: c.unread.badge,
+                images: useImage(c.namekey)
             });
         });
         Q("#texts").innerHTML = htmlChannelConfig();
@@ -499,7 +503,7 @@ function openChannelConfig()
 
 function addChannel(idx)
 {
-    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100, badge: true });
+    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100, badge: true, images: true });
     Q("#texts").innerHTML = htmlChannelConfig();
 }
 
@@ -567,7 +571,7 @@ function doneChannels()
         try {
             if (e.name.length >= 1 && e.key.length >= 4 && e.name.search(/[ \t]/) === -1 && atob(e.key) && e.max >= 10 && e.max <= 1000) {
                 const namekey = `${e.name} ${e.key}`;
-                const channel = getChannel(namekey) || { primary: false, unread: { count: 0, cursor: null, max: 100, badge: true } };
+                const channel = getChannel(namekey) || { primary: false, unread: { count: 0, cursor: null, max: 100, badge: true, images: true } };
                 channelnames.push({ namekey: namekey, max: e.max, badge: e.badge });
                 channel.unread.max = e.max;
                 channel.unread.badge = e.badge;
@@ -647,7 +651,7 @@ function startup()
                     break;
                 case "uploaded":
                 {
-                    if (canDrop(dropSelection)) {
+                    if (useImage(dropSelection)) {
                         const hostname = location.hostname.indexOf(".local.mesh") == -1 ? `${location.hostname}.local.mesh` : location.hostname;
                         send({ cmd: "post", namekey: dropSelection, text: `http://${hostname}/cgi-bin/apps/raven/image?i=${msg.name}` });
                     }

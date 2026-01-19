@@ -470,6 +470,11 @@ a
 {
     width: 77px;
 }
+.config .b .ct div:nth-child(4),
+.config .b .ct div:nth-child(5)
+{
+    width: 30px;
+}
 .config .b .c
 {
     padding-left: 10px;

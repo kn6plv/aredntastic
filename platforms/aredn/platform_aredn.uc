@@ -13,6 +13,8 @@ const pubTopic = "KN6PLV.raven.v1";
 
 const RESCAN_INTERVAL = 1 * 60;
 
+const MAX_BINARY_COUNT = 16;
+
 const LOCATION_SOURCE_INTERNAL = 2;
 
 const ucdata = {};
@@ -36,7 +38,7 @@ const badges = {};
         fs.mkdir(p);
     }
     mkdirp("/usr/local/raven/data");
-    mkdirp("/tmp/apps/raven");
+    mkdirp("/tmp/apps/raven/images");
 
     const c = uci.cursor();
     ucdata.latitude = c.get("aredn", "@location[0]", "lat");
@@ -109,6 +111,7 @@ const badges = {};
 
 function path(name)
 {
+    // Image files are store in ramdisk
     if (index(name, "img") === 0) {
         return `/tmp/apps/raven/images/${name}`;
     }
@@ -136,6 +139,7 @@ function path(name)
 /* export */ function store(name, data)
 {
     const p = path(name);
+    // Keep a copy ofthe stored file until the new one is written
     if (fs.access(p)) {
         fs.unlink(`${p}~`);
         fs.rename(p, `${p}~`);
@@ -147,12 +151,16 @@ function path(name)
 /* export */ function storebinary(name, data)
 {
     const p = path(name);
-    if (fs.access(p)) {
-        fs.unlink(`${p}~`);
-        fs.rename(p, `${p}~`);
-    }
     fs.writefile(p, data);
-    fs.unlink(`${p}~`);
+    // Reduce cached files to MAX_BINARY_COUNT
+    const dirname = fs.dirname(p);
+    const dir = map(fs.lsdir(dirname), f => {
+        return { f: f, m: fs.stat(`${dirname}/${f}`).mtime };
+    });
+    sort(dir, (a, b) => b.m - a.m);
+    for (let i = MAX_BINARY_COUNT; dir[i]; i++) {
+        fs.unlink(`${dirname}/${dir[i].f}`);
+    }
 }
 
 /* export */ function fetch(url, timeout)

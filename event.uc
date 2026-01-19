@@ -172,7 +172,7 @@ export function tick()
                 }
                 case "upload":
                 {
-                    const name = `img${math.rand()}${math.rand()}${math.rand()}${math.rand()}.jpeg`;
+                    const name = sprintf("img%08X.jpg", math.rand());
                     platform.storebinary(name, msg.binary);
                     send({ event: "uploaded", name: name }, msg.socket);
                     break;
