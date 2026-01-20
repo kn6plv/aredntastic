@@ -92,11 +92,11 @@ function syncMessages()
         const stores = platform.getStoresByNamekey(namekey);
         if (stores[0]) {
             const to = stores[0].id;
-            const texts = textmessage.unread(namekey);
+            const state = textmessage.state(namekey);
             router.queue(message.createMessage(to, null, namekey, "resend_messages", {
                 namekey: namekey,
-                cursor: texts.cursor,
-                limit: texts.max
+                cursor: state.cursor,
+                limit: state.max
             }));
         }
     }

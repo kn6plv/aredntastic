@@ -123,7 +123,7 @@ export function tick()
                 case "channels":
                 {
                     const channels = map(channel.getAllChannels(), c => {
-                        return { namekey: c.namekey, primary: c.primary, unread: textmessage.unread(c.namekey) };
+                        return { namekey: c.namekey, primary: c.primary, state: textmessage.state(c.namekey) };
                     });
                     send({ event: msg.cmd, channels: channels });
                     break;
@@ -144,19 +144,19 @@ export function tick()
                 }
                 case "catchup":
                 {
-                    send({ event: msg.cmd, namekey: msg.namekey, unread: textmessage.catchUpMessagesTo(msg.namekey, msg.id) });
+                    send({ event: msg.cmd, namekey: msg.namekey, state: textmessage.catchUpMessagesTo(msg.namekey, msg.id) });
                     break;
                 }
                 case "texts":
                 {
-                    send({ event: msg.cmd, namekey: msg.namekey, texts: textmessage.getMessages(msg.namekey), unread: textmessage.unread(msg.namekey) });
+                    send({ event: msg.cmd, namekey: msg.namekey, texts: textmessage.getMessages(msg.namekey), state: textmessage.state(msg.namekey) });
                     break;
                 }
                 case "text":
                 {
                     const text = textmessage.getMessage(msg.namekey, msg.id);
                     if (text) {
-                        send({ event: msg.cmd, namekey: msg.namekey, text: text, unread: textmessage.unread(msg.namekey) });
+                        send({ event: msg.cmd, namekey: msg.namekey, text: text, state: textmessage.state(msg.namekey) });
                     }
                     break;
                 }

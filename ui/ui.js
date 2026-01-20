@@ -94,7 +94,7 @@ function htmlChannel(channel)
         <div class="n">
             <div class="t">${channel.primary ? "Meshtastic" : nk[0]}</div>
         </div>
-        <div class="unread">${channel.unread.count > 0 ? channel.unread.count : ''}</div>
+        <div class="unread">${channel.state.count > 0 ? channel.state.count : ''}</div>
     </div>`;
 }
 
@@ -167,7 +167,7 @@ function htmlChannelConfig()
             <input value="${e.key}" oninput="typeChannelKey(${i}, event.target.value)" required minlength="4" maxlength="43" size="43" placeholder="Key" ${e.readonly ? "readonly" : ""} pattern="[\\-A-Za-z0-9+\\/]*={0,3}">
             <input value="${e.max}" oninput="typeChannelMax(${i}, event.target.value)" required minlength="2" maxlength="4" size="4" placeholder="Count" ${e.readonly ? "readonly" : ""}>
             <div><input ${e.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(${i}, event.target.checked)"></div>
-            <div><input ${e.images ? "checked" : ""} type="checkbox" disabled></div>
+            <div><input ${e.images ? "checked" : ""} type="checkbox" oninput="typeChannelImages(${i}, event.target.checked)"></div>
             <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>
                 <option>new key</option>
                 <option>1 byte</option>
@@ -284,17 +284,17 @@ function restartTextsObserver(channel)
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 textObs.unobserve(entry.target);
-                channel.unread.count--;
+                channel.state.count--;
                 if (!newest || entry.time >= newest.time) {
                     newest = entry;
-                    channel.unread.cursor = entry.target.id;
+                    channel.state.cursor = entry.target.id;
                 }
             }
         });
         if (newest) {
-            Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
-            send({ cmd: "catchup", namekey: channel.namekey, id: channel.unread.cursor });
-            if (textObs.root.lastElementChild.id === channel.unread.cursor) {
+            Q(channel.element, ".unread").innerText = (channel.state.count > 0 ? channel.state.count : "");
+            send({ cmd: "catchup", namekey: channel.namekey, id: channel.state.cursor });
+            if (textObs.root.lastElementChild.id === channel.state.cursor) {
                 restartTextsObserver(channel);
             }
         }
@@ -309,11 +309,11 @@ function updateTexts(msg)
     t.innerHTML = msg.texts.map(t => htmlText(msg.namekey, t)).join("");
     const channel = getChannel(msg.namekey);
     restartTextsObserver(channel);
-    channel.unread = msg.unread;
-    if (channel.unread.cursor) {
-        I(channel.unread.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
+    channel.state = msg.state;
+    if (channel.state.cursor) {
+        I(channel.state.cursor).scrollIntoView({ behavior: "instant", block: "end", inline: "nearest" });
         for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
-            if (txt.id === channel.unread.cursor) {
+            if (txt.id === channel.state.cursor) {
                 for (txt = txt.nextSibling; txt; txt = txt.nextSibling) {
                     textObs.observe(txt);
                 }
@@ -331,18 +331,18 @@ function updateTexts(msg)
         t.firstElementChild.scrollIntoView({ behavior: "instant", block: "start", inline: "nearest" });
         for (let txt = t.firstElementChild; txt; txt = txt.nextSibling) {
             if (onScreen(txt)) {
-                channel.unread.count--;
-                channel.unread.cursor = txt.id
+                channel.state.count--;
+                channel.state.cursor = txt.id
             }
             else {
                 textObs.observe(txt);
             }
         }
-        if (channel.unread.cursor) {
-            send({ cmd: "catchup", namekey: channel.namekey, id: channel.unread.cursor });
+        if (channel.state.cursor) {
+            send({ cmd: "catchup", namekey: channel.namekey, id: channel.state.cursor });
         }
     }
-    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
+    Q(channel.element, ".unread").innerText = (channel.state.count > 0 ? channel.state.count : "");
 }
 
 function updateText(msg)
@@ -358,16 +358,16 @@ function updateText(msg)
     else {
         textObs.observe(n);
         const channel = getChannel(msg.namekey);
-        channel.unread.count++;
-        Q(channel.element, ".unread").innerText = channel.unread.count;
+        channel.state.count++;
+        Q(channel.element, ".unread").innerText = channel.state.count;
     }
 }
 
-function updateUnread(msg)
+function updateState(msg)
 {
     const channel = getChannel(msg.namekey);
-    channel.unread = msg.unread;
-    Q(channel.element, ".unread").innerText = (channel.unread.count > 0 ? channel.unread.count : "");
+    channel.state = msg.state;
+    Q(channel.element, ".unread").innerText = (channel.state.count > 0 ? channel.state.count : "");
 }
 
 function selectChannel(namekey)
@@ -436,7 +436,7 @@ function resetPost()
 function useImage(namekey)
 {
     const channel = getChannel(namekey);
-    return channel && !channel.primary;
+    return channel && !channel.primary && channel.state.images;
 }
 
 function drag(event)
@@ -530,8 +530,8 @@ function openChannelConfig()
                 key: nk[1],
                 primary: c.primary,
                 readonly: i < 2,
-                max: c.unread.max,
-                badge: c.unread.badge,
+                max: c.state.max,
+                badge: c.state.badge,
                 images: useImage(c.namekey)
             });
         });
@@ -569,6 +569,11 @@ function typeChannelMax(idx, value)
 function typeChannelBadge(idx, value)
 {
     echannels[idx].badge = value;
+}
+
+function typeChannelImages(idx, value)
+{
+    echannels[idx].images = value;
 }
 
 function genChannelKey(idx, value)
@@ -609,11 +614,12 @@ function doneChannels()
         try {
             if (e.name.length >= 1 && e.key.length >= 4 && e.name.search(/[ \t]/) === -1 && atob(e.key) && e.max >= 10 && e.max <= 1000) {
                 const namekey = `${e.name} ${e.key}`;
-                const channel = getChannel(namekey) || { primary: false, unread: { count: 0, cursor: null, max: 100, badge: true, images: true } };
-                channelnames.push({ namekey: namekey, max: e.max, badge: e.badge });
-                channel.unread.max = e.max;
-                channel.unread.badge = e.badge;
-                nchannels.push({ namekey: namekey, primary: channel.primary, unread: channel.unread });
+                const channel = getChannel(namekey) || { primary: false, state: { count: 0, cursor: null, max: 100, badge: true, images: true } };
+                channelnames.push({ namekey: namekey, max: e.max, badge: e.badge, images: e.images });
+                channel.state.max = e.max;
+                channel.state.badge = e.badge;
+                channel.state.images = e.images;
+                nchannels.push({ namekey: namekey, primary: channel.primary, state: channel.state });
             }
         }
         catch (_) {
@@ -670,7 +676,7 @@ function startup()
                         updateTexts(msg);
                     }
                     else {
-                        updateUnread(msg);
+                        updateDate(msg);
                     }
                     break;
                 case "node":
@@ -681,11 +687,11 @@ function startup()
                         updateText(msg);
                     }
                     else {
-                        updateUnread(msg);
+                        updateState(msg);
                     }
                     break;
                 case "catchup":
-                    updateUnread(msg);
+                    updateState(msg);
                     break;
                 case "uploaded":
                 {

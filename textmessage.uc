@@ -21,7 +21,8 @@ function loadMessages(namekey)
             count: 0,
             cursor: null,
             messages: [],
-            badge: true
+            badge: true,
+            images: true
         };
         platform.badge(`messages.${namekey}`, channelmessages[namekey].badge ? channelmessages[namekey].count : 0);
     }
@@ -112,7 +113,7 @@ export function catchUpMessagesTo(namekey, id)
         cm.cursor = id;
         saveMessages(namekey, cm);
     }
-    return { count: cm.count, cursor: cm.cursor, max: cm.max, badge: cm.badge };
+    return { count: cm.count, cursor: cm.cursor, max: cm.max, badge: cm.badge, images: cm.images };
 };
 
 export function updateSettings(channels)
@@ -122,14 +123,15 @@ export function updateSettings(channels)
         const cm = loadMessages(channel.namekey);
         cm.badge = channel.badge;
         cm.max = channel.max;
+        cm.images = channel.images;
         saveMessages(channel.namekey, cm);
     }
 };
 
-export function unread(namekey)
+export function state(namekey)
 {
     const cm = loadMessages(namekey);
-    return { count: cm.count, cursor: cm.cursor, max: cm.max, badge: cm.badge };
+    return { count: cm.count, cursor: cm.cursor, max: cm.max, badge: cm.badge, images: cm.images };
 };
 
 export function setup(config)
