@@ -135,7 +135,7 @@ function htmlText(namekey, text)
     let textmsg = null;
     const img = txt.match(/^(http:\/\/[^\.]+\.local\.mesh\/cgi-bin\/apps\/raven\/image\?i=.+)$/);
     if (img && useImage(namekey)) {
-        textmsg = `<div class="i"><a target="_blank" href="${img[1]}"><img loading="lazy" src="${img[1]}"></a></div>`;
+        textmsg = `<div class="b"><div class="i"><a target="_blank" href="${img[1]}"><img loading="lazy" src="${img[1]}"></a></div></div>`;
     }
     else {
         textmsg = '<div class="b"><div class="t">' + txt.replace(/https?:\/\/[^ \t<]+/g, v => `<a target="_blank" href="${v}">${v}</a>`) + '</div><a href="#" class="re" onclick="setupReply(event)">Reply</a></div>';
@@ -396,7 +396,9 @@ function sendMessage(event)
     else if (event.key === "Enter" && !event.shiftKey) {
         event.target.value = "";
         if (text) {
-            send({ cmd: "post", namekey: rightSelection, text: text.trim(), replyto: replyid });
+            Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+            const rid = replyid;
+            setTimeout(_ => send({ cmd: "post", namekey: rightSelection, text: text.trim(), replyto: rid }), 500);
         }
         resetPost();
         return false;
@@ -408,9 +410,10 @@ function setupReply(event)
 {
     const t = Q(event.target.parentNode, ".t");
     const tt = t.closest(".text");
+    tt.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
     replyid = tt.id;
     const p = Q("#post");
-    const n = N(`<div class="rt">${t.innerText}</div>`);
+    const n = N(`<div class="rt"><div>${t.innerText}</div></div>`);
     if (p.firstElementChild.nodeName == "DIV") {
         p.firstElementChild.remove();
     }
@@ -689,7 +692,8 @@ function startup()
                     Q("#post textarea").placeholder = "Message ...";
                     if (useImage(dropSelection)) {
                         const hostname = location.hostname.indexOf(".local.mesh") == -1 ? `${location.hostname}.local.mesh` : location.hostname;
-                        send({ cmd: "post", namekey: dropSelection, text: `http://${hostname}/cgi-bin/apps/raven/image?i=${msg.name}` });
+                        Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+                        setTimeout(_ => send({ cmd: "post", namekey: dropSelection, text: `http://${hostname}/cgi-bin/apps/raven/image?i=${msg.name}` }), 500);
                     }
                     break;
                 }
