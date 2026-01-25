@@ -123,7 +123,7 @@ export function tick()
                 case "channels":
                 {
                     const channels = map(channel.getAllChannels(), c => {
-                        return { namekey: c.namekey, primary: c.primary, state: textmessage.state(c.namekey) };
+                        return { namekey: c.namekey, meshtastic: c.meshtastic, telemetry: c.telemetry, state: textmessage.state(c.namekey) };
                     });
                     send({ event: msg.cmd, channels: channels });
                     break;

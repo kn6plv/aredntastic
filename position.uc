@@ -3,6 +3,7 @@ import * as message from "message";
 import * as router from "router";
 import * as nodedb from "nodedb";
 import * as node from "node";
+import * as channel from "channel";
 import * as meshtastic from "meshtastic";
 
 const DEFAULT_INTERVAL = 60 * 60;
@@ -59,7 +60,10 @@ function position(precise)
 export function tick()
 {
     if (timers.tick("position")) {
-        router.queue(message.createMessage(null, null, null, "position", position(false)));
+        const telemetry = channel.getTelemetryChannels();
+        for (let i = 0; i < length(telemetry); i++) {
+            router.queue(message.createMessage(null, null, telemetry[i].namekey, "position", position(false)));
+        }
     }
 };
 

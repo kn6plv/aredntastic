@@ -44,23 +44,23 @@ function update(option)
         {
             const channels = channel.getAllChannels();
             const nchannels = [];
-            let primary = null;
+            let meshtastic = null;
             for (let i = 0; i < length(channels); i++) {
                 const nk = split(channels[i].namekey, " ");
-                if (channels[i].primary) {
-                    primary = nk[0];
+                if (channels[i].meshtastic) {
+                    meshtastic = nk[0];
                 }
                 else {
-                    push(nchannels, { namekey: channels[i].namekey });
+                    push(nchannels, { namekey: channels[i].namekey, telemetry: channels[i].telemetry });
                 }
             }
-            if (primary != config.preset) {
-                config.preset = primary;
-                if (primary == bconfig.preset) {
+            if (meshtastic != config.preset) {
+                config.preset = meshtastic;
+                if (meshtastic == bconfig.preset) {
                     delete override.preset;
                 }
                 else {
-                    override.preset = primary;
+                    override.preset = meshtastic;
                 }
                 write = true;
             }
@@ -148,14 +148,11 @@ export function setup()
             break;
     }
 
-    switch (config.platform?.type) {
-        case "aredn":
-        case "debian":
-            global.platform = require(`platforms.${config.platform?.type}.platform_${config.platform?.type}`);
-            break;
-        default:
-            print(`Unknown platform: ${config.platform?.type}\n`);
-            exit(-1);
+    if (config.platform_aredn) {
+        global.platform = require(`platforms.aredn.platform`);
+    }
+    else if (config.platform_debian) {
+        global.platform = require(`platforms.debian.platform`);
     }
     global.platform.setup(config);
     router.registerApp(global.platform);
@@ -193,27 +190,13 @@ export function setup()
     messagestore.setup(config);
     router.registerApp(messagestore);
 
-    if (config.telemetry?.environmental) {
-        switch (config.telemetry.environmental.type) {
-            case "weewx":
-                environmental_weewx.setup(config);
-                router.registerApp(environmental_weewx);
-                break;
-            default:
-                print(`Unknown environmental: ${config.telemetry.environmental.type}\n`);
-                break;
-        }
+    if (config.telemetry?.environmental_weewx) {
+        environmental_weewx.setup(config);
+        router.registerApp(environmental_weewx);
     }
-    if (config.telemetry?.airquality) {
-        switch (config.telemetry.airquality.type) {
-            case "purpleair":
-                airquality_purpleair.setup(config);
-                router.registerApp(airquality_purpleair);
-                break;
-            default:
-                print(`Unknown airquality: ${config.telemetry.airquality.type}\n`);
-                break;
-        }
+    if (config.telemetry?.airquality_purpleair) {
+        airquality_purpleair.setup(config);
+        router.registerApp(airquality_purpleair);
     }
 
     power.setup(config);

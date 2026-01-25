@@ -92,7 +92,7 @@ function htmlChannel(channel)
     const nk = channel.namekey.split(" ");
     return `<div class="channel ${rightSelection === channel.namekey ? "selected" : ""}" onclick="selectChannel('${channel.namekey}')">
         <div class="n">
-            <div class="t">${channel.primary ? "Meshtastic" : nk[0]}</div>
+            <div class="t">${channel.meshtastic ? "Meshtastic" : nk[0]}</div>
         </div>
         <div class="unread">${channel.state.count > 0 ? channel.state.count : ''}</div>
     </div>`;
@@ -155,12 +155,27 @@ function htmlText(namekey, text)
 
 function htmlChannelConfig()
 {
-    let primary = null;
     const body = echannels.map((e, i) => {
         const ne = echannels[i + 1] || {};
-        if (e.primary) {
-            primary = e;
-            return "";
+        if (e.meshtastic) {
+            return `<form class="c">
+                <input value="Meshtastic" readonly><select onchange="typeChannelName(0, event.target.value)">
+                    <option ${e.name === "ShortTurbo" ? "selected" : ""}>ShortTurbo</option>
+                    <option ${e.name === "ShortSlow" ? "selected" : ""}>ShortSlow</option>
+                    <option ${e.name === "ShortFast" ? "selected" : ""}>ShortFast</option>
+                    <option ${e.name === "MediumSlow" ? "selected" : ""}>MediumSlow</option>
+                    <option ${e.name === "MediumFast" ? "selected" : ""}>MediumFast</option>
+                    <option ${e.name === "LongSlow" ? "selected" : ""}>LongSlow</option>
+                    <option ${e.name === "LongFast" ? "selected" : ""}>LongFast</option>
+                    <option ${e.name === "LongMod" ? "selected" : ""}>LongMod</option>
+                    <option ${e.name === "LongTurbo" ? "selected" : ""}>LongTurbo</option>
+                </select>
+                <input value="100" readonly>
+                <div><input ${e.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(0, event.target.checked)"></div>
+                <div><input disabled type="checkbox"></div>
+                <div><input disabled ${e.telemetry ? "checked" : ""} type="checkbox" oninput="typeChannelTelemetry(0, event.target.checked)"></div>
+                <select disabled><option>new key</option></select>
+            </form>`;
         }
         return `<form class="c">
             <input value="${e.name}" oninput="typeChannelName(${i}, event.target.value)" required minlength="1" maxlength="11" size="11" placeholder="Name" ${e.readonly ? "readonly" : ""} pattern="[^ ]+">
@@ -168,6 +183,7 @@ function htmlChannelConfig()
             <input value="${e.max}" oninput="typeChannelMax(${i}, event.target.value)" required minlength="2" maxlength="4" size="4" placeholder="Count" ${e.readonly ? "readonly" : ""}>
             <div><input ${e.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(${i}, event.target.checked)"></div>
             <div><input ${e.images ? "checked" : ""} type="checkbox" oninput="typeChannelImages(${i}, event.target.checked)"></div>
+            <div><input ${e.telemetry ? "checked" : ""} type="checkbox" oninput="typeChannelTelemetry(${i}, event.target.checked)"></div>
             <select onchange="genChannelKey(${i}, event.target.value)" ${e.readonly ? "disabled" : ""}>
                 <option>new key</option>
                 <option>1 byte</option>
@@ -187,24 +203,8 @@ function htmlChannelConfig()
                 <div>Max messages</div>
                 <div>Notify</div>
                 <div>Images</div>
+                <div>Telemetry</div>
             </div>
-            <form class="c">
-                <input value="Meshtastic" readonly><select onchange="typeChannelName(0, event.target.value)">
-                    <option ${primary.name === "ShortTurbo" ? "selected" : ""}>ShortTurbo</option>
-                    <option ${primary.name === "ShortSlow" ? "selected" : ""}>ShortSlow</option>
-                    <option ${primary.name === "ShortFast" ? "selected" : ""}>ShortFast</option>
-                    <option ${primary.name === "MediumSlow" ? "selected" : ""}>MediumSlow</option>
-                    <option ${primary.name === "MediumFast" ? "selected" : ""}>MediumFast</option>
-                    <option ${primary.name === "LongSlow" ? "selected" : ""}>LongSlow</option>
-                    <option ${primary.name === "LongFast" ? "selected" : ""}>LongFast</option>
-                    <option ${primary.name === "LongMod" ? "selected" : ""}>LongMod</option>
-                    <option ${primary.name === "LongTurbo" ? "selected" : ""}>LongTurbo</option>
-                </select>
-                <input value="100" readonly>
-                <div><input ${primary.badge ? "checked" : ""} type="checkbox" oninput="typeChannelBadge(0, event.target.checked)"></div>
-                <div><input type="checkbox" disabled></div>
-                <select disabled><option>new key</option></select>
-            </form>
             ${body}
         </div>
         <div class="d"><button onclick="doneChannels()">Done</button></div>
@@ -436,7 +436,7 @@ function resetPost()
 function useImage(namekey)
 {
     const channel = getChannel(namekey);
-    return channel && !channel.primary && channel.state.images;
+    return channel && !channel.meshtastic && channel.state.images;
 }
 
 function drag(event)
@@ -528,11 +528,12 @@ function openChannelConfig()
             echannels.push({
                 name: nk[0],
                 key: nk[1],
-                primary: c.primary,
+                meshtastic: c.meshtastic,
                 readonly: i < 2,
                 max: c.state.max,
                 badge: c.state.badge,
-                images: useImage(c.namekey)
+                images: useImage(c.namekey),
+                telemetry: c.telemetry
             });
         });
         Q("#texts").innerHTML = htmlChannelConfig();
@@ -541,7 +542,7 @@ function openChannelConfig()
 
 function addChannel(idx)
 {
-    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100, badge: true, images: true });
+    echannels.splice(idx + 1, 0, { name: "", key: "", max: 100, badge: true, images: true, telemetry: false });
     Q("#texts").innerHTML = htmlChannelConfig();
 }
 
@@ -574,6 +575,20 @@ function typeChannelBadge(idx, value)
 function typeChannelImages(idx, value)
 {
     echannels[idx].images = value;
+}
+
+function typeChannelTelemetry(idx, value)
+{
+    for (let i = 0; i < echannels.length; i++) {
+        echannels[i].telemetry = false;
+    }
+    if (value) {
+        echannels[idx].telemetry = true;
+    }
+    else {
+        echannels[0].telemetry = true;
+    }
+    Q("#texts").innerHTML = htmlChannelConfig();
 }
 
 function genChannelKey(idx, value)
@@ -614,12 +629,13 @@ function doneChannels()
         try {
             if (e.name.length >= 1 && e.key.length >= 4 && e.name.search(/[ \t]/) === -1 && atob(e.key) && e.max >= 10 && e.max <= 1000) {
                 const namekey = `${e.name} ${e.key}`;
-                const channel = getChannel(namekey) || { primary: false, state: { count: 0, cursor: null, max: 100, badge: true, images: true } };
-                channelnames.push({ namekey: namekey, max: e.max, badge: e.badge, images: e.images });
+                const channel = getChannel(namekey) || { meshtastic: false, state: { count: 0, cursor: null, max: 100, badge: true, images: true } };
+                channelnames.push({ namekey: namekey, max: e.max, badge: e.badge, images: e.images, telemetry: e.telemetry });
                 channel.state.max = e.max;
                 channel.state.badge = e.badge;
                 channel.state.images = e.images;
-                nchannels.push({ namekey: namekey, primary: channel.primary, state: channel.state });
+                channel.telemetry = e.telemetry;
+                nchannels.push({ namekey: namekey, telemetry: channel.telemetry, meshtastic: channel.meshtastic, state: channel.state });
             }
         }
         catch (_) {

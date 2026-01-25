@@ -1,5 +1,5 @@
 
-const primaryChannelPresets = [
+const meshtasticChannelPresets = [
     "ShortTurbo",
     "ShortSlow",
     "ShortFast",
@@ -13,7 +13,7 @@ const primaryChannelPresets = [
 
 global.channelByNameKey = {};
 global.channelsByHash = {};
-let primaryChannel;
+let meshtasticChannel;
 let channelByName = {};
 
 function getCryptoKey(key)
@@ -51,7 +51,7 @@ export function addMessageNameKey(namekey)
     const nk = split(namekey, " ");
     const crypto = getCryptoKey(nk[1]);
     const hash = getHash(nk[0], crypto);
-    const chan = { namekey: namekey, crypto: crypto, hash: hash };
+    const chan = { namekey: namekey, crypto: crypto, hash: hash, telemetry: false };
     channelByNameKey[namekey] = chan;
     const bucket = channelsByHash[hash] ?? (channelsByHash[hash] = []);
     push(bucket, chan);
@@ -63,11 +63,15 @@ function setChannel(config)
     const name = split(config.namekey, " ")[0];
     const chan = addMessageNameKey(config.namekey);
     if (chan.crypto[-1] === 1) {
-        if (index(primaryChannelPresets, name) == -1) {
-            print("Bad primary channel name\n");
+        if (index(meshtasticChannelPresets, name) == -1) {
+            print("Bad Meshtastic channel name\n");
         }
-        primaryChannel = chan;
-        chan.primary = true;
+        meshtasticChannel = chan;
+        chan.meshtastic = true;
+        chan.telemetry = true;
+    }
+    if (config.telemetry !== null) {
+        chan.telemetry = config.telemetry;
     }
     channelByName[name] = chan;
 };
@@ -75,7 +79,7 @@ function setChannel(config)
 export function getChannelsByHash(hash)
 {
     if (!hash) {
-        return [ primaryChannel ];
+        return [ meshtasticChannel ];
     }
     return channelsByHash[hash];
 };
@@ -83,7 +87,7 @@ export function getChannelsByHash(hash)
 export function getLocalChannelByName(name)
 {
     if (!name) {
-        return primaryChannel;
+        return meshtasticChannel;
     }
     return channelByName[name];
 };
@@ -96,7 +100,7 @@ export function getLocalChannelByNameKey(namekey)
 export function getChannelByNameKey(namekey)
 {
     if (!namekey) {
-        return primaryChannel;
+        return meshtasticChannel;
     }
     return channelByNameKey[namekey];
 };
@@ -104,6 +108,18 @@ export function getChannelByNameKey(namekey)
 export function getAllChannels()
 {
     return values(channelByName);
+};
+
+export function getTelemetryChannels()
+{
+    const telemetry = [];
+    for (let namekey in channelByNameKey) {
+        const chan = channelByNameKey[namekey];
+        if (chan.telemetry) {
+            push(telemetry, chan);
+        }
+    }
+    return telemetry;
 };
 
 export function updateChannels(channels)

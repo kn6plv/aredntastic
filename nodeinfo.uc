@@ -4,13 +4,13 @@ import * as node from "node";
 import * as nodedb from "nodedb";
 import * as timers from "timers";
 import * as meshtastic from "meshtastic";
+import * as channel from "channel";
 import * as textmessage from "textmessage";
 import * as crypto from "crypto.crypto";
 
 const PRIVATE_HW = 255;
 const RAVEN_HW = 254;
 const DEFAULT_INTERVAL = 3 * 60 * 60;
-let platform = "raven";
  
 meshtastic.registerProto(
     "nodeinfo", 4,
@@ -29,7 +29,6 @@ meshtastic.registerProto(
 
 export function setup(config)
 {
-    platform = config.platform?.type ?? "raven";
     timers.setInterval("nodeinfo", 60, config.nodeinfo?.interval ?? DEFAULT_INTERVAL);
 };
 
@@ -44,15 +43,17 @@ function createNodeinfoMessage(to, namekey, extra)
         hw_model: RAVEN_HW,
         role: me.role,
         public_key: crypto.pKeyToString(me.public_key),
-        is_unmessagable: !textmessage.isMessagable(),
-        platform: platform
+        is_unmessagable: !textmessage.isMessagable()
     }, extra);
 }
 
 export function tick()
 {
     if (timers.tick("nodeinfo")) {
-        router.queue(createNodeinfoMessage(null, null, null));
+        const telemetry = channel.getTelemetryChannels();
+        for (let i = 0; i < length(telemetry); i++) {
+            router.queue(createNodeinfoMessage(null, telemetry[i].namekey, null));
+        }
     }
 };
 

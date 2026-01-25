@@ -3,6 +3,7 @@ import * as message from "message";
 import * as node from "node";
 import * as timers from "timers";
 import * as nodedb from "nodedb";
+import * as channel from "channel";
 import * as meshtastic from "meshtastic";
 import * as telemetry from "telemetry";
 
@@ -29,13 +30,16 @@ export function setup(config)
 export function tick()
 {
     if (timers.tick("device_metrics")) {
-        router.queue(message.createMessage(null, null, null, "telemetry", {
-            time: time(),
-            device_metrics: {
-                battery_level: GRID_POWER,
-                uptime_seconds: clock(true)[0] - startTime
-            }
-        }));
+        const telemetry = channel.getTelemetryChannels();
+        for (let i = 0; i < length(telemetry); i++) {
+            router.queue(message.createMessage(null, null, telemetry[i].namekey, "telemetry", {
+                time: time(),
+                device_metrics: {
+                    battery_level: GRID_POWER,
+                    uptime_seconds: clock(true)[0] - startTime
+                }
+            }));
+        }
     }
 };
 

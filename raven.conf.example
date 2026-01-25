@@ -12,15 +12,14 @@
         "altitude": 10,
         "precision": 15
     },
-    "platform": {
-        "type": "debian",
+    "platform_debian": {
         "store": "/tmp/at"
     },
     "maxhops": 7,
     "messages": {},
-    "channels": {
-        "AREDN": "og=="
-    },
+    "channels": [
+        { "namekey": "AREDN og==", "telemetry": false }
+    ],
     "environmental": {
         "type": "weewx",
         "url": "http://192.168.51.130/current_minimal.json"

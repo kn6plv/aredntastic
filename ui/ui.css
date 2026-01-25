@@ -306,6 +306,7 @@ a
     align-items: center;
     min-width: 24px;
     margin: 3px;
+    padding: 0 5px;
     border-radius: 12px;
     color: var(--unread-color);
     background-color: var(--unread-background-color);
@@ -523,12 +524,14 @@ a
 }
 .config .b .ct div:nth-child(3)
 {
-    width: 77px;
+    width: 73px;
 }
 .config .b .ct div:nth-child(4),
-.config .b .ct div:nth-child(5)
+.config .b .ct div:nth-child(5),
+.config .b .ct div:nth-child(6)
 {
-    width: 30px;
+    width: 44px;
+    justify-content: center;
 }
 .config .b .c
 {
@@ -598,6 +601,8 @@ a
 }
 .config .b .c > div
 {
+    width: 44px;
+    justify-content: center;
     border-right: 1px solid var(--config-table-separator-color) !important;
 }
 .config .b .c > div input
