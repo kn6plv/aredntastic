@@ -369,6 +369,7 @@ a
 }
 .text .r
 {
+    max-width: 80%;
     font-size: 12px;
     margin: 7px auto 2px 20px;
 }
@@ -390,7 +391,6 @@ a
 .text .r > div
 {
     display: block;
-    max-width: 80%;
     padding: 4px 10px;
     color: var(--text-reply-color);
     border: 1px solid var(--text-reply-border-color);
