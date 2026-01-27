@@ -494,7 +494,6 @@ a
 .config
 {
     height: 100%;
-    margin-right: 10px;
     border: 1px solid var(--container-border-color);
     border-radius: var(--post-font-size);
     background-color: var(--container-background-color);
