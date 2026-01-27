@@ -472,6 +472,8 @@ a
 {
     margin-bottom: 2px;
     font-size: 14px;
+    font-variant: small-caps;
+    text-decoration: none;
     align-items: end;
     color: transparent;
 }
