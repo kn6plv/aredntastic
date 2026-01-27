@@ -394,7 +394,6 @@ function sendMessage(event)
         resetPost();
     }
     else if (event.key === "Enter" && !event.shiftKey) {
-        event.target.value = "";
         if (text) {
             Q("#texts").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
             const rid = replyid;
@@ -430,7 +429,9 @@ function resetPost()
     if (p.firstElementChild.nodeName == "DIV") {
         p.firstElementChild.remove();
     }
-    Q(p, "textarea").placeholder = "Message ...";
+    const t = Q(p, "textarea");
+    t.placeholder = "Message ...";
+    t.value = "";
 }
 
 function useImage(namekey)

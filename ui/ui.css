@@ -250,11 +250,13 @@ a
 }
 #post .rt > div
 {
+    display: block;
     max-width: 90%;
     max-height: 30px;
     line-height: 22px;
+    white-space: nowrap;
     overflow: hidden;
-    overflow-wrap: anywhere;
+    text-overflow: ellipsis;
     padding: 4px 10px;
     font-size: 12px;
     color: var(--text-reply-color);
@@ -387,10 +389,14 @@ a
 }
 .text .r > div
 {
+    display: block;
+    max-width: 80%;
     padding: 4px 10px;
     color: var(--text-reply-color);
     border: 1px solid var(--text-reply-border-color);
     border-radius: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .text.right > div
 {
