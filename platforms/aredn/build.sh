@@ -31,29 +31,11 @@ Maintainer: Tim Wilkinson (KN6PLV)
 Architecture: all
 Description: Mesh communications
 __EOF__
-cat > $ROOT/control/postinst <<__EOF__
-#!/bin/sh
-/etc/init.d/raven enable
-/etc/init.d/raven start
-/usr/local/bin/restart-firewall
-exit 0
-__EOF__
-cat > $ROOT/control/prerm <<__EOF__
-#!/bin/sh
-/etc/init.d/raven stop
-/etc/init.d/raven disable
-exit 0
-__EOF__
-cat > $ROOT/data/etc/local/mesh-firewall/21-raven <<__EOF__
-nft insert rule inet fw4 input_lan tcp dport 4404 accept
-nft insert rule inet fw4 input_wifi tcp dport 4404 accept
-nft insert rule inet fw4 input_dtdlink tcp dport 4404 accept
-nft insert rule inet fw4 input_vpn tcp dport 4404 accept
-nft insert rule inet fw4 input_lan udp dport 4404 accept
-nft insert rule inet fw4 input_wifi udp dport 4404 accept
-nft insert rule inet fw4 input_dtdlink udp dport 4404 accept
-nft insert rule inet fw4 input_vpn udp dport 4404 accept
-__EOF__
+
+cp $SRC/platforms/aredn/postinst $ROOT/control/postinst
+cp $SRC/platforms/aredn/prerm $ROOT/control/prerm
+cp $SRC/platforms/aredn/firewall $ROOT/data/etc/local/mesh-firewall/21-raven
+
 chmod 755 $ROOT/control/postinst $ROOT/control/prerm $ROOT/data/etc/local/mesh-firewall/21-raven
 
 cp $SRC/*.uc $ROOT/data/usr/local/raven/

@@ -5,6 +5,7 @@ import * as node from "node";
 import * as nodedb from "nodedb";
 import * as channel from "channel";
 import * as textmessage from "textmessage";
+import * as messagestore from "messagestore";
 import * as router from "router";
 
 const q = [];
@@ -135,10 +136,13 @@ export function tick()
                         const n = split(c.namekey, " ");
                         c.namekey = `${substr(join("", slice(n, 0, -1)), 0, 13)} ${n[-1]}`;
                     }
-                    channel.updateChannels(msg.channels);
+                    const nchannels = channel.updateChannels(msg.channels);
                     textmessage.updateSettings(msg.channels);
                     notify({ cmd: "channels" });
                     platform.publish(node.getInfo(), channel.getAllChannels());
+                    for (let i = 0; i < length(nchannels); i++) {
+                        messagestore.syncMessageNamekey(nchannels[i].namekey);
+                    }
                     update("channels");
                     break;
                 }

@@ -84,21 +84,25 @@ function resendMessages(msg)
     }
 }
 
+export function syncMessageNamekey(namekey)
+{
+    const stores = platform.getStoresByNamekey(namekey);
+    if (stores[0]) {
+        const to = stores[0].id;
+        const state = textmessage.state(namekey);
+        router.queue(message.createMessage(to, null, namekey, "resend_messages", {
+            namekey: namekey,
+            cursor: state.cursor,
+            limit: state.max
+        }));
+    }
+};
+
 function syncMessages()
 {
     const all = channel.getAllChannels();
     for (let i = 0; i < length(all); i++) {
-        const namekey = all[i].namekey;
-        const stores = platform.getStoresByNamekey(namekey);
-        if (stores[0]) {
-            const to = stores[0].id;
-            const state = textmessage.state(namekey);
-            router.queue(message.createMessage(to, null, namekey, "resend_messages", {
-                namekey: namekey,
-                cursor: state.cursor,
-                limit: state.max
-            }));
-        }
+        syncMessageNamekey(all[i].namekey);
     }
 }
 

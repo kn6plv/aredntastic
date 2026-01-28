@@ -1,4 +1,3 @@
-
 const meshtasticChannelPresets = [
     "ShortTurbo",
     "ShortSlow",
@@ -124,10 +123,18 @@ export function getTelemetryChannels()
 
 export function updateChannels(channels)
 {
+    const oldChannelByName = channelByName;
     channelByName = {};
     for (let i = 0; i < length(channels); i++) {
         setChannel(channels[i]);
     }
+    const newchannels = [];
+    for (let name in channelByName) {
+        if (!oldChannelByName[name]) {
+            push(newchannels, channelByName[name]);
+        }
+    }
+    return newchannels;
 };
 
 export function setup(config)
