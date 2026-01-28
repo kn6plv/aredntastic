@@ -209,12 +209,7 @@ function path(name)
     else {
         const target = byid[id];
         if (target) {
-            if (target.channels[namekey]) {
-                return [ target ];
-            }
-            else {
-                return [];
-            }
+            return [ target ];
         }
         return canforward ? forwarders : [];
     }
