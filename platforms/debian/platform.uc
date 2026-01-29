@@ -91,6 +91,15 @@ let rootdir = "/tmp/raven";
 {
 }
 
+/* export */ function handle()
+{
+    return null;
+}
+
+/* export */ function handleChanges()
+{
+}
+
 return {
     setup,
     shutdown,
@@ -107,5 +116,7 @@ return {
     auth,
     tick,
     process,
-    refresh
+    refresh,
+    handle,
+    handleChanges
 };

@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as socket from "socket";
 import * as timers from "../../timers.uc";
 import * as uci from "uci";
 import * as services from "aredn.services";
@@ -26,6 +27,7 @@ let myid;
 let arednmeshEnabled = false;
 let storeEnabled = false;
 const badges = {};
+let watcher = null;
 
 /* export */ function setup(config)
 {
@@ -59,12 +61,20 @@ const badges = {};
         storeEnabled = !!config.messagestore;
     }
 
-    timers.setInterval("aredn", 0, RESCAN_INTERVAL);
+    if (services.watch) {
+        watcher = services.watch("publish");
+    }
+    else {
+        timers.setInterval("aredn", 0, RESCAN_INTERVAL);
+    }
 }
 
 /* export */ function shutdown()
 {
     services.unpublish(pubID);
+    if (watcher) {
+        services.unwatch(watcher);
+    }
 }
 
 /* export */ function mergePlatformConfig(config)
@@ -332,6 +342,28 @@ function refreshTargets()
     refreshTargets();
 }
 
+/* export */ function handle()
+{
+    return watcher;
+}
+
+/* export */ function handleChanges()
+{
+    for (;;) {
+        const v = socket.poll(0, [ watcher, socket.POLLIN|socket.POLLRDHUP ]);
+        if (!v[0] || !v[0][1]) {
+            break;
+        }
+        const e = watcher.read("line");
+        if (!length(e)) {
+            services.unwatch(watcher);
+            watcher = services.watch("publish");
+            break;
+        }
+    }
+    refreshTargets();
+}
+
 return {
     setup,
     shutdown,
@@ -348,5 +380,7 @@ return {
     auth,
     tick,
     process,
-    refresh
+    refresh,
+    handle,
+    handleChanges
 };

@@ -85,7 +85,11 @@ export function tick()
     }
     const ms = meshtastic.handle();
     if (ms) {
-        push(sockets, [ ms, socket.POLLIN, "meshtastic" ])
+        push(sockets, [ ms, socket.POLLIN, "meshtastic" ]);
+    }
+    const ph = platform.handle();
+    if (ph) {
+        push(sockets, [ ph, socket.POLLIN|socket.POLLRDHUP, "platform" ]);
     }
     const ws = websocket.handles();
     if (ws) {
@@ -112,6 +116,11 @@ export function tick()
                     {
                     }
                     break;
+                case "platform":
+                {
+                    platform.handleChanges();
+                    break;
+                }
                 case "websocket":
                     {
                         const msgs = websocket.recv(v[i][0]);
